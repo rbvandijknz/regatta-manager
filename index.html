@@ -229,7 +229,7 @@
 
         // --- Core Logic ---
         
-        // 1. Render Function (Replaces React)
+        // 1. Render Function
         function render() {
             // Update Clocks
             const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -265,93 +265,115 @@
                     const onWaterMins = delayedMins - state.settings.onWaterOffset;
                     const warmUpStartMins = onWaterMins - state.settings.warmUpDuration;
 
+                    // State calculations
+                    const isActive = currentMins >= warmUpStartMins;
+                    const isPast = currentMins > delayedMins;
+                    const showOriginal = state.delay > 0 && !isPast;
+                    
                     let statusClass = 'bg-white shadow-sm border-slate-200';
-                    let isActive = false;
-                    let isPast = false;
+                    if (isPast) statusClass = 'bg-slate-50 border-slate-200 opacity-60 grayscale';
+                    else if (isActive) statusClass = 'bg-white ring-2 ring-blue-400 shadow-md transform scale-[1.01]';
 
-                    if (currentMins > delayedMins) {
-                        isPast = true;
-                        statusClass = 'bg-slate-50 border-slate-200 opacity-60 grayscale';
-                    } else if (currentMins >= warmUpStartMins) {
-                        isActive = true;
-                        statusClass = 'bg-white ring-2 ring-blue-400 shadow-md transform scale-[1.01]';
-                    }
-
-                    // Content HTML
-                    const innerHTML = `
-                        ${isActive ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>' : ''}
-                        <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
-                            <!-- Crew -->
-                            <div class="col-span-2 md:col-span-5 flex items-start gap-3">
-                                <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
-                                <div>
-                                    <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
-                                    ${state.delay > 0 && !isPast ? `<div class="text-xs text-red-500 font-medium mt-1">Original: ${ev.originalTime}</div>` : ''}
-                                </div>
-                            </div>
-
-                            <!-- Warm Up -->
-                            <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
-                                <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
-                                <div class="text-slate-600 font-mono text-sm">${formatDisplayTime(warmUpStartMins)}</div>
-                            </div>
-
-                            <!-- On Water -->
-                            <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
-                                <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
-                                <div class="text-blue-700 font-bold font-mono text-lg md:text-xl">${formatDisplayTime(onWaterMins)}</div>
-                                <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
-                            </div>
-
-                            <!-- Start -->
-                            <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0">
-                                <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
-                                <div class="text-xl font-bold font-mono ${state.delay > 0 ? 'text-red-600' : 'text-slate-800'}">${formatDisplayTime(delayedMins)}</div>
-                            </div>
-
-                            <!-- Delete -->
-                            <div class="col-span-2 md:col-span-1 flex justify-end">
-                                <button onclick="window.deleteEvent('${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-
-                    // Check if element exists
+                    // Get existing element
                     let el = document.getElementById(ev.id);
                     
                     if (!el) {
-                        // Create New
+                        // Create New Element (Once)
                         el = document.createElement('div');
                         el.id = ev.id;
-                        el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 ${statusClass} fade-in`;
-                        el.innerHTML = innerHTML;
-                    } else {
-                        // Update Existing
-                        // Only update class if changed to prevent animation restarts/jitters
-                        const newClass = `relative overflow-hidden rounded-xl border transition-all duration-300 ${statusClass}`;
-                        if (el.className !== newClass && el.className !== newClass + ' fade-in') {
-                             el.className = newClass;
+                        el.innerHTML = `
+                            <div class="indicator-bar absolute left-0 top-0 bottom-0 w-1 bg-blue-500 hidden"></div>
+                            <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
+                                <div class="col-span-2 md:col-span-5 flex items-start gap-3">
+                                    <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
+                                        <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
+                                    <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
+                                    <div class="val-warmup text-slate-600 font-mono text-sm"></div>
+                                </div>
+
+                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
+                                    <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
+                                    <div class="val-onwater text-blue-700 font-bold font-mono text-lg md:text-xl"></div>
+                                    <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
+                                </div>
+
+                                <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0">
+                                    <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
+                                    <div class="val-start text-xl font-bold font-mono text-slate-800"></div>
+                                </div>
+
+                                <div class="col-span-2 md:col-span-1 flex justify-end">
+                                    <button onclick="window.deleteEvent('${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        // Initialize basic class + fade-in
+                        el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 fade-in ${statusClass}`;
+                        els.eventsContainer.appendChild(el);
+                    }
+
+                    // --- Granular Updates (No flashing) ---
+                    
+                    // 1. Update Class (Only if changed)
+                    const baseClasses = "relative overflow-hidden rounded-xl border transition-all duration-300";
+                    const targetClass = `${baseClasses} ${statusClass}`;
+                    // We check if the class needs updating, ignoring 'fade-in' presence
+                    if (!el.className.includes(statusClass)) {
+                        el.className = targetClass; // This removes fade-in after first update which is fine
+                    }
+
+                    // 2. Update Text Nodes
+                    const updateText = (sel, txt) => {
+                        const n = el.querySelector(sel);
+                        if(n && n.textContent !== txt) n.textContent = txt;
+                    };
+                    updateText('.val-warmup', formatDisplayTime(warmUpStartMins));
+                    updateText('.val-onwater', formatDisplayTime(onWaterMins));
+                    updateText('.val-start', formatDisplayTime(delayedMins));
+
+                    // 3. Toggle Elements (Active Bar / Orig Time)
+                    const toggle = (sel, condition) => {
+                        const n = el.querySelector(sel);
+                        if(n) {
+                            if(condition) n.classList.remove('hidden');
+                            else n.classList.add('hidden');
                         }
-                        // Only update content if changed (prevents text selection loss or micro-flashing)
-                        if (el.innerHTML !== innerHTML) {
-                            el.innerHTML = innerHTML;
+                    };
+                    toggle('.indicator-bar', isActive);
+                    toggle('.original-time', showOriginal);
+
+                    // 4. Start Time Color
+                    const startNode = el.querySelector('.val-start');
+                    if(startNode) {
+                        if(state.delay > 0) {
+                            startNode.classList.remove('text-slate-800');
+                            startNode.classList.add('text-red-600');
+                        } else {
+                            startNode.classList.remove('text-red-600');
+                            startNode.classList.add('text-slate-800');
                         }
                     }
 
-                    // Ensure Order (appending an existing child moves it to the end)
+                    // Ensure Order
                     els.eventsContainer.appendChild(el);
                 });
 
-                // Remove deleted events
+                // Remove deleted
                 [...els.eventsContainer.children].forEach(child => {
                     if (!processedIds.has(child.id)) {
                         child.remove();
                     }
                 });
                 
-                // Refresh icons (safe to call repeatedly)
+                // Refresh icons (Safe now as we don't overwrite innerHTML)
                 lucide.createIcons();
             }
         }
