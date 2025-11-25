@@ -103,18 +103,27 @@
                     </div>
                 </div>
 
-                <div class="flex gap-2">
-                    <label class="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded cursor-pointer transition text-sm font-medium">
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded cursor-pointer transition text-sm font-medium border border-blue-200">
                         <i data-lucide="upload" class="w-4 h-4"></i> Upload CSV
                         <input type="file" id="input-csv" accept=".csv" class="hidden">
                     </label>
-                    <button id="btn-demo" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition">
+                    
+                    <button id="btn-template" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200">
+                        <i data-lucide="download" class="w-4 h-4"></i> Get Template
+                    </button>
+
+                    <button id="btn-demo" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200">
                         Demo Data
                     </button>
-                    <button id="btn-clear" class="px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded transition" title="Clear All">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+
+                    <button id="btn-clear" class="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 rounded transition border border-red-100" title="Clear All">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Clear
                     </button>
                 </div>
+                <p class="text-xs text-slate-400 mt-2 text-center">
+                    Format: Event #, Crew Name, Time (HH:MM)
+                </p>
             </div>
         </div>
 
@@ -440,21 +449,38 @@
                 lines.forEach((line, idx) => {
                     if(!line.trim()) return;
                     const cols = line.split(',').map(c => c.trim());
-                    if(cols[0].toLowerCase().includes('event') && idx < 2) return;
+                    // Basic header detection: if first col has 'event' or 'number', skip row 0
+                    if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                     
                     let eventNum='', crew='', time='';
+                    // Handle 3 cols: Event, Crew, Time
                     if(cols.length >= 3) { eventNum=cols[0]; crew=cols[1]; time=cols[2]; }
+                    // Handle 2 cols: Crew, Time
                     else if(cols.length === 2) { crew=cols[0]; time=cols[1]; }
 
-                    if(time.match(/\d{1,2}:\d{2}/)) {
+                    if(time && time.match(/\d{1,2}:\d{2}/)) {
                         batch.set(doc(colRef), { eventNum, crew, originalTime: time });
                         count++;
                     }
                 });
                 if(count > 0) await batch.commit();
+                else alert("No valid rows found. Check format: Event, Crew, Time (HH:MM)");
             };
             reader.readAsText(file);
             e.target.value = null;
+        };
+
+        // Download Template
+        document.getElementById('btn-template').onclick = () => {
+            const csvContent = "Event Number,Crew Name,Start Time (HH:MM)\n101,Sample Crew A,08:30\n102,Sample Crew B,09:15";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "regatta_template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         };
 
         // Demo Data
