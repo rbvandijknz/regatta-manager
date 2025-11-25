@@ -264,7 +264,8 @@
             if(state.groupCode) {
                 els.groupBadge.textContent = state.groupCode;
                 els.groupBadge.classList.remove('hidden');
-                els.groupInput.value = state.groupCode;
+                // FIXED: Removed the line below that was overwriting your typing every second
+                // els.groupInput.value = state.groupCode; 
             } else {
                 els.groupBadge.classList.add('hidden');
             }
@@ -310,28 +311,7 @@
                     if (!el) {
                         el = document.createElement('div');
                         el.id = ev.id;
-                        el.innerHTML = `
-                            <div class="indicator-bar absolute left-0 top-0 bottom-0 w-1 bg-blue-500 hidden"></div>
-                            <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
-                                <div class="col-span-2 md:col-span-5 flex items-start gap-3">
-                                    <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
-                                    <!-- Alpha Badge (Mobile friendly flex) -->
-                                    <div class="md:hidden bg-slate-50 text-slate-500 border border-slate-200 px-2 py-1 rounded text-sm font-mono font-bold">${ev.alpha || '-'}</div>
-                                    <div class="flex-1">
-                                        <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
-                                        <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Desktop Only Alpha Column (Positioned absolute or just hidden on mobile logic handled by grid above) -->
-                                <!-- We actually need to restructure the desktop grid for the new column -->
-                                <!-- To avoid complex DOM manipulation on existing items, we just rebuild the structure inside innerHTML above.
-                                     However, the grid defined above was col-span-2 md:col-span-5. We need to split that for desktop.
-                                -->
-                                <!-- Re-writing the first block for better desktop grid alignment -->
-                            </div>
-                        `;
-                        // FIX: We need a cleaner HTML structure to support the 12-col grid perfectly
+                        // ... existing innerHTML logic ...
                         el.innerHTML = `
                             <div class="indicator-bar absolute left-0 top-0 bottom-0 w-1 bg-blue-500 hidden"></div>
                             <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
@@ -378,7 +358,8 @@
                         `;
                         el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 fade-in ${statusClass}`;
                     }
-
+                    
+                    // ... existing update logic ...
                     const baseClasses = "relative overflow-hidden rounded-xl border transition-all duration-300";
                     const targetClass = `${baseClasses} ${statusClass}`;
                     if (!el.className.includes(statusClass)) el.className = targetClass;
@@ -459,6 +440,9 @@
                 // FORCE UPDATE: Explicitly replace HTML to ensure Green Cloud renders
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
                 lucide.createIcons();
+                
+                // Initialize input value ONCE on login
+                if(state.groupCode) els.groupInput.value = state.groupCode;
                 
                 setupListeners();
             } else {
