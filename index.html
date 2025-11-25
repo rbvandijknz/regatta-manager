@@ -256,9 +256,10 @@
                 const currentMins = timeToMinutes(`${state.currentTime.getHours()}:${state.currentTime.getMinutes()}`);
                 const sortedEvents = [...state.events].sort((a,b) => timeToMinutes(a.originalTime) - timeToMinutes(b.originalTime));
                 const processedIds = new Set();
+                const container = els.eventsContainer;
 
-                // Diffing Logic: Update existing or create new
-                sortedEvents.forEach(ev => {
+                // Reconciliation Loop
+                sortedEvents.forEach((ev, index) => {
                     processedIds.add(ev.id);
                     const baseMins = timeToMinutes(ev.originalTime);
                     const delayedMins = baseMins + state.delay;
@@ -274,11 +275,10 @@
                     if (isPast) statusClass = 'bg-slate-50 border-slate-200 opacity-60 grayscale';
                     else if (isActive) statusClass = 'bg-white ring-2 ring-blue-400 shadow-md transform scale-[1.01]';
 
-                    // Get existing element
+                    // 1. Get or Create Element
                     let el = document.getElementById(ev.id);
                     
                     if (!el) {
-                        // Create New Element (Once)
                         el = document.createElement('div');
                         el.id = ev.id;
                         el.innerHTML = `
@@ -315,22 +315,21 @@
                                 </div>
                             </div>
                         `;
-                        // Initialize basic class + fade-in
+                        // Initial animation class
                         el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 fade-in ${statusClass}`;
-                        els.eventsContainer.appendChild(el);
                     }
 
-                    // --- Granular Updates (No flashing) ---
-                    
-                    // 1. Update Class (Only if changed)
+                    // 2. Update Class (Only if changed)
+                    // We construct the target class string. If it matches, we don't touch className.
                     const baseClasses = "relative overflow-hidden rounded-xl border transition-all duration-300";
                     const targetClass = `${baseClasses} ${statusClass}`;
-                    // We check if the class needs updating, ignoring 'fade-in' presence
+                    
+                    // Allow fade-in to exist if it's there, otherwise enforce target
                     if (!el.className.includes(statusClass)) {
-                        el.className = targetClass; // This removes fade-in after first update which is fine
+                         el.className = targetClass;
                     }
 
-                    // 2. Update Text Nodes
+                    // 3. Update Text Content (Only if changed)
                     const updateText = (sel, txt) => {
                         const n = el.querySelector(sel);
                         if(n && n.textContent !== txt) n.textContent = txt;
@@ -339,41 +338,54 @@
                     updateText('.val-onwater', formatDisplayTime(onWaterMins));
                     updateText('.val-start', formatDisplayTime(delayedMins));
 
-                    // 3. Toggle Elements (Active Bar / Orig Time)
+                    // 4. Toggle Visibility
                     const toggle = (sel, condition) => {
                         const n = el.querySelector(sel);
                         if(n) {
-                            if(condition) n.classList.remove('hidden');
-                            else n.classList.add('hidden');
+                            if(condition && n.classList.contains('hidden')) n.classList.remove('hidden');
+                            else if(!condition && !n.classList.contains('hidden')) n.classList.add('hidden');
                         }
                     };
                     toggle('.indicator-bar', isActive);
                     toggle('.original-time', showOriginal);
 
-                    // 4. Start Time Color
+                    // 5. Colors
                     const startNode = el.querySelector('.val-start');
                     if(startNode) {
                         if(state.delay > 0) {
-                            startNode.classList.remove('text-slate-800');
-                            startNode.classList.add('text-red-600');
+                            if(!startNode.classList.contains('text-red-600')) {
+                                startNode.classList.remove('text-slate-800');
+                                startNode.classList.add('text-red-600');
+                            }
                         } else {
-                            startNode.classList.remove('text-red-600');
-                            startNode.classList.add('text-slate-800');
+                            if(!startNode.classList.contains('text-slate-800')) {
+                                startNode.classList.remove('text-red-600');
+                                startNode.classList.add('text-slate-800');
+                            }
                         }
                     }
 
-                    // Ensure Order
-                    els.eventsContainer.appendChild(el);
+                    // 6. STABLE PLACEMENT (Fixes Flashing)
+                    // Check if the element at this specific index in the DOM is our element.
+                    // If it is, do nothing (stable). If not, move it.
+                    const currentChildAtIndex = container.children[index];
+                    if (currentChildAtIndex !== el) {
+                        if (currentChildAtIndex) {
+                            container.insertBefore(el, currentChildAtIndex);
+                        } else {
+                            container.appendChild(el);
+                        }
+                    }
                 });
 
-                // Remove deleted
-                [...els.eventsContainer.children].forEach(child => {
+                // Remove deleted items
+                [...container.children].forEach(child => {
                     if (!processedIds.has(child.id)) {
                         child.remove();
                     }
                 });
                 
-                // Refresh icons (Safe now as we don't overwrite innerHTML)
+                // Refresh icons
                 lucide.createIcons();
             }
         }
