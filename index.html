@@ -155,17 +155,22 @@
         import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 
         // --- Config ---
-        // Provided by environment or manually pasted here
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAbQE9pdiPYP1BdUb4T6AaEnMQwmfe2s3k",
-  authDomain: "regatta-manager-d6101.firebaseapp.com",
-  projectId: "regatta-manager-d6101",
-  storageBucket: "regatta-manager-d6101.firebasestorage.app",
-  messagingSenderId: "1023336958830",
-  appId: "1:1023336958830:web:19f0cfc62274189d8b8f7f",
-  measurementId: "G-0Y0FELH6KE"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbQE9pdiPYP1BdUb4T6AaEnMQwmfe2s3k",
+            authDomain: "regatta-manager-d6101.firebaseapp.com",
+            projectId: "regatta-manager-d6101",
+            storageBucket: "regatta-manager-d6101.firebasestorage.app",
+            messagingSenderId: "1023336958830",
+            appId: "1:1023336958830:web:19f0cfc62274189d8b8f7f",
+            measurementId: "G-0Y0FELH6KE"
+        };
+        
+        // This unique ID separates your app's data in the database
+        const appId = 'regatta-manager-d6101';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         // --- State ---
         let state = {
@@ -315,12 +320,9 @@ const firebaseConfig = {
         // 2. Auth & Setup
         const initAuth = async () => {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch(e) { console.error(e); }
+                // Try anonymous sign-in (standard for this app)
+                await signInAnonymously(auth);
+            } catch(e) { console.error("Auth Error:", e); }
         };
         initAuth();
 
