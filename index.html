@@ -36,8 +36,11 @@
                         <h1 class="text-xl font-bold tracking-tight">RegattaMaster</h1>
                         <!-- Group Indicator -->
                         <span id="group-badge" class="hidden text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono ml-2 border border-blue-400"></span>
-                        <!-- Updated Icon: Added cursor-pointer and hover effect -->
-                        <i id="connection-status" data-lucide="cloud-off" class="w-4 h-4 text-red-400 ml-2 cursor-pointer hover:scale-110 transition-transform" title="Status: Disconnected (Click to Retry)"></i>
+                        
+                        <!-- FIXED: Wrapped icon in a button so the click listener survives Lucide rendering -->
+                        <button id="connection-btn" class="ml-2 p-1 rounded hover:bg-slate-800 transition-colors" title="Connection Status">
+                            <i id="connection-icon" data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>
+                        </button>
                     </div>
                     <!-- Mobile Clock -->
                     <div class="md:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
@@ -212,7 +215,8 @@
             emptyState: document.getElementById('empty-state'),
             delayDisplay: document.getElementById('delay-display'),
             statusSummary: document.getElementById('status-summary'),
-            connectionIcon: document.getElementById('connection-status'),
+            connectionBtn: document.getElementById('connection-btn'), // Updated to button
+            connectionIcon: document.getElementById('connection-icon'), // The inner icon
             submitBtn: document.getElementById('btn-submit'),
             configPanel: document.getElementById('config-panel'),
             clockDisplays: document.querySelectorAll('.clock-display'),
@@ -413,20 +417,28 @@
         }
 
         // --- Auth & Setup ---
-        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error("Auth Error:", e); } };
+        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error("Auth Error:", e); return e; } };
         initAuth();
 
-        // New: Click handler for the connection icon
-        document.getElementById('connection-status').onclick = async () => {
+        // FIXED: Click handler now attached to the persistent button wrapper
+        els.connectionBtn.onclick = async () => {
             if (!state.user) {
-                if(confirm("Database is disconnected. Retry connection?")) {
-                    await initAuth();
+                // Visual feedback that something is happening
+                els.connectionIcon.classList.add('animate-spin');
+                
+                if(confirm("Database is disconnected. Attempt to reconnect?")) {
+                    const error = await initAuth();
+                    
+                    // Stop spinner after attempt
+                    els.connectionIcon.classList.remove('animate-spin');
+
                     // If still no user after retry, show help
-                    setTimeout(() => {
-                        if(!state.user) {
-                            alert("Connection Failed.\n\nTroubleshooting:\n1. Check internet connection.\n2. If on GitHub Pages, go to Firebase Console > Authentication > Settings > Authorized Domains and add 'rbvandijknz.github.io'.");
-                        }
-                    }, 1000);
+                    if(!auth.currentUser) {
+                        const errKey = error?.code || 'unknown';
+                        alert(`Connection Failed (${errKey}).\n\nTroubleshooting:\n1. Check internet.\n2. GitHub Pages? Add domain to Firebase Console > Auth > Settings > Authorized Domains.`);
+                    }
+                } else {
+                     els.connectionIcon.classList.remove('animate-spin');
                 }
             } else {
                 alert(`✅ Connected to Database\nProject: ${firebaseConfig.projectId}\nUser ID: ${state.user.uid}`);
@@ -441,10 +453,18 @@
             if(u) {
                 els.submitBtn.textContent = "Add to Schedule";
                 els.submitBtn.disabled = false;
+                
+                // Update the icon inside the button
                 els.connectionIcon.setAttribute('data-lucide', 'cloud');
                 els.connectionIcon.classList.replace('text-red-400', 'text-green-400');
+                
                 lucide.createIcons();
                 setupListeners();
+            } else {
+                // Handle logout/disconnect state visually
+                els.connectionIcon.setAttribute('data-lucide', 'cloud-off');
+                els.connectionIcon.classList.replace('text-green-400', 'text-red-400');
+                lucide.createIcons();
             }
         });
 
