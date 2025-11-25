@@ -808,7 +808,14 @@
                 let count = 0;
                 lines.forEach((line, idx) => {
                     if(!line.trim()) return;
-                    const cols = line.split(',').map(c => c.trim());
+                    
+                    // FIXED: Use Regex to split by comma ONLY if not inside quotes
+                    // This allows "Smith, John" to be treated as one column
+                    const rawCols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    
+                    // Clean up: trim whitespace and remove surrounding quotes if present
+                    const cols = rawCols.map(c => c.trim().replace(/^"|"$/g, ''));
+
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                     
                     let eventNum='', alpha='', crew='', time='', cox='', rowers='';
