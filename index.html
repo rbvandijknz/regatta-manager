@@ -31,6 +31,8 @@
                     <div class="flex items-center gap-2">
                         <i data-lucide="anchor" class="text-blue-400 w-6 h-6"></i>
                         <h1 class="text-xl font-bold tracking-tight">RegattaMaster</h1>
+                        <!-- Group Indicator -->
+                        <span id="group-badge" class="hidden text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono ml-2 border border-blue-400"></span>
                         <i id="connection-status" data-lucide="cloud-off" class="w-4 h-4 text-red-400 ml-2" title="Connecting to Database..."></i>
                     </div>
                     <!-- Mobile Clock -->
@@ -92,18 +94,31 @@
                 </div>
 
                 <!-- Hidden Config -->
-                <div id="config-panel" class="hidden mb-4 p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
-                    <div class="flex justify-between items-center">
-                        <span>On Water Minutes Before:</span>
-                        <input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center">
+                <div id="config-panel" class="hidden mb-4 space-y-4 border-b border-slate-100 pb-4">
+                    
+                    <!-- Shared Access Code -->
+                    <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                        <div class="text-xs font-bold text-blue-700 uppercase mb-1">Shared Regatta Code</div>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-group-code" placeholder="e.g. baycoast" class="flex-1 p-1 text-sm border rounded">
+                            <button id="btn-join-group" class="bg-blue-600 text-white text-xs px-3 rounded font-medium hover:bg-blue-700">Join</button>
+                        </div>
+                        <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span>Warm Up Duration (mins):</span>
-                        <input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center">
+
+                    <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
+                        <div class="flex justify-between items-center">
+                            <span>On Water Minutes Before:</span>
+                            <input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Warm Up Duration (mins):</span>
+                            <input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center">
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-2 mt-2">
                     <label class="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded cursor-pointer transition text-sm font-medium border border-blue-200">
                         <i data-lucide="upload" class="w-4 h-4"></i> Upload CSV
                         <input type="file" id="input-csv" accept=".csv" class="hidden">
@@ -121,9 +136,6 @@
                         <i data-lucide="trash-2" class="w-4 h-4"></i> Clear
                     </button>
                 </div>
-                <p class="text-xs text-slate-400 mt-2 text-center">
-                    Format: Event #, Crew Name, Time (HH:MM)
-                </p>
             </div>
         </div>
 
@@ -144,9 +156,7 @@
         </div>
 
         <!-- Events Container -->
-        <div id="events-container" class="space-y-3 pb-10">
-            <!-- Items injected here by JS -->
-        </div>
+        <div id="events-container" class="space-y-3 pb-10"></div>
 
         <!-- Empty State -->
         <div id="empty-state" class="hidden text-center py-20 bg-white rounded-xl border-2 border-dashed border-slate-200 text-slate-400">
@@ -160,7 +170,7 @@
     <!-- Firebase & Application Logic -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
         import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 
         // --- Config ---
@@ -174,7 +184,6 @@
             measurementId: "G-0Y0FELH6KE"
         };
         
-        // This unique ID separates your app's data in the database
         const appId = 'regatta-manager-d6101';
 
         const app = initializeApp(firebaseConfig);
@@ -187,7 +196,8 @@
             events: [],
             delay: 0,
             settings: { onWaterOffset: 35, warmUpDuration: 40 },
-            currentTime: new Date()
+            currentTime: new Date(),
+            groupCode: localStorage.getItem('regatta_group_code') || ''
         };
 
         // --- DOM Elements ---
@@ -199,49 +209,61 @@
             connectionIcon: document.getElementById('connection-status'),
             submitBtn: document.getElementById('btn-submit'),
             configPanel: document.getElementById('config-panel'),
-            clockDisplays: document.querySelectorAll('.clock-display')
+            clockDisplays: document.querySelectorAll('.clock-display'),
+            groupBadge: document.getElementById('group-badge'),
+            groupInput: document.getElementById('input-group-code')
         };
 
-        // --- Helpers ---
-        const timeToMinutes = (str) => {
-            if(!str) return 0;
-            const [h, m] = str.split(':').map(Number);
-            return h * 60 + m;
+        // --- Database Path Helpers ---
+        // If a group code exists, we use the public data path. 
+        // If not, we use the private user path.
+        const getEventsRef = () => {
+            if (state.groupCode) {
+                // Public Shared Path
+                return collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`);
+            } else {
+                // Private User Path
+                return collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
+            }
         };
 
-        const minutesToTime = (total) => {
-            let m = total % 60;
-            let h = Math.floor(total / 60);
-            if (h >= 24) h %= 24;
-            if (h < 0) h = 24 + (h % 24);
-            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        const getConfigRef = () => {
+            if (state.groupCode) {
+                return doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main');
+            } else {
+                return doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
+            }
         };
 
+        // --- Rendering & Logic ---
+        const timeToMinutes = (str) => { if(!str) return 0; const [h, m] = str.split(':').map(Number); return h * 60 + m; };
+        const minutesToTime = (total) => { let m = total % 60; let h = Math.floor(total / 60); if (h >= 24) h %= 24; if (h < 0) h = 24 + (h % 24); return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
         const formatDisplayTime = (mins) => {
-            let h = Math.floor(mins / 60);
-            let m = mins % 60;
-            let ampm = 'AM';
+            let h = Math.floor(mins / 60); let m = mins % 60; let ampm = 'AM';
             if (h >= 12) { ampm = 'PM'; if (h > 12) h -= 12; }
-            if (h === 0) h = 12;
-            if (h >= 24) h %= 24; 
+            if (h === 0) h = 12; if (h >= 24) h %= 24; 
             return `${h}:${String(m).padStart(2,'0')} ${ampm}`;
         };
 
-        // --- Core Logic ---
-        
-        // 1. Render Function
         function render() {
             // Update Clocks
             const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             els.clockDisplays.forEach(el => el.textContent = timeStr);
 
+            // Update Group Badge
+            if(state.groupCode) {
+                els.groupBadge.textContent = state.groupCode;
+                els.groupBadge.classList.remove('hidden');
+                els.groupInput.value = state.groupCode;
+            } else {
+                els.groupBadge.classList.add('hidden');
+            }
+
             // Update Delay Display
             els.delayDisplay.textContent = `+${state.delay}m`;
-            if(state.delay > 0) {
-                els.delayDisplay.className = "px-4 py-1 rounded font-mono text-xl font-bold bg-red-500/20 text-red-600 border border-red-500/50 transition-colors";
-            } else {
-                els.delayDisplay.className = "px-4 py-1 rounded font-mono text-xl font-bold text-slate-200 transition-colors";
-            }
+            els.delayDisplay.className = state.delay > 0 
+                ? "px-4 py-1 rounded font-mono text-xl font-bold bg-red-500/20 text-red-600 border border-red-500/50 transition-colors"
+                : "px-4 py-1 rounded font-mono text-xl font-bold text-slate-200 transition-colors";
 
             // Update Summary
             els.statusSummary.textContent = `${state.events.length} Events | ${state.delay > 0 ? `Delayed ${state.delay}m` : 'On Time'}`;
@@ -258,7 +280,6 @@
                 const processedIds = new Set();
                 const container = els.eventsContainer;
 
-                // Reconciliation Loop
                 sortedEvents.forEach((ev, index) => {
                     processedIds.add(ev.id);
                     const baseMins = timeToMinutes(ev.originalTime);
@@ -266,7 +287,6 @@
                     const onWaterMins = delayedMins - state.settings.onWaterOffset;
                     const warmUpStartMins = onWaterMins - state.settings.warmUpDuration;
 
-                    // State calculations
                     const isActive = currentMins >= warmUpStartMins;
                     const isPast = currentMins > delayedMins;
                     const showOriginal = state.delay > 0 && !isPast;
@@ -275,7 +295,6 @@
                     if (isPast) statusClass = 'bg-slate-50 border-slate-200 opacity-60 grayscale';
                     else if (isActive) statusClass = 'bg-white ring-2 ring-blue-400 shadow-md transform scale-[1.01]';
 
-                    // 1. Get or Create Element
                     let el = document.getElementById(ev.id);
                     
                     if (!el) {
@@ -291,23 +310,19 @@
                                         <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
                                     </div>
                                 </div>
-
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
                                     <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
                                     <div class="val-warmup text-slate-600 font-mono text-sm"></div>
                                 </div>
-
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
                                     <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
                                     <div class="val-onwater text-blue-700 font-bold font-mono text-lg md:text-xl"></div>
                                     <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
                                 </div>
-
                                 <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0">
                                     <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
                                     <div class="val-start text-xl font-bold font-mono text-slate-800"></div>
                                 </div>
-
                                 <div class="col-span-2 md:col-span-1 flex justify-end">
                                     <button onclick="window.deleteEvent('${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -315,89 +330,52 @@
                                 </div>
                             </div>
                         `;
-                        // Initial animation class
                         el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 fade-in ${statusClass}`;
                     }
 
-                    // 2. Update Class (Only if changed)
-                    // We construct the target class string. If it matches, we don't touch className.
                     const baseClasses = "relative overflow-hidden rounded-xl border transition-all duration-300";
                     const targetClass = `${baseClasses} ${statusClass}`;
-                    
-                    // Allow fade-in to exist if it's there, otherwise enforce target
-                    if (!el.className.includes(statusClass)) {
-                         el.className = targetClass;
-                    }
+                    if (!el.className.includes(statusClass)) el.className = targetClass;
 
-                    // 3. Update Text Content (Only if changed)
-                    const updateText = (sel, txt) => {
-                        const n = el.querySelector(sel);
-                        if(n && n.textContent !== txt) n.textContent = txt;
-                    };
+                    const updateText = (sel, txt) => { const n = el.querySelector(sel); if(n && n.textContent !== txt) n.textContent = txt; };
                     updateText('.val-warmup', formatDisplayTime(warmUpStartMins));
                     updateText('.val-onwater', formatDisplayTime(onWaterMins));
                     updateText('.val-start', formatDisplayTime(delayedMins));
 
-                    // 4. Toggle Visibility
                     const toggle = (sel, condition) => {
                         const n = el.querySelector(sel);
-                        if(n) {
-                            if(condition && n.classList.contains('hidden')) n.classList.remove('hidden');
-                            else if(!condition && !n.classList.contains('hidden')) n.classList.add('hidden');
-                        }
+                        if(n) { if(condition && n.classList.contains('hidden')) n.classList.remove('hidden'); else if(!condition && !n.classList.contains('hidden')) n.classList.add('hidden'); }
                     };
                     toggle('.indicator-bar', isActive);
                     toggle('.original-time', showOriginal);
 
-                    // 5. Colors
                     const startNode = el.querySelector('.val-start');
                     if(startNode) {
                         if(state.delay > 0) {
-                            if(!startNode.classList.contains('text-red-600')) {
-                                startNode.classList.remove('text-slate-800');
-                                startNode.classList.add('text-red-600');
-                            }
+                            if(!startNode.classList.contains('text-red-600')) { startNode.classList.remove('text-slate-800'); startNode.classList.add('text-red-600'); }
                         } else {
-                            if(!startNode.classList.contains('text-slate-800')) {
-                                startNode.classList.remove('text-red-600');
-                                startNode.classList.add('text-slate-800');
-                            }
+                            if(!startNode.classList.contains('text-slate-800')) { startNode.classList.remove('text-red-600'); startNode.classList.add('text-slate-800'); }
                         }
                     }
 
-                    // 6. STABLE PLACEMENT (Fixes Flashing)
-                    // Check if the element at this specific index in the DOM is our element.
-                    // If it is, do nothing (stable). If not, move it.
                     const currentChildAtIndex = container.children[index];
                     if (currentChildAtIndex !== el) {
-                        if (currentChildAtIndex) {
-                            container.insertBefore(el, currentChildAtIndex);
-                        } else {
-                            container.appendChild(el);
-                        }
+                        if (currentChildAtIndex) container.insertBefore(el, currentChildAtIndex);
+                        else container.appendChild(el);
                     }
                 });
 
-                // Remove deleted items
-                [...container.children].forEach(child => {
-                    if (!processedIds.has(child.id)) {
-                        child.remove();
-                    }
-                });
-                
-                // Refresh icons
+                [...container.children].forEach(child => { if (!processedIds.has(child.id)) child.remove(); });
                 lucide.createIcons();
             }
         }
 
-        // 2. Auth & Setup
-        const initAuth = async () => {
-            try {
-                // Try anonymous sign-in (standard for this app)
-                await signInAnonymously(auth);
-            } catch(e) { console.error("Auth Error:", e); }
-        };
+        // --- Auth & Setup ---
+        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error("Auth Error:", e); } };
         initAuth();
+
+        let unsubscribeEvents = null;
+        let unsubscribeConfig = null;
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
@@ -407,42 +385,56 @@
                 els.connectionIcon.setAttribute('data-lucide', 'cloud');
                 els.connectionIcon.classList.replace('text-red-400', 'text-green-400');
                 lucide.createIcons();
-                setupListeners(u.uid);
+                setupListeners();
             }
         });
 
-        // 3. Firestore Listeners
-        function setupListeners(uid) {
-            const eventsRef = collection(db, 'artifacts', appId, 'users', uid, 'regatta_events');
-            const configRef = doc(db, 'artifacts', appId, 'users', uid, 'config', 'main');
+        function setupListeners() {
+            // Unsubscribe previous listeners if exists
+            if (unsubscribeEvents) unsubscribeEvents();
+            if (unsubscribeConfig) unsubscribeConfig();
 
-            onSnapshot(eventsRef, (snap) => {
+            // Clear current events visually while loading new ones
+            state.events = [];
+            render();
+
+            const eventsRef = getEventsRef();
+            const configRef = getConfigRef();
+
+            unsubscribeEvents = onSnapshot(eventsRef, (snap) => {
                 state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 render();
             });
 
-            onSnapshot(configRef, (snap) => {
+            unsubscribeConfig = onSnapshot(configRef, (snap) => {
                 if(snap.exists()) {
                     const d = snap.data();
                     if(d.delay !== undefined) state.delay = d.delay;
                     if(d.settings) state.settings = d.settings;
                     
-                    // Sync config inputs
                     document.getElementById('input-offset').value = state.settings.onWaterOffset;
                     document.getElementById('input-warmup').value = state.settings.warmUpDuration;
+                    render();
+                } else {
+                    // Reset if no config exists for this group
+                    state.delay = 0;
                     render();
                 }
             });
         }
 
-        // 4. Action Handlers (Global scope for onclick)
-        window.deleteEvent = async (id) => {
-            if(!state.user) return;
-            await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events', id));
+        // --- Interaction ---
+
+        // Join Group
+        document.getElementById('btn-join-group').onclick = () => {
+            const code = document.getElementById('input-group-code').value.trim().toLowerCase();
+            if(code !== state.groupCode) {
+                state.groupCode = code;
+                localStorage.setItem('regatta_group_code', code);
+                setupListeners(); // Switch DB paths
+            }
         };
 
-        // 5. Event Listeners
-        
         // Add Event
         document.getElementById('add-event-form').onsubmit = async (e) => {
             e.preventDefault();
@@ -451,52 +443,45 @@
             const crew = document.getElementById('input-crew').value;
             const time = document.getElementById('input-time').value;
 
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events'), {
-                eventNum: eventNum || 'N/A', crew, originalTime: time
-            });
+            await addDoc(getEventsRef(), { eventNum: eventNum || 'N/A', crew, originalTime: time });
             e.target.reset();
+        };
+
+        // Global Delete
+        window.deleteEvent = async (id) => {
+            if(!state.user) return;
+            await deleteDoc(doc(getEventsRef(), id));
         };
 
         // Delay Controls
         const updateDelay = async (delta) => {
             if(!state.user) return;
             const newDelay = Math.max(0, state.delay + delta);
-            await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main'), {
-                delay: newDelay, settings: state.settings
-            }, { merge: true });
+            await setDoc(getConfigRef(), { delay: newDelay, settings: state.settings }, { merge: true });
         };
         document.getElementById('btn-delay-plus').onclick = () => updateDelay(5);
         document.getElementById('btn-delay-minus').onclick = () => updateDelay(-5);
 
-        // Settings Toggle
-        document.getElementById('btn-toggle-config').onclick = () => {
-            els.configPanel.classList.toggle('hidden');
-        };
+        // Tools
+        document.getElementById('btn-toggle-config').onclick = () => els.configPanel.classList.toggle('hidden');
 
-        // Settings Inputs
         const updateSettings = async () => {
             if(!state.user) return;
             const newSettings = {
                 onWaterOffset: Number(document.getElementById('input-offset').value),
                 warmUpDuration: Number(document.getElementById('input-warmup').value)
             };
-            await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main'), {
-                delay: state.delay, settings: newSettings
-            }, { merge: true });
+            await setDoc(getConfigRef(), { delay: state.delay, settings: newSettings }, { merge: true });
         };
         document.getElementById('input-offset').onchange = updateSettings;
         document.getElementById('input-warmup').onchange = updateSettings;
 
         // Clear All
         document.getElementById('btn-clear').onclick = async () => {
-            if(!state.user || !confirm("Delete all events?")) return;
+            if(!state.user || !confirm(`Delete all events for ${state.groupCode || 'myself'}?`)) return;
             const batch = writeBatch(db);
-            state.events.forEach(ev => {
-                batch.delete(doc(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events', ev.id));
-            });
-            batch.set(doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main'), {
-                delay: 0, settings: state.settings
-            });
+            state.events.forEach(ev => batch.delete(doc(getEventsRef(), ev.id)));
+            batch.set(getConfigRef(), { delay: 0, settings: state.settings });
             await batch.commit();
         };
 
@@ -508,18 +493,16 @@
             reader.onload = async (evt) => {
                 const lines = evt.target.result.split('\n');
                 const batch = writeBatch(db);
-                const colRef = collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
+                // Note: We use the helper to get the current collection (Shared or Private)
+                const colRef = getEventsRef();
                 let count = 0;
                 lines.forEach((line, idx) => {
                     if(!line.trim()) return;
                     const cols = line.split(',').map(c => c.trim());
-                    // Basic header detection: if first col has 'event' or 'number', skip row 0
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                     
                     let eventNum='', crew='', time='';
-                    // Handle 3 cols: Event, Crew, Time
                     if(cols.length >= 3) { eventNum=cols[0]; crew=cols[1]; time=cols[2]; }
-                    // Handle 2 cols: Crew, Time
                     else if(cols.length === 2) { crew=cols[0]; time=cols[1]; }
 
                     if(time && time.match(/\d{1,2}:\d{2}/)) {
@@ -556,18 +539,12 @@
                 { eventNum: '105', crew: 'M Novice 2-', originalTime: '08:30' }
             ];
             const batch = writeBatch(db);
-            const colRef = collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
+            const colRef = getEventsRef();
             demo.forEach(d => batch.set(doc(colRef), d));
             await batch.commit();
         };
 
-        // Clock loop
-        setInterval(() => {
-            state.currentTime = new Date();
-            render();
-        }, 1000);
-
-        // Initial Icons
+        setInterval(() => { state.currentTime = new Date(); render(); }, 1000);
         lucide.createIcons();
     </script>
 </body>
