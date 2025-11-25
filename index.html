@@ -216,7 +216,7 @@
             delayDisplay: document.getElementById('delay-display'),
             statusSummary: document.getElementById('status-summary'),
             connectionBtn: document.getElementById('connection-btn'), // Updated to button
-            connectionIcon: document.getElementById('connection-icon'), // The inner icon
+            // Removed connectionIcon from here because it changes dynamicallly
             submitBtn: document.getElementById('btn-submit'),
             configPanel: document.getElementById('config-panel'),
             clockDisplays: document.querySelectorAll('.clock-display'),
@@ -422,15 +422,17 @@
 
         // FIXED: Click handler now attached to the persistent button wrapper
         els.connectionBtn.onclick = async () => {
+            const currentIcon = els.connectionBtn.querySelector('svg') || els.connectionBtn.querySelector('i');
+
             if (!state.user) {
-                // Visual feedback that something is happening
-                els.connectionIcon.classList.add('animate-spin');
+                // Visual feedback
+                if(currentIcon) currentIcon.classList.add('animate-spin');
                 
                 if(confirm("Database is disconnected. Attempt to reconnect?")) {
                     const error = await initAuth();
                     
-                    // Stop spinner after attempt
-                    els.connectionIcon.classList.remove('animate-spin');
+                    // Stop spinner
+                    if(currentIcon) currentIcon.classList.remove('animate-spin');
 
                     // If still no user after retry, show help
                     if(!auth.currentUser) {
@@ -438,7 +440,7 @@
                         alert(`Connection Failed (${errKey}).\n\nTroubleshooting:\n1. Check internet.\n2. GitHub Pages? Add domain to Firebase Console > Auth > Settings > Authorized Domains.`);
                     }
                 } else {
-                     els.connectionIcon.classList.remove('animate-spin');
+                     if(currentIcon) currentIcon.classList.remove('animate-spin');
                 }
             } else {
                 alert(`✅ Connected to Database\nProject: ${firebaseConfig.projectId}\nUser ID: ${state.user.uid}`);
@@ -454,16 +456,14 @@
                 els.submitBtn.textContent = "Add to Schedule";
                 els.submitBtn.disabled = false;
                 
-                // Update the icon inside the button
-                els.connectionIcon.setAttribute('data-lucide', 'cloud');
-                els.connectionIcon.classList.replace('text-red-400', 'text-green-400');
-                
+                // FORCE UPDATE: Explicitly replace HTML to ensure Green Cloud renders
+                els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
                 lucide.createIcons();
+                
                 setupListeners();
             } else {
-                // Handle logout/disconnect state visually
-                els.connectionIcon.setAttribute('data-lucide', 'cloud-off');
-                els.connectionIcon.classList.replace('text-green-400', 'text-red-400');
+                // FORCE UPDATE: Explicitly replace HTML for Red Cloud
+                els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
                 lucide.createIcons();
             }
         });
