@@ -36,7 +36,8 @@
                         <h1 class="text-xl font-bold tracking-tight">RegattaMaster</h1>
                         <!-- Group Indicator -->
                         <span id="group-badge" class="hidden text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono ml-2 border border-blue-400"></span>
-                        <i id="connection-status" data-lucide="cloud-off" class="w-4 h-4 text-red-400 ml-2" title="Connecting to Database..."></i>
+                        <!-- Updated Icon: Added cursor-pointer and hover effect -->
+                        <i id="connection-status" data-lucide="cloud-off" class="w-4 h-4 text-red-400 ml-2 cursor-pointer hover:scale-110 transition-transform" title="Status: Disconnected (Click to Retry)"></i>
                     </div>
                     <!-- Mobile Clock -->
                     <div class="md:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
@@ -414,6 +415,23 @@
         // --- Auth & Setup ---
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error("Auth Error:", e); } };
         initAuth();
+
+        // New: Click handler for the connection icon
+        document.getElementById('connection-status').onclick = async () => {
+            if (!state.user) {
+                if(confirm("Database is disconnected. Retry connection?")) {
+                    await initAuth();
+                    // If still no user after retry, show help
+                    setTimeout(() => {
+                        if(!state.user) {
+                            alert("Connection Failed.\n\nTroubleshooting:\n1. Check internet connection.\n2. If on GitHub Pages, go to Firebase Console > Authentication > Settings > Authorized Domains and add 'rbvandijknz.github.io'.");
+                        }
+                    }, 1000);
+                }
+            } else {
+                alert(`✅ Connected to Database\nProject: ${firebaseConfig.projectId}\nUser ID: ${state.user.uid}`);
+            }
+        };
 
         let unsubscribeEvents = null;
         let unsubscribeConfig = null;
