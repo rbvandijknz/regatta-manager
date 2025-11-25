@@ -24,6 +24,17 @@
         
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Select Styling for Weather Widget */
+        select.weather-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none;
+            text-align: center;
+            text-align-last: center;
+        }
+        select.weather-select::-ms-expand { display: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans pb-20">
@@ -44,7 +55,6 @@
                         <!-- Group Indicator -->
                         <span id="group-badge" class="hidden text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono ml-2 border border-blue-400"></span>
                         
-                        <!-- FIXED: Wrapped icon in a button so the click listener survives Lucide rendering -->
                         <button id="connection-btn" class="ml-2 p-1 rounded hover:bg-slate-800 transition-colors" title="Connection Status">
                             <i id="connection-icon" data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>
                         </button>
@@ -53,20 +63,45 @@
                     <div class="md:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
                 </div>
 
-                <!-- Delay Controls -->
-                <div class="flex items-center justify-center gap-4 bg-slate-800 p-2 rounded-lg border border-slate-700">
-                    <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider mr-2">Programme Delay</div>
-                    <button id="btn-delay-minus" class="p-2 hover:bg-slate-700 rounded text-slate-300 active:scale-95 transition" title="Remove 5 mins">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                    </button>
-                    
-                    <div id="delay-display" class="px-4 py-1 rounded font-mono text-xl font-bold text-slate-200 transition-colors">
-                        +0m
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <!-- Weather Widget -->
+                    <div id="weather-widget" class="flex items-center gap-3 bg-slate-800/80 p-2 rounded-lg border border-slate-700 text-slate-300 text-sm w-full sm:w-auto justify-center">
+                        <div class="flex items-center gap-1 relative group cursor-pointer">
+                            <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i>
+                            <!-- Location Selector -->
+                            <select id="weather-location" class="weather-select bg-transparent font-semibold text-xs uppercase tracking-wider text-slate-300 focus:text-white focus:outline-none cursor-pointer border-b border-transparent hover:border-slate-500 transition-colors">
+                                <option value="karapiro" class="bg-slate-800 text-slate-300">Karapiro</option>
+                                <option value="bluelake" class="bg-slate-800 text-slate-300">Blue Lake</option>
+                                <option value="ruataniwha" class="bg-slate-800 text-slate-300">Ruataniwha</option>
+                            </select>
+                        </div>
+                        <div class="h-4 w-px bg-slate-600"></div>
+                        <div class="flex items-center gap-1">
+                            <i id="weather-icon" data-lucide="cloud" class="w-4 h-4 text-blue-300"></i>
+                            <span id="weather-temp" class="font-mono font-bold text-white">--°</span>
+                        </div>
+                        <div class="h-4 w-px bg-slate-600"></div>
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="wind" class="w-4 h-4 text-slate-400"></i>
+                            <span id="weather-wind" class="font-mono">--</span>
+                        </div>
                     </div>
 
-                    <button id="btn-delay-plus" class="p-2 hover:bg-slate-700 rounded text-yellow-400 active:scale-95 transition" title="Add 5 mins">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                    </button>
+                    <!-- Delay Controls -->
+                    <div class="flex items-center justify-center gap-4 bg-slate-800 p-2 rounded-lg border border-slate-700 w-full sm:w-auto">
+                        <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider mr-2">Delay</div>
+                        <button id="btn-delay-minus" class="p-2 hover:bg-slate-700 rounded text-slate-300 active:scale-95 transition" title="Remove 5 mins">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <div id="delay-display" class="px-4 py-1 rounded font-mono text-xl font-bold text-slate-200 transition-colors">
+                            +0m
+                        </div>
+
+                        <button id="btn-delay-plus" class="p-2 hover:bg-slate-700 rounded text-yellow-400 active:scale-95 transition" title="Add 5 mins">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Desktop Clock -->
@@ -206,6 +241,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- Locations Data ---
+        const LOCATIONS = {
+            karapiro: { name: 'Karapiro', lat: -37.9265, lon: 175.5435 },
+            bluelake: { name: 'Blue Lake', lat: -38.196, lon: 176.327 },
+            ruataniwha: { name: 'Ruataniwha', lat: -44.218, lon: 170.086 }
+        };
+
         // --- State ---
         let state = {
             user: null,
@@ -213,7 +255,9 @@
             delay: 0,
             settings: { onWaterOffset: 35, warmUpDuration: 40 },
             currentTime: new Date(),
-            groupCode: localStorage.getItem('regatta_group_code') || ''
+            groupCode: localStorage.getItem('regatta_group_code') || '',
+            weather: { temp: null, wind: null, dir: null, code: null },
+            locationKey: localStorage.getItem('regatta_location') || 'karapiro'
         };
 
         // --- DOM Elements ---
@@ -222,24 +266,25 @@
             emptyState: document.getElementById('empty-state'),
             delayDisplay: document.getElementById('delay-display'),
             statusSummary: document.getElementById('status-summary'),
-            connectionBtn: document.getElementById('connection-btn'), // Updated to button
-            // Removed connectionIcon from here because it changes dynamicallly
+            connectionBtn: document.getElementById('connection-btn'),
             submitBtn: document.getElementById('btn-submit'),
             configPanel: document.getElementById('config-panel'),
             clockDisplays: document.querySelectorAll('.clock-display'),
             groupBadge: document.getElementById('group-badge'),
-            groupInput: document.getElementById('input-group-code')
+            groupInput: document.getElementById('input-group-code'),
+            weatherWidget: {
+                select: document.getElementById('weather-location'),
+                temp: document.getElementById('weather-temp'),
+                wind: document.getElementById('weather-wind'),
+                icon: document.getElementById('weather-icon')
+            }
         };
 
         // --- Database Path Helpers ---
-        // If a group code exists, we use the public data path. 
-        // If not, we use the private user path.
         const getEventsRef = () => {
             if (state.groupCode) {
-                // Public Shared Path
                 return collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`);
             } else {
-                // Private User Path
                 return collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
             }
         };
@@ -250,6 +295,56 @@
             } else {
                 return doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
             }
+        };
+
+        // --- Weather Service ---
+        const fetchWeather = async () => {
+            try {
+                const loc = LOCATIONS[state.locationKey] || LOCATIONS['karapiro'];
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=kmh&timezone=Pacific%2FAuckland`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (data.current) {
+                    state.weather = {
+                        temp: Math.round(data.current.temperature_2m),
+                        wind: Math.round(data.current.wind_speed_10m),
+                        dir: getWindDir(data.current.wind_direction_10m),
+                        code: data.current.weather_code
+                    };
+                    renderWeather();
+                }
+            } catch (error) {
+                console.error("Weather fetch failed:", error);
+                els.weatherWidget.temp.textContent = "--";
+            }
+        };
+
+        const getWindDir = (d) => {
+            const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+            return dirs[Math.round(d / 45) % 8];
+        };
+
+        const getWeatherIconName = (code) => {
+            if (code <= 1) return 'sun';
+            if (code <= 3) return 'cloud';
+            if (code <= 48) return 'cloud-fog';
+            if (code <= 67) return 'cloud-rain';
+            if (code <= 77) return 'snowflake';
+            if (code <= 82) return 'cloud-rain';
+            return 'cloud-lightning';
+        };
+
+        const renderWeather = () => {
+            if(state.weather.temp !== null) {
+                els.weatherWidget.temp.textContent = `${state.weather.temp}°`;
+                els.weatherWidget.wind.textContent = `${state.weather.wind}kmh ${state.weather.dir}`;
+                const iconName = getWeatherIconName(state.weather.code);
+                els.weatherWidget.icon.setAttribute('data-lucide', iconName);
+                lucide.createIcons();
+            }
+            // Ensure select value matches state
+            els.weatherWidget.select.value = state.locationKey;
         };
 
         // --- Rendering & Logic ---
@@ -271,8 +366,6 @@
             if(state.groupCode) {
                 els.groupBadge.textContent = state.groupCode;
                 els.groupBadge.classList.remove('hidden');
-                // FIXED: Removed the line below that was overwriting your typing every second
-                // els.groupInput.value = state.groupCode; 
             } else {
                 els.groupBadge.classList.add('hidden');
             }
@@ -318,7 +411,6 @@
                     if (!el) {
                         el = document.createElement('div');
                         el.id = ev.id;
-                        // ... existing innerHTML logic ...
                         el.innerHTML = `
                             <div class="indicator-bar absolute left-0 top-0 bottom-0 w-1 bg-blue-500 hidden"></div>
                             <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
@@ -366,7 +458,6 @@
                         el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 fade-in ${statusClass}`;
                     }
                     
-                    // ... existing update logic ...
                     const baseClasses = "relative overflow-hidden rounded-xl border transition-all duration-300";
                     const targetClass = `${baseClasses} ${statusClass}`;
                     if (!el.className.includes(statusClass)) el.className = targetClass;
@@ -408,21 +499,14 @@
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error("Auth Error:", e); return e; } };
         initAuth();
 
-        // FIXED: Click handler now attached to the persistent button wrapper
         els.connectionBtn.onclick = async () => {
             const currentIcon = els.connectionBtn.querySelector('svg') || els.connectionBtn.querySelector('i');
 
             if (!state.user) {
-                // Visual feedback
                 if(currentIcon) currentIcon.classList.add('animate-spin');
-                
                 if(confirm("Database is disconnected. Attempt to reconnect?")) {
                     const error = await initAuth();
-                    
-                    // Stop spinner
                     if(currentIcon) currentIcon.classList.remove('animate-spin');
-
-                    // If still no user after retry, show help
                     if(!auth.currentUser) {
                         const errKey = error?.code || 'unknown';
                         alert(`Connection Failed (${errKey}).\n\nTroubleshooting:\n1. Check internet.\n2. GitHub Pages? Add domain to Firebase Console > Auth > Settings > Authorized Domains.`);
@@ -443,28 +527,25 @@
             if(u) {
                 els.submitBtn.textContent = "Add to Schedule";
                 els.submitBtn.disabled = false;
-                
-                // FORCE UPDATE: Explicitly replace HTML to ensure Green Cloud renders
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
                 lucide.createIcons();
-                
-                // Initialize input value ONCE on login
                 if(state.groupCode) els.groupInput.value = state.groupCode;
-                
                 setupListeners();
+                
+                // Initialize Weather and Location
+                els.weatherWidget.select.value = state.locationKey;
+                fetchWeather();
+                setInterval(fetchWeather, 900000); 
+
             } else {
-                // FORCE UPDATE: Explicitly replace HTML for Red Cloud
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
                 lucide.createIcons();
             }
         });
 
         function setupListeners() {
-            // Unsubscribe previous listeners if exists
             if (unsubscribeEvents) unsubscribeEvents();
             if (unsubscribeConfig) unsubscribeConfig();
-
-            // Clear current events visually while loading new ones
             state.events = [];
             render();
 
@@ -486,7 +567,6 @@
                     document.getElementById('input-warmup').value = state.settings.warmUpDuration;
                     render();
                 } else {
-                    // Reset if no config exists for this group
                     state.delay = 0;
                     render();
                 }
@@ -495,17 +575,25 @@
 
         // --- Interaction ---
 
-        // Join Group
+        // Weather Location Change
+        els.weatherWidget.select.onchange = (e) => {
+            const newLoc = e.target.value;
+            state.locationKey = newLoc;
+            localStorage.setItem('regatta_location', newLoc);
+            // Reset weather display to loading state briefly
+            els.weatherWidget.temp.textContent = "--";
+            fetchWeather();
+        };
+
         document.getElementById('btn-join-group').onclick = () => {
             const code = document.getElementById('input-group-code').value.trim().toLowerCase();
             if(code !== state.groupCode) {
                 state.groupCode = code;
                 localStorage.setItem('regatta_group_code', code);
-                setupListeners(); // Switch DB paths
+                setupListeners();
             }
         };
 
-        // Add Event
         document.getElementById('add-event-form').onsubmit = async (e) => {
             e.preventDefault();
             if(!state.user) return;
@@ -523,13 +611,11 @@
             e.target.reset();
         };
 
-        // Global Delete
         window.deleteEvent = async (id) => {
             if(!state.user) return;
             await deleteDoc(doc(getEventsRef(), id));
         };
 
-        // Delay Controls
         const updateDelay = async (delta) => {
             if(!state.user) return;
             const newDelay = Math.max(0, state.delay + delta);
@@ -538,7 +624,6 @@
         document.getElementById('btn-delay-plus').onclick = () => updateDelay(5);
         document.getElementById('btn-delay-minus').onclick = () => updateDelay(-5);
 
-        // Tools
         document.getElementById('btn-toggle-config').onclick = () => els.configPanel.classList.toggle('hidden');
 
         const updateSettings = async () => {
@@ -552,7 +637,6 @@
         document.getElementById('input-offset').onchange = updateSettings;
         document.getElementById('input-warmup').onchange = updateSettings;
 
-        // Clear All
         document.getElementById('btn-clear').onclick = async () => {
             if(!state.user || !confirm(`Delete all events for ${state.groupCode || 'myself'}?`)) return;
             const batch = writeBatch(db);
@@ -561,7 +645,6 @@
             await batch.commit();
         };
 
-        // CSV Upload
         document.getElementById('input-csv').onchange = (e) => {
             const file = e.target.files[0];
             if(!file || !state.user) return;
@@ -569,7 +652,6 @@
             reader.onload = async (evt) => {
                 const lines = evt.target.result.split('\n');
                 const batch = writeBatch(db);
-                // Note: We use the helper to get the current collection (Shared or Private)
                 const colRef = getEventsRef();
                 let count = 0;
                 lines.forEach((line, idx) => {
@@ -578,33 +660,12 @@
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                     
                     let eventNum='', alpha='', crew='', time='';
-                    
-                    // 4 Cols: Event, Alpha, Crew, Time
-                    if(cols.length >= 4) { 
-                        eventNum=cols[0]; 
-                        alpha=cols[1]; 
-                        crew=cols[2]; 
-                        time=cols[3]; 
-                    }
-                    // 3 Cols: Event, Crew, Time (Backward compatibility)
-                    else if(cols.length === 3) { 
-                        eventNum=cols[0]; 
-                        crew=cols[1]; 
-                        time=cols[2]; 
-                    }
-                    // 2 Cols: Crew, Time
-                    else if(cols.length === 2) { 
-                        crew=cols[0]; 
-                        time=cols[1]; 
-                    }
+                    if(cols.length >= 4) { eventNum=cols[0]; alpha=cols[1]; crew=cols[2]; time=cols[3]; }
+                    else if(cols.length === 3) { eventNum=cols[0]; crew=cols[1]; time=cols[2]; }
+                    else if(cols.length === 2) { crew=cols[0]; time=cols[1]; }
 
                     if(time && time.match(/\d{1,2}:\d{2}/)) {
-                        batch.set(doc(colRef), { 
-                            eventNum, 
-                            alpha, 
-                            crew, 
-                            originalTime: time 
-                        });
+                        batch.set(doc(colRef), { eventNum, alpha, crew, originalTime: time });
                         count++;
                     }
                 });
@@ -615,7 +676,6 @@
             e.target.value = null;
         };
 
-        // Download Template
         document.getElementById('btn-template').onclick = () => {
             const csvContent = "Event Number,Alpha,Crew Name,Start Time (HH:MM)\n101,A,Sample Crew A,08:30\n101,B,Sample Crew B,08:35";
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -628,7 +688,6 @@
             document.body.removeChild(link);
         };
 
-        // Demo Data
         document.getElementById('btn-demo').onclick = async () => {
             if(!state.user) return;
             const demo = [
