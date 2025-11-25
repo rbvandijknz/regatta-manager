@@ -30,8 +30,8 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <i data-lucide="anchor" class="text-blue-400 w-6 h-6"></i>
-                        <h1 class="text-xl font-bold tracking-tight">RegattaMaster <span class="text-xs font-normal opacity-50 ml-1">Vanilla</span></h1>
-                        <i id="connection-status" data-lucide="cloud-off" class="w-4 h-4 text-red-400 ml-2"></i>
+                        <h1 class="text-xl font-bold tracking-tight">RegattaMaster</h1>
+                        <i id="connection-status" data-lucide="cloud-off" class="w-4 h-4 text-red-400 ml-2" title="Connecting to Database..."></i>
                     </div>
                     <!-- Mobile Clock -->
                     <div class="md:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
@@ -254,12 +254,12 @@
                 els.emptyState.classList.add('hidden');
                 
                 const currentMins = timeToMinutes(`${state.currentTime.getHours()}:${state.currentTime.getMinutes()}`);
-                
-                // Sort
                 const sortedEvents = [...state.events].sort((a,b) => timeToMinutes(a.originalTime) - timeToMinutes(b.originalTime));
+                const processedIds = new Set();
 
-                // Generate HTML
-                const html = sortedEvents.map(ev => {
+                // Diffing Logic: Update existing or create new
+                sortedEvents.forEach(ev => {
+                    processedIds.add(ev.id);
                     const baseMins = timeToMinutes(ev.originalTime);
                     const delayedMins = baseMins + state.delay;
                     const onWaterMins = delayedMins - state.settings.onWaterOffset;
@@ -277,52 +277,82 @@
                         statusClass = 'bg-white ring-2 ring-blue-400 shadow-md transform scale-[1.01]';
                     }
 
-                    return `
-                        <div class="relative overflow-hidden rounded-xl border transition-all duration-300 ${statusClass} fade-in">
-                            ${isActive ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>' : ''}
-                            
-                            <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
-                                <!-- Crew -->
-                                <div class="col-span-2 md:col-span-5 flex items-start gap-3">
-                                    <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
-                                    <div>
-                                        <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
-                                        ${state.delay > 0 && !isPast ? `<div class="text-xs text-red-500 font-medium mt-1">Original: ${ev.originalTime}</div>` : ''}
-                                    </div>
+                    // Content HTML
+                    const innerHTML = `
+                        ${isActive ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>' : ''}
+                        <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
+                            <!-- Crew -->
+                            <div class="col-span-2 md:col-span-5 flex items-start gap-3">
+                                <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
+                                <div>
+                                    <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
+                                    ${state.delay > 0 && !isPast ? `<div class="text-xs text-red-500 font-medium mt-1">Original: ${ev.originalTime}</div>` : ''}
                                 </div>
+                            </div>
 
-                                <!-- Warm Up -->
-                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
-                                    <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
-                                    <div class="text-slate-600 font-mono text-sm">${formatDisplayTime(warmUpStartMins)}</div>
-                                </div>
+                            <!-- Warm Up -->
+                            <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
+                                <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
+                                <div class="text-slate-600 font-mono text-sm">${formatDisplayTime(warmUpStartMins)}</div>
+                            </div>
 
-                                <!-- On Water -->
-                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
-                                    <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
-                                    <div class="text-blue-700 font-bold font-mono text-lg md:text-xl">${formatDisplayTime(onWaterMins)}</div>
-                                    <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
-                                </div>
+                            <!-- On Water -->
+                            <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
+                                <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
+                                <div class="text-blue-700 font-bold font-mono text-lg md:text-xl">${formatDisplayTime(onWaterMins)}</div>
+                                <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
+                            </div>
 
-                                <!-- Start -->
-                                <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0">
-                                    <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
-                                    <div class="text-xl font-bold font-mono ${state.delay > 0 ? 'text-red-600' : 'text-slate-800'}">${formatDisplayTime(delayedMins)}</div>
-                                </div>
+                            <!-- Start -->
+                            <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0">
+                                <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
+                                <div class="text-xl font-bold font-mono ${state.delay > 0 ? 'text-red-600' : 'text-slate-800'}">${formatDisplayTime(delayedMins)}</div>
+                            </div>
 
-                                <!-- Delete -->
-                                <div class="col-span-2 md:col-span-1 flex justify-end">
-                                    <button onclick="window.deleteEvent('${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
+                            <!-- Delete -->
+                            <div class="col-span-2 md:col-span-1 flex justify-end">
+                                <button onclick="window.deleteEvent('${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
                             </div>
                         </div>
                     `;
-                }).join('');
 
-                els.eventsContainer.innerHTML = html;
-                lucide.createIcons(); // Refresh icons in new HTML
+                    // Check if element exists
+                    let el = document.getElementById(ev.id);
+                    
+                    if (!el) {
+                        // Create New
+                        el = document.createElement('div');
+                        el.id = ev.id;
+                        el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 ${statusClass} fade-in`;
+                        el.innerHTML = innerHTML;
+                    } else {
+                        // Update Existing
+                        // Only update class if changed to prevent animation restarts/jitters
+                        const newClass = `relative overflow-hidden rounded-xl border transition-all duration-300 ${statusClass}`;
+                        if (el.className !== newClass && el.className !== newClass + ' fade-in') {
+                             el.className = newClass;
+                        }
+                        // Only update content if changed (prevents text selection loss or micro-flashing)
+                        if (el.innerHTML !== innerHTML) {
+                            el.innerHTML = innerHTML;
+                        }
+                    }
+
+                    // Ensure Order (appending an existing child moves it to the end)
+                    els.eventsContainer.appendChild(el);
+                });
+
+                // Remove deleted events
+                [...els.eventsContainer.children].forEach(child => {
+                    if (!processedIds.has(child.id)) {
+                        child.remove();
+                    }
+                });
+                
+                // Refresh icons (safe to call repeatedly)
+                lucide.createIcons();
             }
         }
 
