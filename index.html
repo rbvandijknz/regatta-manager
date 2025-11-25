@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regatta Manager</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar for cleanliness */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans pb-20">
+
+    <!-- Sticky Header -->
+    <div class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-700">
+        <div class="max-w-4xl mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                
+                <!-- Brand -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="anchor" class="text-blue-400 w-6 h-6"></i>
+                        <h1 class="text-xl font-bold tracking-tight">RegattaMaster <span class="text-xs font-normal opacity-50 ml-1">Vanilla</span></h1>
+                        <i id="connection-status" data-lucide="cloud-off" class="w-4 h-4 text-red-400 ml-2"></i>
+                    </div>
+                    <!-- Mobile Clock -->
+                    <div class="md:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
+                </div>
+
+                <!-- Delay Controls -->
+                <div class="flex items-center justify-center gap-4 bg-slate-800 p-2 rounded-lg border border-slate-700">
+                    <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider mr-2">Programme Delay</div>
+                    <button id="btn-delay-minus" class="p-2 hover:bg-slate-700 rounded text-slate-300 active:scale-95 transition" title="Remove 5 mins">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                    
+                    <div id="delay-display" class="px-4 py-1 rounded font-mono text-xl font-bold text-slate-200 transition-colors">
+                        +0m
+                    </div>
+
+                    <button id="btn-delay-plus" class="p-2 hover:bg-slate-700 rounded text-yellow-400 active:scale-95 transition" title="Add 5 mins">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Desktop Clock -->
+                <div class="hidden md:block font-mono text-2xl text-blue-300 font-semibold w-28 text-right clock-display">
+                    00:00
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- Controls Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Add Event Form -->
+            <form id="add-event-form" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
+                <h3 class="font-semibold text-slate-700 flex items-center gap-2">
+                    <i data-lucide="play-circle" class="w-4 h-4"></i> Add Event
+                </h3>
+                <div class="flex gap-2">
+                    <input type="text" id="input-event-num" placeholder="Ev #" class="w-20 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <input type="text" id="input-crew" placeholder="Crew Name" class="flex-1 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <input type="time" id="input-time" class="p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    Connecting...
+                </button>
+            </form>
+
+            <!-- Tools Panel -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-semibold text-slate-700 flex items-center gap-2">
+                        <i data-lucide="settings" class="w-4 h-4"></i> Tools
+                    </h3>
+                    <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline">Config</button>
+                </div>
+
+                <!-- Hidden Config -->
+                <div id="config-panel" class="hidden mb-4 p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
+                    <div class="flex justify-between items-center">
+                        <span>On Water Minutes Before:</span>
+                        <input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Warm Up Duration (mins):</span>
+                        <input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center">
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <label class="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded cursor-pointer transition text-sm font-medium">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Upload CSV
+                        <input type="file" id="input-csv" accept=".csv" class="hidden">
+                    </label>
+                    <button id="btn-demo" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition">
+                        Demo Data
+                    </button>
+                    <button id="btn-clear" class="px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded transition" title="Clear All">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- List Header -->
+        <div class="flex items-center justify-between mb-2">
+            <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
+            <div class="text-sm text-slate-500" id="status-summary">Loading...</div>
+        </div>
+
+        <!-- Table Header (Desktop) -->
+        <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div class="col-span-1">#</div>
+            <div class="col-span-4">Crew</div>
+            <div class="col-span-2 text-center">Warm Up</div>
+            <div class="col-span-2 text-center text-blue-600">On Water</div>
+            <div class="col-span-2 text-right">Start Time</div>
+            <div class="col-span-1"></div>
+        </div>
+
+        <!-- Events Container -->
+        <div id="events-container" class="space-y-3 pb-10">
+            <!-- Items injected here by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 bg-white rounded-xl border-2 border-dashed border-slate-200 text-slate-400">
+            <i data-lucide="timer" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+            <p class="text-lg font-medium">No events scheduled</p>
+            <p class="text-sm">Add manually or upload a CSV.</p>
+        </div>
+
+    </div>
+
+    <!-- Firebase & Application Logic -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
+        import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
+
+        // --- Config ---
+        // Provided by environment or manually pasted here
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- State ---
+        let state = {
+            user: null,
+            events: [],
+            delay: 0,
+            settings: { onWaterOffset: 35, warmUpDuration: 40 },
+            currentTime: new Date()
+        };
+
+        // --- DOM Elements ---
+        const els = {
+            eventsContainer: document.getElementById('events-container'),
+            emptyState: document.getElementById('empty-state'),
+            delayDisplay: document.getElementById('delay-display'),
+            statusSummary: document.getElementById('status-summary'),
+            connectionIcon: document.getElementById('connection-status'),
+            submitBtn: document.getElementById('btn-submit'),
+            configPanel: document.getElementById('config-panel'),
+            clockDisplays: document.querySelectorAll('.clock-display')
+        };
+
+        // --- Helpers ---
+        const timeToMinutes = (str) => {
+            if(!str) return 0;
+            const [h, m] = str.split(':').map(Number);
+            return h * 60 + m;
+        };
+
+        const minutesToTime = (total) => {
+            let m = total % 60;
+            let h = Math.floor(total / 60);
+            if (h >= 24) h %= 24;
+            if (h < 0) h = 24 + (h % 24);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        };
+
+        const formatDisplayTime = (mins) => {
+            let h = Math.floor(mins / 60);
+            let m = mins % 60;
+            let ampm = 'AM';
+            if (h >= 12) { ampm = 'PM'; if (h > 12) h -= 12; }
+            if (h === 0) h = 12;
+            if (h >= 24) h %= 24; 
+            return `${h}:${String(m).padStart(2,'0')} ${ampm}`;
+        };
+
+        // --- Core Logic ---
+        
+        // 1. Render Function (Replaces React)
+        function render() {
+            // Update Clocks
+            const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            els.clockDisplays.forEach(el => el.textContent = timeStr);
+
+            // Update Delay Display
+            els.delayDisplay.textContent = `+${state.delay}m`;
+            if(state.delay > 0) {
+                els.delayDisplay.className = "px-4 py-1 rounded font-mono text-xl font-bold bg-red-500/20 text-red-600 border border-red-500/50 transition-colors";
+            } else {
+                els.delayDisplay.className = "px-4 py-1 rounded font-mono text-xl font-bold text-slate-200 transition-colors";
+            }
+
+            // Update Summary
+            els.statusSummary.textContent = `${state.events.length} Events | ${state.delay > 0 ? `Delayed ${state.delay}m` : 'On Time'}`;
+
+            // Render Events
+            if (state.events.length === 0) {
+                els.eventsContainer.innerHTML = '';
+                els.emptyState.classList.remove('hidden');
+            } else {
+                els.emptyState.classList.add('hidden');
+                
+                const currentMins = timeToMinutes(`${state.currentTime.getHours()}:${state.currentTime.getMinutes()}`);
+                
+                // Sort
+                const sortedEvents = [...state.events].sort((a,b) => timeToMinutes(a.originalTime) - timeToMinutes(b.originalTime));
+
+                // Generate HTML
+                const html = sortedEvents.map(ev => {
+                    const baseMins = timeToMinutes(ev.originalTime);
+                    const delayedMins = baseMins + state.delay;
+                    const onWaterMins = delayedMins - state.settings.onWaterOffset;
+                    const warmUpStartMins = onWaterMins - state.settings.warmUpDuration;
+
+                    let statusClass = 'bg-white shadow-sm border-slate-200';
+                    let isActive = false;
+                    let isPast = false;
+
+                    if (currentMins > delayedMins) {
+                        isPast = true;
+                        statusClass = 'bg-slate-50 border-slate-200 opacity-60 grayscale';
+                    } else if (currentMins >= warmUpStartMins) {
+                        isActive = true;
+                        statusClass = 'bg-white ring-2 ring-blue-400 shadow-md transform scale-[1.01]';
+                    }
+
+                    return `
+                        <div class="relative overflow-hidden rounded-xl border transition-all duration-300 ${statusClass} fade-in">
+                            ${isActive ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>' : ''}
+                            
+                            <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
+                                <!-- Crew -->
+                                <div class="col-span-2 md:col-span-5 flex items-start gap-3">
+                                    <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
+                                        ${state.delay > 0 && !isPast ? `<div class="text-xs text-red-500 font-medium mt-1">Original: ${ev.originalTime}</div>` : ''}
+                                    </div>
+                                </div>
+
+                                <!-- Warm Up -->
+                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
+                                    <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
+                                    <div class="text-slate-600 font-mono text-sm">${formatDisplayTime(warmUpStartMins)}</div>
+                                </div>
+
+                                <!-- On Water -->
+                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
+                                    <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
+                                    <div class="text-blue-700 font-bold font-mono text-lg md:text-xl">${formatDisplayTime(onWaterMins)}</div>
+                                    <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
+                                </div>
+
+                                <!-- Start -->
+                                <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0">
+                                    <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
+                                    <div class="text-xl font-bold font-mono ${state.delay > 0 ? 'text-red-600' : 'text-slate-800'}">${formatDisplayTime(delayedMins)}</div>
+                                </div>
+
+                                <!-- Delete -->
+                                <div class="col-span-2 md:col-span-1 flex justify-end">
+                                    <button onclick="window.deleteEvent('${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                els.eventsContainer.innerHTML = html;
+                lucide.createIcons(); // Refresh icons in new HTML
+            }
+        }
+
+        // 2. Auth & Setup
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch(e) { console.error(e); }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (u) => {
+            state.user = u;
+            if(u) {
+                els.submitBtn.textContent = "Add to Schedule";
+                els.submitBtn.disabled = false;
+                els.connectionIcon.setAttribute('data-lucide', 'cloud');
+                els.connectionIcon.classList.replace('text-red-400', 'text-green-400');
+                lucide.createIcons();
+                setupListeners(u.uid);
+            }
+        });
+
+        // 3. Firestore Listeners
+        function setupListeners(uid) {
+            const eventsRef = collection(db, 'artifacts', appId, 'users', uid, 'regatta_events');
+            const configRef = doc(db, 'artifacts', appId, 'users', uid, 'config', 'main');
+
+            onSnapshot(eventsRef, (snap) => {
+                state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                render();
+            });
+
+            onSnapshot(configRef, (snap) => {
+                if(snap.exists()) {
+                    const d = snap.data();
+                    if(d.delay !== undefined) state.delay = d.delay;
+                    if(d.settings) state.settings = d.settings;
+                    
+                    // Sync config inputs
+                    document.getElementById('input-offset').value = state.settings.onWaterOffset;
+                    document.getElementById('input-warmup').value = state.settings.warmUpDuration;
+                    render();
+                }
+            });
+        }
+
+        // 4. Action Handlers (Global scope for onclick)
+        window.deleteEvent = async (id) => {
+            if(!state.user) return;
+            await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events', id));
+        };
+
+        // 5. Event Listeners
+        
+        // Add Event
+        document.getElementById('add-event-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if(!state.user) return;
+            const eventNum = document.getElementById('input-event-num').value;
+            const crew = document.getElementById('input-crew').value;
+            const time = document.getElementById('input-time').value;
+
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events'), {
+                eventNum: eventNum || 'N/A', crew, originalTime: time
+            });
+            e.target.reset();
+        };
+
+        // Delay Controls
+        const updateDelay = async (delta) => {
+            if(!state.user) return;
+            const newDelay = Math.max(0, state.delay + delta);
+            await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main'), {
+                delay: newDelay, settings: state.settings
+            }, { merge: true });
+        };
+        document.getElementById('btn-delay-plus').onclick = () => updateDelay(5);
+        document.getElementById('btn-delay-minus').onclick = () => updateDelay(-5);
+
+        // Settings Toggle
+        document.getElementById('btn-toggle-config').onclick = () => {
+            els.configPanel.classList.toggle('hidden');
+        };
+
+        // Settings Inputs
+        const updateSettings = async () => {
+            if(!state.user) return;
+            const newSettings = {
+                onWaterOffset: Number(document.getElementById('input-offset').value),
+                warmUpDuration: Number(document.getElementById('input-warmup').value)
+            };
+            await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main'), {
+                delay: state.delay, settings: newSettings
+            }, { merge: true });
+        };
+        document.getElementById('input-offset').onchange = updateSettings;
+        document.getElementById('input-warmup').onchange = updateSettings;
+
+        // Clear All
+        document.getElementById('btn-clear').onclick = async () => {
+            if(!state.user || !confirm("Delete all events?")) return;
+            const batch = writeBatch(db);
+            state.events.forEach(ev => {
+                batch.delete(doc(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events', ev.id));
+            });
+            batch.set(doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main'), {
+                delay: 0, settings: state.settings
+            });
+            await batch.commit();
+        };
+
+        // CSV Upload
+        document.getElementById('input-csv').onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file || !state.user) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                const lines = evt.target.result.split('\n');
+                const batch = writeBatch(db);
+                const colRef = collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
+                let count = 0;
+                lines.forEach((line, idx) => {
+                    if(!line.trim()) return;
+                    const cols = line.split(',').map(c => c.trim());
+                    if(cols[0].toLowerCase().includes('event') && idx < 2) return;
+                    
+                    let eventNum='', crew='', time='';
+                    if(cols.length >= 3) { eventNum=cols[0]; crew=cols[1]; time=cols[2]; }
+                    else if(cols.length === 2) { crew=cols[0]; time=cols[1]; }
+
+                    if(time.match(/\d{1,2}:\d{2}/)) {
+                        batch.set(doc(colRef), { eventNum, crew, originalTime: time });
+                        count++;
+                    }
+                });
+                if(count > 0) await batch.commit();
+            };
+            reader.readAsText(file);
+            e.target.value = null;
+        };
+
+        // Demo Data
+        document.getElementById('btn-demo').onclick = async () => {
+            if(!state.user) return;
+            const demo = [
+                { eventNum: '101', crew: 'M U19 8+', originalTime: '08:00' },
+                { eventNum: '102', crew: 'W Club 4x', originalTime: '08:15' },
+                { eventNum: '105', crew: 'M Novice 2-', originalTime: '08:30' }
+            ];
+            const batch = writeBatch(db);
+            const colRef = collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
+            demo.forEach(d => batch.set(doc(colRef), d));
+            await batch.commit();
+        };
+
+        // Clock loop
+        setInterval(() => {
+            state.currentTime = new Date();
+            render();
+        }, 1000);
+
+        // Initial Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
