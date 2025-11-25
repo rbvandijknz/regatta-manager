@@ -29,7 +29,10 @@
                 <!-- Brand -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="anchor" class="text-blue-400 w-6 h-6"></i>
+                        <!-- Custom Podium Icon (SVG) -->
+                        <svg class="text-yellow-500 w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 21v-8h6v-3h6v5h6v6H3z" />
+                        </svg>
                         <h1 class="text-xl font-bold tracking-tight">RegattaMaster</h1>
                         <!-- Group Indicator -->
                         <span id="group-badge" class="hidden text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono ml-2 border border-blue-400"></span>
@@ -75,7 +78,8 @@
                     <i data-lucide="play-circle" class="w-4 h-4"></i> Add Event
                 </h3>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="input-event-num" placeholder="Ev #" class="w-full sm:w-20 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <input type="text" id="input-event-num" placeholder="Ev #" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <input type="text" id="input-alpha" placeholder="Alpha" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     <input type="text" id="input-crew" placeholder="Crew Name" class="w-full sm:flex-1 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
                     <input type="time" id="input-time" class="w-full sm:w-auto p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
                 </div>
@@ -148,7 +152,8 @@
         <!-- Table Header (Desktop) -->
         <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
             <div class="col-span-1">#</div>
-            <div class="col-span-4">Crew</div>
+            <div class="col-span-1">Alpha</div>
+            <div class="col-span-3">Crew</div>
             <div class="col-span-2 text-center">Warm Up</div>
             <div class="col-span-2 text-center text-blue-600">On Water</div>
             <div class="col-span-2 text-right">Start Time</div>
@@ -305,11 +310,47 @@
                             <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
                                 <div class="col-span-2 md:col-span-5 flex items-start gap-3">
                                     <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
+                                    <!-- Alpha Badge (Mobile friendly flex) -->
+                                    <div class="md:hidden bg-slate-50 text-slate-500 border border-slate-200 px-2 py-1 rounded text-sm font-mono font-bold">${ev.alpha || '-'}</div>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
+                                        <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Desktop Only Alpha Column (Positioned absolute or just hidden on mobile logic handled by grid above) -->
+                                <!-- We actually need to restructure the desktop grid for the new column -->
+                                <!-- To avoid complex DOM manipulation on existing items, we just rebuild the structure inside innerHTML above.
+                                     However, the grid defined above was col-span-2 md:col-span-5. We need to split that for desktop.
+                                -->
+                                <!-- Re-writing the first block for better desktop grid alignment -->
+                            </div>
+                        `;
+                        // FIX: We need a cleaner HTML structure to support the 12-col grid perfectly
+                        el.innerHTML = `
+                            <div class="indicator-bar absolute left-0 top-0 bottom-0 w-1 bg-blue-500 hidden"></div>
+                            <div class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center">
+                                
+                                <!-- Event # -->
+                                <div class="col-span-1 md:col-span-1 hidden md:block">
+                                    <div class="bg-slate-100 text-slate-600 font-bold px-1 py-1 rounded text-sm text-center">#${ev.eventNum}</div>
+                                </div>
+
+                                <!-- Alpha -->
+                                <div class="col-span-1 md:col-span-1 hidden md:block text-center">
+                                    <div class="text-slate-500 font-mono font-bold text-sm">${ev.alpha || ''}</div>
+                                </div>
+
+                                <!-- Crew (Mobile combines #, Alpha, Crew) -->
+                                <div class="col-span-2 md:col-span-3 flex items-start gap-3 md:block">
+                                    <div class="md:hidden bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
+                                    <div class="md:hidden bg-slate-50 text-slate-500 border border-slate-200 px-2 py-1 rounded text-sm font-mono font-bold ${!ev.alpha ? 'hidden' : ''}">${ev.alpha || ''}</div>
                                     <div>
                                         <div class="font-bold text-slate-800 text-lg md:text-base leading-tight">${ev.crew}</div>
                                         <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
                                     </div>
                                 </div>
+
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center">
                                     <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
                                     <div class="val-warmup text-slate-600 font-mono text-sm"></div>
@@ -440,10 +481,16 @@
             e.preventDefault();
             if(!state.user) return;
             const eventNum = document.getElementById('input-event-num').value;
+            const alpha = document.getElementById('input-alpha').value;
             const crew = document.getElementById('input-crew').value;
             const time = document.getElementById('input-time').value;
 
-            await addDoc(getEventsRef(), { eventNum: eventNum || 'N/A', crew, originalTime: time });
+            await addDoc(getEventsRef(), { 
+                eventNum: eventNum || 'N/A', 
+                alpha: alpha || '',
+                crew, 
+                originalTime: time 
+            });
             e.target.reset();
         };
 
@@ -501,17 +548,39 @@
                     const cols = line.split(',').map(c => c.trim());
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                     
-                    let eventNum='', crew='', time='';
-                    if(cols.length >= 3) { eventNum=cols[0]; crew=cols[1]; time=cols[2]; }
-                    else if(cols.length === 2) { crew=cols[0]; time=cols[1]; }
+                    let eventNum='', alpha='', crew='', time='';
+                    
+                    // 4 Cols: Event, Alpha, Crew, Time
+                    if(cols.length >= 4) { 
+                        eventNum=cols[0]; 
+                        alpha=cols[1]; 
+                        crew=cols[2]; 
+                        time=cols[3]; 
+                    }
+                    // 3 Cols: Event, Crew, Time (Backward compatibility)
+                    else if(cols.length === 3) { 
+                        eventNum=cols[0]; 
+                        crew=cols[1]; 
+                        time=cols[2]; 
+                    }
+                    // 2 Cols: Crew, Time
+                    else if(cols.length === 2) { 
+                        crew=cols[0]; 
+                        time=cols[1]; 
+                    }
 
                     if(time && time.match(/\d{1,2}:\d{2}/)) {
-                        batch.set(doc(colRef), { eventNum, crew, originalTime: time });
+                        batch.set(doc(colRef), { 
+                            eventNum, 
+                            alpha, 
+                            crew, 
+                            originalTime: time 
+                        });
                         count++;
                     }
                 });
                 if(count > 0) await batch.commit();
-                else alert("No valid rows found. Check format: Event, Crew, Time (HH:MM)");
+                else alert("No valid rows found. Check format: Event, Alpha, Crew, Time (HH:MM)");
             };
             reader.readAsText(file);
             e.target.value = null;
@@ -519,7 +588,7 @@
 
         // Download Template
         document.getElementById('btn-template').onclick = () => {
-            const csvContent = "Event Number,Crew Name,Start Time (HH:MM)\n101,Sample Crew A,08:30\n102,Sample Crew B,09:15";
+            const csvContent = "Event Number,Alpha,Crew Name,Start Time (HH:MM)\n101,A,Sample Crew A,08:30\n101,B,Sample Crew B,08:35";
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
@@ -534,9 +603,10 @@
         document.getElementById('btn-demo').onclick = async () => {
             if(!state.user) return;
             const demo = [
-                { eventNum: '101', crew: 'M U19 8+', originalTime: '08:00' },
-                { eventNum: '102', crew: 'W Club 4x', originalTime: '08:15' },
-                { eventNum: '105', crew: 'M Novice 2-', originalTime: '08:30' }
+                { eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00' },
+                { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05' },
+                { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15' },
+                { eventNum: '105', alpha: 'A', crew: 'M Novice 2-', originalTime: '08:30' }
             ];
             const batch = writeBatch(db);
             const colRef = getEventsRef();
