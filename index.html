@@ -22,13 +22,19 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Toast Animation */
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        .toast { animation: slideDown 0.3s ease-out forwards; }
+        .toast.hiding { animation: fadeOut 0.3s ease-in forwards; }
+
         select.weather-select {
             -webkit-appearance: none; -moz-appearance: none; appearance: none;
             background-image: none; text-align: center; text-align-last: center;
         }
         select.weather-select::-ms-expand { display: none; }
         
-        /* Trailer Grid Styles */
         .trailer-cell {
             border: 1px solid #e2e8f0;
             padding: 2px;
@@ -78,6 +84,9 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans pb-10">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-0 right-0 z-[100] flex justify-center pointer-events-none"></div>
 
     <!-- Sticky Header -->
     <div class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-700">
@@ -193,6 +202,12 @@
                             </div>
                             <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                         </div>
+                        <!-- New Notification Button -->
+                        <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
+                            <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full">
+                                <i data-lucide="bell" class="w-4 h-4"></i> Enable Notifications
+                            </button>
+                        </div>
                         <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
                             <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
                             <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
@@ -305,6 +320,7 @@
 
         let state = { user: null, events: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro' };
         let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
+        let previousDelay = null; // Track changes
 
         const els = {
             eventsContainer: document.getElementById('events-container'),
@@ -319,12 +335,55 @@
             groupInput: document.getElementById('input-group-code'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon') },
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat') },
-            saveStatus: document.getElementById('trailer-status')
+            saveStatus: document.getElementById('trailer-status'),
+            toastContainer: document.getElementById('toast-container')
         };
 
         const getEventsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
         const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
         const getTrailerRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
+
+        // --- Notifications ---
+        const showToast = (msg, type='info') => {
+            const toast = document.createElement('div');
+            const colorClass = type === 'warn' ? 'bg-yellow-500 text-white' : 'bg-slate-800 text-white';
+            toast.className = `toast pointer-events-auto px-4 py-2 rounded shadow-lg text-sm font-medium mb-2 ${colorClass}`;
+            toast.innerHTML = msg;
+            els.toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 4000);
+        };
+
+        const triggerNotification = (newDelay, oldDelay) => {
+            if (oldDelay === null) return; // Initial load ignore
+            const diff = newDelay - oldDelay;
+            if (diff === 0) return;
+
+            const direction = diff > 0 ? "Increased" : "Decreased";
+            const msg = `Delay ${direction} to +${newDelay}m`;
+
+            // 1. Visual Toast
+            showToast(`<i class="inline-block mr-2 w-4 h-4" data-lucide="clock"></i> ${msg}`, 'warn');
+            lucide.createIcons();
+
+            // 2. Browser Notification
+            if (Notification.permission === 'granted') {
+                new Notification("RegattaMaster Update", { body: msg, icon: 'https://cdn-icons-png.flaticon.com/512/2972/2972123.png' });
+            }
+        };
+
+        document.getElementById('btn-enable-notifications').onclick = () => {
+            Notification.requestPermission().then(perm => {
+                if (perm === 'granted') {
+                    alert("Notifications Enabled! You will be alerted when the delay changes.");
+                    new Notification("Test Notification", { body: "This is how alerts will look." });
+                } else {
+                    alert("Notifications denied. Please enable them in your browser settings.");
+                }
+            });
+        };
 
         const fetchWeather = async () => {
             try {
@@ -357,7 +416,6 @@
             const cleanState = JSON.parse(JSON.stringify(trailerState, (k, v) => v === undefined ? null : v));
             localStorage.setItem('regatta_trailer_layout', JSON.stringify(cleanState));
             try { 
-                // FIX: Serialize to string because Firestore doesn't support nested arrays (array of arrays)
                 await setDoc(getTrailerRef(), { layout: JSON.stringify(cleanState) }, { merge: true }); 
                 els.saveStatus.textContent = "Saved";
                 els.saveStatus.classList.replace('text-slate-400', 'text-green-500');
@@ -547,6 +605,8 @@
             if(unsubscribeTrailer) unsubscribeTrailer();
 
             state.events = [];
+            // Reset previous delay to prevent notification on initial load
+            previousDelay = null;
             render();
 
             unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => {
@@ -557,27 +617,31 @@
             unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
                 if(snap.exists()) {
                     const d = snap.data();
-                    if(d.delay !== undefined) state.delay = d.delay;
+                    if(d.delay !== undefined) {
+                        // Check for changes BEFORE updating state
+                        triggerNotification(d.delay, previousDelay);
+                        previousDelay = d.delay;
+                        state.delay = d.delay;
+                    }
                     if(d.settings) state.settings = d.settings;
+                    
                     document.getElementById('input-offset').value = state.settings.onWaterOffset;
                     document.getElementById('input-warmup').value = state.settings.warmUpDuration;
                     render();
                 } else {
                     state.delay = 0;
+                    previousDelay = 0;
                     render();
                 }
             });
 
             unsubscribeTrailer = onSnapshot(getTrailerRef(), (snap) => {
                 if(snap.exists()) {
-                    // FIX: Parse if string (because we serialize nested arrays now)
                     const rawLayout = snap.data().layout;
                     trailerState = typeof rawLayout === 'string' ? JSON.parse(rawLayout) : rawLayout;
-                    
                     localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
                     if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
                 } else {
-                    // Reset to default if new group
                     trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
                     if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
                 }
