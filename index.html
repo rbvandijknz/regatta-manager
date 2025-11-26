@@ -41,6 +41,7 @@
             background-color: white;
             transition: background-color 0.2s;
             cursor: pointer;
+            user-select: none;
         }
         .trailer-cell.drag-over {
             background-color: #eff6ff; /* blue-50 */
@@ -173,6 +174,7 @@
                     <div id="add-details-panel" class="hidden grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                         <input type="text" id="input-cox" placeholder="Coxswain Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                         <input type="text" id="input-rowers" placeholder="Rowers" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="input-boat" placeholder="Boat Name" class="col-span-2 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">Connecting...</button>
                 </form>
@@ -212,7 +214,10 @@
     <div id="view-trailer" class="hidden max-w-6xl mx-auto px-4 py-6 fade-in pb-20">
         <div class="flex justify-between items-center mb-6">
             <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
-            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading</h2>
+            <div class="flex items-center gap-3">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading</h2>
+                <span id="trailer-status" class="text-xs font-medium text-slate-400 italic transition-opacity opacity-0">Saved</span>
+            </div>
             <button onclick="resetTrailer()" class="text-xs text-red-500 hover:underline">Reset Layout</button>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="trailer-container"></div>
@@ -237,6 +242,7 @@
                 <div class="space-y-3">
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="anchor" class="w-3 h-3"></i> Boat</div><div id="modal-boat" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                 </div>
             </div>
             <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end"><button onclick="window.closeModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 transition">Close</button></div>
@@ -312,7 +318,8 @@
             groupBadge: document.getElementById('group-badge'),
             groupInput: document.getElementById('input-group-code'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon') },
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers') }
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat') },
+            saveStatus: document.getElementById('trailer-status')
         };
 
         const getEventsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
@@ -344,12 +351,26 @@
 
         const saveTrailer = async () => {
             if(!state.user) return;
-            localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
-            try { await setDoc(getTrailerRef(), { layout: trailerState }, { merge: true }); } catch(e) { console.error(e); }
+            els.saveStatus.textContent = "Saving...";
+            els.saveStatus.classList.remove('opacity-0', 'text-green-500');
+            els.saveStatus.classList.add('text-slate-400');
+            const cleanState = JSON.parse(JSON.stringify(trailerState, (k, v) => v === undefined ? null : v));
+            localStorage.setItem('regatta_trailer_layout', JSON.stringify(cleanState));
+            try { 
+                // FIX: Serialize to string because Firestore doesn't support nested arrays (array of arrays)
+                await setDoc(getTrailerRef(), { layout: JSON.stringify(cleanState) }, { merge: true }); 
+                els.saveStatus.textContent = "Saved";
+                els.saveStatus.classList.replace('text-slate-400', 'text-green-500');
+                setTimeout(() => els.saveStatus.classList.add('opacity-0'), 2000);
+            } catch(e) { 
+                console.error("Save failed", e); 
+                els.saveStatus.textContent = "Error saving";
+                els.saveStatus.classList.replace('text-slate-400', 'text-red-500');
+            }
         };
 
         window.resetTrailer = () => {
-            if(confirm("Reset layout?")) {
+            if(confirm("Reset trailer layout to default?")) {
                 trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
                 renderTrailer();
                 saveTrailer();
@@ -372,7 +393,7 @@
                         if(cell.h) {
                             html += `<div class="${span} trailer-header py-2 border-r border-slate-200 last:border-r-0">${cell.t}</div>`;
                         } else {
-                            const content = cell.t ? `<div class="boat-card" draggable="true" ondragstart="dragStart(event)" id="item-${cell.id}">${cell.t}</div>` : ``;
+                            const content = cell.t ? `<div class="boat-card" draggable="true" ondragstart="dragStart(event)" ondblclick="event.stopPropagation(); editCell('${key}', '${cell.id}')" id="item-${cell.id}">${cell.t}</div>` : ``;
                             html += `<div id="${cell.id}" class="${span} trailer-cell ${bg} ${font}" ondragover="dragOver(event)" ondrop="drop(event)" ondblclick="editCell('${key}', '${cell.id}')" data-key="${key}">${content}</div>`;
                         }
                     });
@@ -406,11 +427,8 @@
                 const temp = sData.t;
                 sData.t = tData.t;
                 tData.t = temp;
-                
-                // FIXED: Ensure no undefined values are saved to DB
                 if(sData.t === undefined) sData.t = null;
                 if(tData.t === undefined) tData.t = null;
-
                 renderTrailer();
                 saveTrailer();
             }
@@ -421,7 +439,6 @@
             if(newText !== null) {
                 const cell = trailerState[key].rows.flat().find(c => c.id === id);
                 if(cell) {
-                    // FIXED: Use null instead of undefined for deletion
                     cell.t = newText.trim() === "" ? null : newText;
                     renderTrailer();
                     saveTrailer();
@@ -553,11 +570,14 @@
 
             unsubscribeTrailer = onSnapshot(getTrailerRef(), (snap) => {
                 if(snap.exists()) {
-                    trailerState = snap.data().layout;
+                    // FIX: Parse if string (because we serialize nested arrays now)
+                    const rawLayout = snap.data().layout;
+                    trailerState = typeof rawLayout === 'string' ? JSON.parse(rawLayout) : rawLayout;
+                    
                     localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
                     if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
                 } else {
-                    // Reset to default if switching to a new group that has no data
+                    // Reset to default if new group
                     trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
                     if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
                 }
@@ -582,6 +602,7 @@
             els.modal.start.textContent = formatDisplayTime(delayed);
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
+            els.modal.boat.textContent = ev.boat || 'Not specified';
             els.modal.el.classList.remove('hidden');
         };
         window.closeModal = () => els.modal.el.classList.add('hidden');
@@ -595,7 +616,8 @@
                 crew: document.getElementById('input-crew').value,
                 originalTime: document.getElementById('input-time').value,
                 cox: document.getElementById('input-cox').value,
-                rowers: document.getElementById('input-rowers').value
+                rowers: document.getElementById('input-rowers').value,
+                boat: document.getElementById('input-boat').value
             };
             await addDoc(getEventsRef(), { ...d, eventNum: d.eventNum || 'N/A' });
             e.target.reset();
@@ -632,8 +654,10 @@
                     if(!line.trim()) return;
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
-                    let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'' };
-                    if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
+                    let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'' };
+                    
+                    if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
+                    else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
                     else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
                     else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
                     else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
@@ -646,7 +670,7 @@
             e.target.value = null;
         };
         document.getElementById('btn-template').onclick = () => {
-            const content = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2...";
+            const content = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers,Boat Name\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2...,The Black Pearl";
             const link = document.createElement("a");
             link.href = URL.createObjectURL(new Blob([content], { type: 'text/csv;charset=utf-8;' }));
             link.download = "regatta_template.csv";
@@ -656,7 +680,7 @@
             if(!state.user) return;
             const batch = writeBatch(db);
             const ref = getEventsRef();
-            const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny' }];
+            const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager' }];
             d.forEach(i => batch.set(doc(ref), i));
             await batch.commit();
         };
