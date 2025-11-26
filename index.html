@@ -454,6 +454,7 @@
             const cleanState = JSON.parse(JSON.stringify(trailerState, (k, v) => v === undefined ? null : v));
             localStorage.setItem('regatta_trailer_layout', JSON.stringify(cleanState));
             try { 
+                // FIX: Serialize to string because Firestore doesn't support nested arrays (array of arrays)
                 await setDoc(getTrailerRef(), { layout: JSON.stringify(cleanState) }, { merge: true }); 
                 els.saveStatus.textContent = "Saved";
                 els.saveStatus.classList.replace('text-slate-400', 'text-green-500');
@@ -596,6 +597,8 @@
                     const warmUp = onWater - state.settings.warmUpDuration;
                     const isActive = currentMins >= warmUp;
                     const isPast = currentMins > delayed;
+                    const weighInMins = delayed - 90;
+                    const hasCox = ev.cox && ev.cox.trim().length > 0;
                     
                     let el = document.getElementById(ev.id);
                     if(!el) {
@@ -612,7 +615,11 @@
                                 <div class="col-span-1 hidden md:block pointer-events-none"><div class="bg-slate-100 text-slate-600 font-bold px-1 py-1 rounded text-sm text-center">#${ev.eventNum}</div></div>
                                 <div class="col-span-1 hidden md:block text-center pointer-events-none"><div class="text-slate-500 font-mono font-bold text-sm">${ev.alpha || ''}</div></div>
                                 <div class="col-span-3 hidden md:block pointer-events-none"><div class="font-bold text-slate-800 text-base leading-tight">${ev.crew}</div></div>
-                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none"><span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span><div class="val-warmup text-slate-600 font-mono text-sm"></div></div>
+                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none">
+                                    <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
+                                    <div class="val-warmup text-slate-600 font-mono text-sm"></div>
+                                    <div class="val-weighin text-[10px] text-orange-500 font-bold hidden mt-0.5"></div>
+                                </div>
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none"><span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span><div class="val-onwater text-blue-700 font-bold font-mono text-lg md:text-xl"></div><div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div></div>
                                 <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 pointer-events-none"><span class="md:hidden text-sm font-bold text-slate-700">Race Start</span><div class="val-start text-xl font-bold font-mono text-slate-800"></div></div>
                             </div>
@@ -626,6 +633,15 @@
                     el.querySelector('.val-warmup').textContent = formatDisplayTime(warmUp);
                     el.querySelector('.val-onwater').textContent = formatDisplayTime(onWater);
                     el.querySelector('.val-start').textContent = formatDisplayTime(delayed);
+                    
+                    const weighInEl = el.querySelector('.val-weighin');
+                    if (hasCox) {
+                        // UPDATED: Changed label to "Weigh-in" (it is already styled with text-orange-500)
+                        weighInEl.textContent = `Weigh-in: ${formatDisplayTime(weighInMins)}`;
+                        weighInEl.classList.remove('hidden');
+                    } else {
+                        weighInEl.classList.add('hidden');
+                    }
                     
                     const startNode = el.querySelector('.val-start');
                     if(state.delay > 0) { startNode.classList.remove('text-slate-800'); startNode.classList.add('text-red-600'); }
