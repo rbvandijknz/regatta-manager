@@ -437,11 +437,9 @@
             const code = els.landingCode.value.trim().toLowerCase();
             if(!code) return alert("Please enter a Regatta Code");
             
-            // Check password logic
             pendingCode = code;
             els.passwordModal.classList.remove('hidden');
             
-            // Check if config exists for this code
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', `${code}_config`, 'main');
             try {
                 const snap = await getDoc(docRef);
@@ -457,7 +455,6 @@
                     els.passwordInput.focus();
                 }
             } catch (e) {
-                // Fallback if offline or error, assume new
                 els.passwordTitle.textContent = "Create Password";
                 els.passwordDesc.textContent = "Set a password to secure Coach access.";
             }
@@ -474,7 +471,6 @@
                 const snap = await getDoc(docRef);
                 
                 if (snap.exists() && snap.data().adminPassword) {
-                    // Verify
                     if (snap.data().adminPassword === pass) {
                         closePasswordModal();
                         enterApp(code, false);
@@ -482,7 +478,6 @@
                         alert("Incorrect password");
                     }
                 } else {
-                    // Create New
                     await setDoc(docRef, { adminPassword: pass }, { merge: true });
                     closePasswordModal();
                     enterApp(code, false);
@@ -523,16 +518,9 @@
             els.landingCode.value = state.groupCode;
             state.groupCode = '';
             state.readOnly = false;
-            
             els.appContent.classList.add('hidden');
             els.landing.classList.remove('hidden');
-            
-            // Prevent SecurityError in sandboxed environments
-            try {
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (e) {
-                console.warn("Could not clear URL params (likely due to iframe sandbox):", e);
-            }
+            try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
         };
 
         window.copyParentLink = () => {
@@ -541,7 +529,6 @@
             navigator.clipboard.writeText(url).then(() => showToast("Parent Link Copied to Clipboard!"));
         };
 
-        // --- Notifications ---
         const showToast = (msg, type='info') => {
             const toast = document.createElement('div');
             const colorClass = type === 'warn' ? 'bg-yellow-500 text-white' : 'bg-slate-800 text-white';
@@ -641,14 +628,10 @@
                         if(cell.h) {
                             html += `<div class="${span} trailer-header py-2 border-r border-slate-200 last:border-r-0">${cell.t}</div>`;
                         } else {
-                            // Only make draggable if NOT read only
                             const dragAttrs = state.readOnly ? '' : `draggable="true" ondragstart="dragStart(event)"`;
                             const clickAction = state.readOnly ? '' : `ondblclick="event.stopPropagation(); editCell('${key}', '${cell.id}')"`;
-                            
                             const content = cell.t ? `<div class="boat-card" ${dragAttrs} id="item-${cell.id}" ${clickAction}>${cell.t}</div>` : ``;
-                            
                             const cellClick = state.readOnly ? '' : `ondblclick="editCell('${key}', '${cell.id}')"`;
-                            
                             html += `<div id="${cell.id}" class="${span} trailer-cell ${bg} ${font}" ondragover="dragOver(event)" ondrop="drop(event)" ${cellClick} data-key="${key}">${content}</div>`;
                         }
                     });
@@ -770,12 +753,8 @@
                     }
                     el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 ${isPast ? 'bg-slate-50 border-slate-200 opacity-60 grayscale' : 'bg-white shadow-sm border-slate-200'} ${isActive ? 'ring-2 ring-blue-400 shadow-md transform scale-[1.01]' : ''}`;
                     
-                    // Hide admin controls if in read-only mode
-                    if(state.readOnly) {
-                        el.querySelectorAll('.admin-only').forEach(b => b.style.display = 'none');
-                    } else {
-                        el.querySelectorAll('.admin-only').forEach(b => b.style.display = '');
-                    }
+                    if(state.readOnly) { el.querySelectorAll('.admin-only').forEach(b => b.style.display = 'none'); } 
+                    else { el.querySelectorAll('.admin-only').forEach(b => b.style.display = ''); }
 
                     el.querySelector('.indicator-bar').classList.toggle('hidden', !isActive);
                     el.querySelector('.val-warmup').textContent = formatDisplayTime(warmUp);
@@ -784,7 +763,6 @@
                     
                     const weighInEl = el.querySelector('.val-weighin');
                     if (hasCox) {
-                        // UPDATED: Changed label to "Weigh-in" (it is already styled with text-orange-500)
                         weighInEl.textContent = `Weigh-in: ${formatDisplayTime(weighInMins)}`;
                         weighInEl.classList.remove('hidden');
                     } else {
@@ -802,8 +780,21 @@
             }
         }
 
-        // --- Listeners ---
-        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
+        const initAuth = async () => { 
+            try { 
+                await signInAnonymously(auth); 
+            } catch(e) { 
+                console.error(e);
+                els.submitBtn.textContent = "Connection Failed (Retry)";
+                els.submitBtn.disabled = false; 
+                els.submitBtn.onclick = (e) => {
+                    e.preventDefault();
+                    els.submitBtn.textContent = "Connecting...";
+                    els.submitBtn.disabled = true;
+                    initAuth();
+                };
+            } 
+        };
         initAuth();
 
         let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer;
@@ -811,10 +802,13 @@
         onAuthStateChanged(auth, (u) => {
             state.user = u;
             if(u) {
+                els.submitBtn.textContent = "Add to Schedule";
+                els.submitBtn.disabled = false;
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
                 lucide.createIcons();
-                // No listener setup here anymore - wait for user input on landing
             } else {
+                els.submitBtn.textContent = "Offline";
+                els.submitBtn.disabled = true;
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
                 lucide.createIcons();
             }
@@ -866,7 +860,6 @@
             });
         }
 
-        // Global Handlers
         els.weatherWidget.select.onchange = (e) => { state.locationKey = e.target.value; localStorage.setItem('regatta_location', e.target.value); els.weatherWidget.temp.textContent = "--"; fetchWeather(); };
         
         els.filterCoach.onchange = (e) => {
@@ -874,14 +867,7 @@
             render();
         };
 
-        document.getElementById('btn-join-group').onclick = () => { 
-            const code = document.getElementById('input-group-code').value.trim().toLowerCase(); 
-            if(code !== state.groupCode) { 
-                // Reload app with new code
-                enterApp(code, false); 
-            } 
-        };
-
+        document.getElementById('btn-join-group').onclick = () => { const code = document.getElementById('input-group-code').value.trim().toLowerCase(); if(code !== state.groupCode) { enterApp(code, false); } };
         window.openModal = (id) => { 
             const ev = state.events.find(e => e.id === id);
             if(!ev) return;
@@ -903,9 +889,14 @@
         };
         window.closeModal = () => els.modal.el.classList.add('hidden');
         document.getElementById('btn-toggle-details').onclick = () => document.getElementById('add-details-panel').classList.toggle('hidden');
+        
         document.getElementById('add-event-form').onsubmit = async (e) => {
             e.preventDefault();
             if(!state.user) return;
+            
+            els.submitBtn.textContent = "Saving...";
+            els.submitBtn.disabled = true;
+            
             const d = {
                 eventNum: document.getElementById('input-event-num').value,
                 alpha: document.getElementById('input-alpha').value,
@@ -916,10 +907,20 @@
                 boat: document.getElementById('input-boat').value,
                 coach: document.getElementById('input-coach').value
             };
-            await addDoc(getEventsRef(), { ...d, eventNum: d.eventNum || 'N/A' });
-            e.target.reset();
-            document.getElementById('add-details-panel').classList.add('hidden');
+            
+            try {
+                await addDoc(getEventsRef(), { ...d, eventNum: d.eventNum || 'N/A' });
+                e.target.reset();
+                document.getElementById('add-details-panel').classList.add('hidden');
+            } catch(err) {
+                console.error(err);
+                alert("Failed to save event.");
+            } finally {
+                els.submitBtn.textContent = "Add to Schedule";
+                els.submitBtn.disabled = false;
+            }
         };
+        
         window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
         document.getElementById('btn-delay-plus').onclick = async () => { if(!state.user || state.readOnly) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay + 5), settings: state.settings }, { merge: true }); };
         document.getElementById('btn-delay-minus').onclick = async () => { if(!state.user || state.readOnly) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay - 5), settings: state.settings }, { merge: true }); };
