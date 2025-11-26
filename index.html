@@ -46,11 +46,12 @@
             background-color: #eff6ff; /* blue-50 */
             border: 2px dashed #3b82f6;
         }
-        /* Header styling used only for labels like 'tent' now */
-        .trailer-label {
-            background-color: #f8fafc;
+        .trailer-header {
+            background-color: #f1f5f9;
             font-weight: bold;
-            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: #475569;
         }
         .trailer-section-title {
             background-color: #1e293b;
@@ -60,7 +61,6 @@
             text-align: center;
         }
         
-        /* Draggable Item */
         .boat-card {
             cursor: grab;
             width: 100%;
@@ -72,12 +72,8 @@
             font-weight: 500;
             color: #1e293b;
         }
-        .boat-card:active {
-            cursor: grabbing;
-        }
-        .boat-card.dragging {
-            opacity: 0.5;
-        }
+        .boat-card:active { cursor: grabbing; }
+        .boat-card.dragging { opacity: 0.5; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans pb-10">
@@ -87,14 +83,11 @@
         <div class="max-w-6xl mx-auto px-4 py-3">
             <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                 
-                <!-- Brand Section -->
+                <!-- Brand -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <svg class="text-yellow-500 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 21v-8h6v-3h6v5h6v6H3z" />
-                        </svg>
+                        <svg class="text-yellow-500 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>
                         <h1 class="text-2xl font-bold tracking-tight flex items-center h-full pt-1">RegattaMaster</h1>
-                        
                         <div class="flex items-center ml-2 pt-1">
                             <span id="group-badge" class="hidden text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono border border-blue-400 mr-2"></span>
                             <button id="connection-btn" class="p-1 rounded hover:bg-slate-800 transition-colors" title="Connection Status">
@@ -102,14 +95,11 @@
                             </button>
                         </div>
                     </div>
-                    <!-- Mobile Clock -->
                     <div class="xl:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
                 </div>
 
-                <!-- Control Widgets Container -->
+                <!-- Widgets -->
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
-                    
-                    <!-- Weather Widget -->
                     <div id="weather-widget" class="h-12 flex items-center gap-3 bg-slate-800/80 px-4 rounded-lg border border-slate-700 text-slate-300 text-sm w-full sm:w-auto min-w-[240px] justify-between shadow-sm">
                         <div class="flex items-center gap-1 relative group cursor-pointer">
                             <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i>
@@ -131,111 +121,68 @@
                         </div>
                     </div>
 
-                    <!-- Delay Controls -->
                     <div class="h-12 flex items-center justify-between gap-4 bg-slate-800 px-4 rounded-lg border border-slate-700 w-full sm:w-auto min-w-[240px] shadow-sm">
                         <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Delay</div>
-                        
                         <div class="flex items-center gap-3">
-                            <button id="btn-delay-minus" class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded-full text-slate-300 active:scale-95 transition bg-slate-700/50" title="Remove 5 mins">
-                                <i data-lucide="minus" class="w-4 h-4"></i>
-                            </button>
-                            
-                            <div id="delay-display" class="min-w-[3.5rem] text-center font-mono text-xl font-bold text-slate-200 transition-colors">
-                                +0m
-                            </div>
-
-                            <button id="btn-delay-plus" class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded-full text-yellow-400 active:scale-95 transition bg-slate-700/50" title="Add 5 mins">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                            </button>
+                            <button id="btn-delay-minus" class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded-full text-slate-300 active:scale-95 transition bg-slate-700/50"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                            <div id="delay-display" class="min-w-[3.5rem] text-center font-mono text-xl font-bold text-slate-200 transition-colors">+0m</div>
+                            <button id="btn-delay-plus" class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded-full text-yellow-400 active:scale-95 transition bg-slate-700/50"><i data-lucide="plus" class="w-4 h-4"></i></button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Desktop Clock -->
-                <div class="hidden xl:block font-mono text-3xl text-blue-300 font-semibold w-32 text-right clock-display">
-                    00:00
-                </div>
+                <div class="hidden xl:block font-mono text-3xl text-blue-300 font-semibold w-32 text-right clock-display">00:00</div>
             </div>
         </div>
     </div>
 
     <!-- VIEW 1: REGATTA PROGRAMME -->
     <div id="view-regatta" class="max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in">
-
-        <!-- List Header -->
         <div class="flex items-center justify-between mb-2">
             <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
             <div class="text-sm text-slate-500" id="status-summary">Loading...</div>
         </div>
 
-        <!-- Table Header (Desktop) -->
         <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <div class="col-span-1">#</div>
-            <div class="col-span-1">Alpha</div>
-            <div class="col-span-3">Crew</div>
-            <div class="col-span-2 text-center">Warm Up</div>
-            <div class="col-span-2 text-center text-blue-600">On Water</div>
-            <div class="col-span-2 text-right">Start Time</div>
-            <div class="col-span-1"></div>
+            <div class="col-span-1">#</div><div class="col-span-1">Alpha</div><div class="col-span-3">Crew</div>
+            <div class="col-span-2 text-center">Warm Up</div><div class="col-span-2 text-center text-blue-600">On Water</div><div class="col-span-2 text-right">Start Time</div><div class="col-span-1"></div>
         </div>
 
-        <!-- Events Container -->
         <div id="events-container" class="space-y-3"></div>
 
-        <!-- Empty State -->
         <div id="empty-state" class="hidden text-center py-20 bg-white rounded-xl border-2 border-dashed border-slate-200 text-slate-400">
             <i data-lucide="timer" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
             <p class="text-lg font-medium">No events scheduled</p>
             <p class="text-sm">Add manually or upload a CSV.</p>
         </div>
 
-        <!-- Controls Grid -->
+        <!-- Admin Controls -->
         <div class="pt-8 border-t border-slate-200">
             <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Admin Controls</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                <!-- Add Event Form -->
                 <form id="add-event-form" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
                     <div class="flex justify-between items-center">
-                        <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-                            <i data-lucide="play-circle" class="w-4 h-4"></i> Add Event
-                        </h3>
-                        <button type="button" id="btn-toggle-details" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                            + Details
-                        </button>
+                        <h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="play-circle" class="w-4 h-4"></i> Add Event</h3>
+                        <button type="button" id="btn-toggle-details" class="text-xs text-blue-600 hover:text-blue-800 font-medium">+ Details</button>
                     </div>
-                    
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="text" id="input-event-num" placeholder="Ev #" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
                         <input type="text" id="input-alpha" placeholder="Alpha" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                         <input type="text" id="input-crew" placeholder="Crew Name" class="w-full sm:flex-1 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
                         <input type="time" id="input-time" class="w-full sm:w-auto p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
                     </div>
-
-                    <!-- Extra Details (Hidden by default) -->
                     <div id="add-details-panel" class="hidden grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                         <input type="text" id="input-cox" placeholder="Coxswain Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                        <input type="text" id="input-rowers" placeholder="Rowers (comma separated)" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="input-rowers" placeholder="Rowers" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
-
-                    <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                        Connecting...
-                    </button>
+                    <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">Connecting...</button>
                 </form>
 
-                <!-- Tools Panel -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-                            <i data-lucide="settings" class="w-4 h-4"></i> Tools
-                        </h3>
+                        <h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4"></i> Tools</h3>
                         <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline">Config</button>
                     </div>
-
-                    <!-- Hidden Config -->
                     <div id="config-panel" class="hidden mb-4 space-y-4 border-b border-slate-100 pb-4">
-                        
-                        <!-- Shared Access Code -->
                         <div class="bg-blue-50 p-3 rounded border border-blue-100">
                             <div class="text-xs font-bold text-blue-700 uppercase mb-1">Shared Regatta Code</div>
                             <div class="flex gap-2">
@@ -244,136 +191,64 @@
                             </div>
                             <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                         </div>
-
                         <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
-                            <div class="flex justify-between items-center">
-                                <span>On Water Minutes Before:</span>
-                                <input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center">
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span>Warm Up Duration (mins):</span>
-                                <input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center">
-                            </div>
+                            <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
+                            <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-2 mt-2">
-                        <label class="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded cursor-pointer transition text-sm font-medium border border-blue-200">
-                            <i data-lucide="upload" class="w-4 h-4"></i> Upload CSV
-                            <input type="file" id="input-csv" accept=".csv" class="hidden">
-                        </label>
-                        
-                        <button id="btn-template" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200">
-                            <i data-lucide="download" class="w-4 h-4"></i> Get Template
-                        </button>
-
-                        <button id="btn-demo" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200">
-                            Demo Data
-                        </button>
-
-                        <button id="btn-clear" class="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 rounded transition border border-red-100" title="Clear All">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i> Clear
-                        </button>
-
-                        <!-- Added Trailer Link Button Here -->
-                        <button onclick="window.switchView('trailer')" class="col-span-2 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200 mt-1">
-                            <i data-lucide="truck" class="w-4 h-4"></i> View Trailer Plan
-                        </button>
+                        <label class="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded cursor-pointer transition text-sm font-medium border border-blue-200"><i data-lucide="upload" class="w-4 h-4"></i> Upload CSV<input type="file" id="input-csv" accept=".csv" class="hidden"></label>
+                        <button id="btn-template" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200"><i data-lucide="download" class="w-4 h-4"></i> Get Template</button>
+                        <button id="btn-demo" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200">Demo Data</button>
+                        <button id="btn-clear" class="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 rounded transition border border-red-100" title="Clear All"><i data-lucide="trash-2" class="w-4 h-4"></i> Clear</button>
+                        <button onclick="window.switchView('trailer')" class="col-span-2 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200 mt-1"><i data-lucide="truck" class="w-4 h-4"></i> View Trailer Plan</button>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- VIEW 2: TRAILER DIAGRAM -->
     <div id="view-trailer" class="hidden max-w-6xl mx-auto px-4 py-6 fade-in pb-20">
-        
         <div class="flex justify-between items-center mb-6">
-            <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme
-            </button>
-            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                <i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading
-            </h2>
+            <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading</h2>
             <button onclick="resetTrailer()" class="text-xs text-red-500 hover:underline">Reset Layout</button>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="trailer-container">
-            <!-- Trailer grids injected via JS -->
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="trailer-container"></div>
     </div>
 
     <!-- Crew Details Modal -->
     <div id="crew-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100">
-            <!-- Modal Header -->
             <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start">
                 <div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span id="modal-event-num" class="bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded text-xs">#101</span>
-                        <span id="modal-alpha" class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-xs font-mono">A</span>
-                    </div>
+                    <div class="flex items-center gap-2 mb-1"><span id="modal-event-num" class="bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded text-xs">#101</span><span id="modal-alpha" class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-xs font-mono">A</span></div>
                     <h3 id="modal-crew-name" class="text-xl font-bold text-slate-800 leading-tight">Crew Name</h3>
                 </div>
-                <button onclick="window.closeModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
+                <button onclick="window.closeModal()" class="text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            
-            <!-- Modal Body -->
             <div class="p-5 space-y-4">
-                <!-- Times -->
                 <div class="grid grid-cols-3 gap-2 text-center bg-slate-50 rounded-lg p-3 border border-slate-100">
-                    <div>
-                        <div class="text-[10px] uppercase text-slate-400 font-bold">Warm Up</div>
-                        <div id="modal-time-warmup" class="font-mono font-bold text-slate-600">--:--</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] uppercase text-blue-500 font-bold">On Water</div>
-                        <div id="modal-time-onwater" class="font-mono font-bold text-blue-600 text-lg">--:--</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] uppercase text-slate-400 font-bold">Start</div>
-                        <div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div>
-                    </div>
+                    <div><div class="text-[10px] uppercase text-slate-400 font-bold">Warm Up</div><div id="modal-time-warmup" class="font-mono font-bold text-slate-600">--:--</div></div>
+                    <div><div class="text-[10px] uppercase text-blue-500 font-bold">On Water</div><div id="modal-time-onwater" class="font-mono font-bold text-blue-600 text-lg">--:--</div></div>
+                    <div><div class="text-[10px] uppercase text-slate-400 font-bold">Start</div><div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div></div>
                 </div>
-
-                <!-- Personnel -->
                 <div class="space-y-3">
-                    <div>
-                        <div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1">
-                            <i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain
-                        </div>
-                        <div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">
-                            -
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1">
-                            <i data-lucide="users" class="w-3 h-3"></i> Crew
-                        </div>
-                        <div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">
-                            -
-                        </div>
-                    </div>
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
                 </div>
             </div>
-
-            <!-- Modal Footer -->
-            <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end">
-                <button onclick="window.closeModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 transition">Close</button>
-            </div>
+            <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end"><button onclick="window.closeModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 transition">Close</button></div>
         </div>
     </div>
 
-    <!-- Firebase & Application Logic -->
+    <!-- Logic -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
         import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 
-        // --- Config ---
         const firebaseConfig = {
             apiKey: "AIzaSyAbQE9pdiPYP1BdUb4T6AaEnMQwmfe2s3k",
             authDomain: "regatta-manager-d6101.firebaseapp.com",
@@ -383,14 +258,11 @@
             appId: "1:1023336958830:web:19f0cfc62274189d8b8f7f",
             measurementId: "G-0Y0FELH6KE"
         };
-        
         const appId = 'regatta-manager-d6101';
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- Constants ---
         const LOCATIONS = {
             karapiro: { name: 'Karapiro', lat: -37.9265, lon: 175.5435 },
             bluelake: { name: 'Blue Lake', lat: -38.196, lon: 176.327 },
@@ -425,21 +297,9 @@
             }
         };
 
-        // --- State ---
-        let state = {
-            user: null,
-            events: [],
-            delay: 0,
-            settings: { onWaterOffset: 35, warmUpDuration: 40 },
-            currentTime: new Date(),
-            groupCode: localStorage.getItem('regatta_group_code') || '',
-            weather: { temp: null, wind: null, dir: null, code: null },
-            locationKey: localStorage.getItem('regatta_location') || 'karapiro'
-        };
-
+        let state = { user: null, events: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro' };
         let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
 
-        // --- DOM Elements ---
         const els = {
             eventsContainer: document.getElementById('events-container'),
             emptyState: document.getElementById('empty-state'),
@@ -451,472 +311,213 @@
             clockDisplays: document.querySelectorAll('.clock-display'),
             groupBadge: document.getElementById('group-badge'),
             groupInput: document.getElementById('input-group-code'),
-            weatherWidget: {
-                select: document.getElementById('weather-location'),
-                temp: document.getElementById('weather-temp'),
-                wind: document.getElementById('weather-wind'),
-                icon: document.getElementById('weather-icon')
-            },
-            modal: {
-                el: document.getElementById('crew-modal'),
-                eventNum: document.getElementById('modal-event-num'),
-                alpha: document.getElementById('modal-alpha'),
-                crew: document.getElementById('modal-crew-name'),
-                warmup: document.getElementById('modal-time-warmup'),
-                onwater: document.getElementById('modal-time-onwater'),
-                start: document.getElementById('modal-time-start'),
-                cox: document.getElementById('modal-cox'),
-                rowers: document.getElementById('modal-rowers')
-            }
+            weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon') },
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers') }
         };
 
-        // --- Database Path Helpers ---
-        const getEventsRef = () => {
-            if (state.groupCode) {
-                return collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`);
-            } else {
-                return collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
-            }
-        };
+        const getEventsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
+        const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
+        const getTrailerRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
 
-        const getConfigRef = () => {
-            if (state.groupCode) {
-                return doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main');
-            } else {
-                return doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
-            }
-        };
-
-        // New: Trailer Ref Helper
-        const getTrailerRef = () => {
-            if (state.groupCode) {
-                return doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main');
-            } else {
-                return doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
-            }
-        };
-
-        // --- Navigation Logic ---
-        window.switchView = (view) => {
-            const regattaView = document.getElementById('view-regatta');
-            const trailerView = document.getElementById('view-trailer');
-
-            if (view === 'regatta') {
-                regattaView.classList.remove('hidden');
-                trailerView.classList.add('hidden');
-            } else {
-                regattaView.classList.add('hidden');
-                trailerView.classList.remove('hidden');
-                
-                // Initialize Trailer if empty
-                if(document.getElementById('trailer-container').children.length === 0) {
-                    renderTrailer();
-                }
-            }
-        };
-
-        // --- Weather Service ---
         const fetchWeather = async () => {
             try {
                 const loc = LOCATIONS[state.locationKey] || LOCATIONS['karapiro'];
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=kmh&timezone=Pacific%2FAuckland`;
-                const res = await fetch(url);
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=kmh&timezone=Pacific%2FAuckland`);
                 const data = await res.json();
-                
                 if (data.current) {
-                    state.weather = {
-                        temp: Math.round(data.current.temperature_2m),
-                        wind: Math.round(data.current.wind_speed_10m),
-                        dir: getWindDir(data.current.wind_direction_10m),
-                        code: data.current.weather_code
-                    };
+                    state.weather = { temp: Math.round(data.current.temperature_2m), wind: Math.round(data.current.wind_speed_10m), dir: getWindDir(data.current.wind_direction_10m), code: data.current.weather_code };
                     renderWeather();
                 }
-            } catch (error) {
-                console.error("Weather fetch failed:", error);
-                els.weatherWidget.temp.textContent = "--";
-            }
+            } catch (e) { els.weatherWidget.temp.textContent = "--"; }
         };
-
-        const getWindDir = (d) => {
-            const dirs = ['N','NE','E','SE','S','SW','W','NW'];
-            return dirs[Math.round(d / 45) % 8];
-        };
-
-        const getWeatherIconName = (code) => {
-            if (code <= 1) return 'sun';
-            if (code <= 3) return 'cloud';
-            if (code <= 48) return 'cloud-fog';
-            if (code <= 67) return 'cloud-rain';
-            if (code <= 77) return 'snowflake';
-            if (code <= 82) return 'cloud-rain';
-            return 'cloud-lightning';
-        };
-
+        const getWindDir = (d) => ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8];
+        const getWeatherIconName = (code) => { if(code<=1) return 'sun'; if(code<=3) return 'cloud'; if(code<=67) return 'cloud-rain'; return 'cloud-lightning'; };
         const renderWeather = () => {
             if(state.weather.temp !== null) {
                 els.weatherWidget.temp.textContent = `${state.weather.temp}°`;
                 els.weatherWidget.wind.textContent = `${state.weather.wind}kmh ${state.weather.dir}`;
-                const iconName = getWeatherIconName(state.weather.code);
-                els.weatherWidget.icon.setAttribute('data-lucide', iconName);
+                els.weatherWidget.icon.setAttribute('data-lucide', getWeatherIconName(state.weather.code));
                 lucide.createIcons();
             }
             els.weatherWidget.select.value = state.locationKey;
         };
 
-        // --- Trailer Logic & Handlers ---
-        
-        // New Helper: Save Trailer State to Firestore
         const saveTrailer = async () => {
             if(!state.user) return;
-            // Also update local storage for immediate feedback or offline backup
             localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
-            
-            try {
-                await setDoc(getTrailerRef(), { layout: trailerState }, { merge: true });
-            } catch (err) {
-                console.error("Error saving trailer layout:", err);
-            }
+            try { await setDoc(getTrailerRef(), { layout: trailerState }, { merge: true }); } catch(e) { console.error(e); }
         };
 
         window.resetTrailer = () => {
-            if(confirm("Reset trailer layout to default? This will update for everyone.")) {
+            if(confirm("Reset layout?")) {
                 trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
                 renderTrailer();
-                saveTrailer(); // Sync to DB
+                saveTrailer();
             }
         };
 
         const renderTrailer = () => {
             const container = document.getElementById('trailer-container');
             container.innerHTML = '';
-
             ['bc', 'otc'].forEach(key => {
                 const section = trailerState[key];
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-lg shadow-sm overflow-hidden border border-slate-200";
-                
                 let html = `<div class="trailer-section-title">${section.title}</div><div class="grid grid-cols-4">`;
-                
                 section.rows.forEach(row => {
                     row.forEach(cell => {
                         const span = cell.span ? `col-span-${cell.span}` : 'col-span-1';
                         const bg = cell.bg || 'bg-white';
                         const font = cell.font || '';
-                        
                         if(cell.h) {
                             html += `<div class="${span} trailer-header py-2 border-r border-slate-200 last:border-r-0">${cell.t}</div>`;
                         } else {
-                            const content = cell.t 
-                                ? `<div class="boat-card" draggable="true" ondragstart="dragStart(event)" id="item-${cell.id}">${cell.t}</div>`
-                                : ``;
-
-                            html += `
-                                <div id="${cell.id}" 
-                                     class="${span} trailer-cell ${bg} ${font}" 
-                                     ondragover="dragOver(event)" 
-                                     ondrop="drop(event)"
-                                     ondblclick="editCell('${key}', '${cell.id}')"
-                                     data-key="${key}">
-                                    ${content}
-                                </div>`;
+                            const content = cell.t ? `<div class="boat-card" draggable="true" ondragstart="dragStart(event)" id="item-${cell.id}">${cell.t}</div>` : ``;
+                            html += `<div id="${cell.id}" class="${span} trailer-cell ${bg} ${font}" ondragover="dragOver(event)" ondrop="drop(event)" ondblclick="editCell('${key}', '${cell.id}')" data-key="${key}">${content}</div>`;
                         }
                     });
                 });
-                
                 html += `</div>`;
                 card.innerHTML = html;
                 container.appendChild(card);
             });
         };
 
-        window.dragStart = (e) => {
-            e.dataTransfer.setData("text/plain", e.target.id);
-            e.dataTransfer.effectAllowed = "move";
-            setTimeout(() => e.target.classList.add('dragging'), 0);
-        };
-
-        window.dragOver = (e) => {
-            e.preventDefault();
-            const cell = e.target.closest('.trailer-cell');
-            if(cell) {
-                cell.classList.add('drag-over');
-                e.dataTransfer.dropEffect = "move";
-            }
-        };
-
-        document.addEventListener('dragend', (e) => {
-            e.target.classList.remove('dragging');
-            document.querySelectorAll('.trailer-cell').forEach(c => c.classList.remove('drag-over'));
-        });
-        
-        document.addEventListener('dragleave', (e) => {
-             if(e.target.classList && e.target.classList.contains('trailer-cell')) {
-                 e.target.classList.remove('drag-over');
-             }
-        });
+        window.dragStart = (e) => { e.dataTransfer.setData("text/plain", e.target.id); setTimeout(() => e.target.classList.add('dragging'), 0); };
+        window.dragOver = (e) => { e.preventDefault(); e.target.closest('.trailer-cell')?.classList.add('drag-over'); };
+        document.addEventListener('dragend', (e) => { e.target.classList.remove('dragging'); document.querySelectorAll('.trailer-cell').forEach(c => c.classList.remove('drag-over')); });
+        document.addEventListener('dragleave', (e) => e.target.classList?.remove('drag-over'));
 
         window.drop = (e) => {
             e.preventDefault();
             const targetCell = e.target.closest('.trailer-cell');
-            document.querySelectorAll('.trailer-cell').forEach(c => c.classList.remove('drag-over'));
-
-            if (!targetCell) return;
-
+            if(!targetCell) return;
             const draggedId = e.dataTransfer.getData("text/plain");
             const draggedEl = document.getElementById(draggedId);
-            if (!draggedEl) return;
-
+            if(!draggedEl) return;
             const sourceCell = draggedEl.parentElement;
-            
-            if (sourceCell === targetCell) return;
+            if(sourceCell === targetCell) return;
 
-            const sourceKey = sourceCell.dataset.key;
-            const sourceId = sourceCell.id;
-            const targetKey = targetCell.dataset.key;
-            const targetId = targetCell.id;
-
-            const findCellData = (key, id) => {
-                for (let row of trailerState[key].rows) {
-                    const c = row.find(x => x.id === id);
-                    if(c) return c;
-                }
-                return null;
-            };
-
-            const sData = findCellData(sourceKey, sourceId);
-            const tData = findCellData(targetKey, targetId);
+            const findCell = (k, id) => trailerState[k].rows.flat().find(c => c.id === id);
+            const sData = findCell(sourceCell.dataset.key, sourceCell.id);
+            const tData = findCell(targetCell.dataset.key, targetCell.id);
 
             if(sData && tData) {
                 const temp = sData.t;
-                sData.t = tData.t; 
+                sData.t = tData.t;
                 tData.t = temp;
+                
+                // FIXED: Ensure no undefined values are saved to DB
+                if(sData.t === undefined) sData.t = null;
+                if(tData.t === undefined) tData.t = null;
 
                 renderTrailer();
-                saveTrailer(); // Sync to DB
+                saveTrailer();
             }
         };
 
         window.editCell = (key, id) => {
-            const newText = prompt("Enter boat/item name (or leave empty to clear):");
+            const newText = prompt("Enter name:");
             if(newText !== null) {
-                for(let row of trailerState[key].rows) {
-                    const c = row.find(x => x.id === id);
-                    if(c) {
-                        c.t = newText.trim() === "" ? undefined : newText;
-                        break;
-                    }
+                const cell = trailerState[key].rows.flat().find(c => c.id === id);
+                if(cell) {
+                    // FIXED: Use null instead of undefined for deletion
+                    cell.t = newText.trim() === "" ? null : newText;
+                    renderTrailer();
+                    saveTrailer();
                 }
-                renderTrailer();
-                saveTrailer(); // Sync to DB
             }
         };
 
-        // --- Regatta Rendering & Logic ---
-        const timeToMinutes = (str) => { if(!str) return 0; const [h, m] = str.split(':').map(Number); return h * 60 + m; };
-        const minutesToTime = (total) => { let m = total % 60; let h = Math.floor(total / 60); if (h >= 24) h %= 24; if (h < 0) h = 24 + (h % 24); return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
-        const formatDisplayTime = (mins) => {
-            let h = Math.floor(mins / 60); let m = mins % 60; let ampm = 'AM';
-            if (h >= 12) { ampm = 'PM'; if (h > 12) h -= 12; }
-            if (h === 0) h = 12; if (h >= 24) h %= 24; 
-            return `${h}:${String(m).padStart(2,'0')} ${ampm}`;
-        };
+        const timeToMinutes = (str) => { if(!str) return 0; const [h,m]=str.split(':').map(Number); return h*60+m; };
+        const minutesToTime = (t) => { let m=t%60; let h=Math.floor(t/60)%24; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
+        const formatDisplayTime = (m) => { let h=Math.floor(m/60)%24; let am=h>=12?'PM':'AM'; if(h>12)h-=12; if(h===0)h=12; return `${h}:${String(m%60).padStart(2,'0')} ${am}`; };
 
         function render() {
-            // Update Clocks
             const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             els.clockDisplays.forEach(el => el.textContent = timeStr);
+            
+            if(state.groupCode) { els.groupBadge.textContent = state.groupCode; els.groupBadge.classList.remove('hidden'); } 
+            else els.groupBadge.classList.add('hidden');
 
-            // Update Group Badge
-            if(state.groupCode) {
-                els.groupBadge.textContent = state.groupCode;
-                els.groupBadge.classList.remove('hidden');
-            } else {
-                els.groupBadge.classList.add('hidden');
-            }
-
-            // Update Delay Display
             els.delayDisplay.textContent = `+${state.delay}m`;
-            els.delayDisplay.className = state.delay > 0 
-                ? "min-w-[3.5rem] text-center font-mono text-xl font-bold text-red-400 border-b-2 border-red-500/50"
-                : "min-w-[3.5rem] text-center font-mono text-xl font-bold text-slate-200";
-
-            // Update Summary
+            els.delayDisplay.className = state.delay > 0 ? "min-w-[3.5rem] text-center font-mono text-xl font-bold text-red-400 border-b-2 border-red-500/50" : "min-w-[3.5rem] text-center font-mono text-xl font-bold text-slate-200";
             els.statusSummary.textContent = `${state.events.length} Events | ${state.delay > 0 ? `Delayed ${state.delay}m` : 'On Time'}`;
 
-            // Render Events
-            if (state.events.length === 0) {
-                els.eventsContainer.innerHTML = '';
-                els.emptyState.classList.remove('hidden');
-            } else {
+            if (state.events.length === 0) { els.eventsContainer.innerHTML = ''; els.emptyState.classList.remove('hidden'); }
+            else {
                 els.emptyState.classList.add('hidden');
-                
                 const currentMins = timeToMinutes(`${state.currentTime.getHours()}:${state.currentTime.getMinutes()}`);
                 const sortedEvents = [...state.events].sort((a,b) => timeToMinutes(a.originalTime) - timeToMinutes(b.originalTime));
-                const processedIds = new Set();
-                const container = els.eventsContainer;
-
-                sortedEvents.forEach((ev, index) => {
-                    processedIds.add(ev.id);
-                    const baseMins = timeToMinutes(ev.originalTime);
-                    const delayedMins = baseMins + state.delay;
-                    const onWaterMins = delayedMins - state.settings.onWaterOffset;
-                    const warmUpStartMins = onWaterMins - state.settings.warmUpDuration;
-
-                    const isActive = currentMins >= warmUpStartMins;
-                    const isPast = currentMins > delayedMins;
-                    const showOriginal = state.delay > 0 && !isPast;
+                
+                const fragment = document.createDocumentFragment();
+                sortedEvents.forEach(ev => {
+                    const base = timeToMinutes(ev.originalTime);
+                    const delayed = base + state.delay;
+                    const onWater = delayed - state.settings.onWaterOffset;
+                    const warmUp = onWater - state.settings.warmUpDuration;
+                    const isActive = currentMins >= warmUp;
+                    const isPast = currentMins > delayed;
                     
-                    let statusClass = 'bg-white shadow-sm border-slate-200';
-                    if (isPast) statusClass = 'bg-slate-50 border-slate-200 opacity-60 grayscale';
-                    else if (isActive) statusClass = 'bg-white ring-2 ring-blue-400 shadow-md transform scale-[1.01]';
-
                     let el = document.getElementById(ev.id);
-                    
-                    if (!el) {
+                    if(!el) {
                         el = document.createElement('div');
                         el.id = ev.id;
                         el.innerHTML = `
                             <div class="indicator-bar absolute left-0 top-0 bottom-0 w-1 bg-blue-500 hidden"></div>
-                            
-                            <!-- Main Clickable Area -->
                             <div onclick="window.openModal('${ev.id}')" class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center cursor-pointer hover:bg-slate-50 transition-colors">
-                                
-                                <!-- MOBILE LAYOUT -->
                                 <div class="col-span-2 md:hidden flex items-start gap-3 pointer-events-none">
                                     <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
                                     <div class="bg-slate-50 text-slate-500 border border-slate-200 px-2 py-1 rounded text-sm font-mono font-bold ${!ev.alpha ? 'hidden' : ''}">${ev.alpha || '-'}</div>
-                                    <div class="flex-1">
-                                        <div class="font-bold text-slate-800 text-lg leading-tight">${ev.crew}</div>
-                                        <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
-                                    </div>
+                                    <div class="flex-1"><div class="font-bold text-slate-800 text-lg leading-tight">${ev.crew}</div></div>
                                 </div>
-                                
-                                <!-- DESKTOP LAYOUT -->
-                                <div class="col-span-1 hidden md:block pointer-events-none">
-                                    <div class="bg-slate-100 text-slate-600 font-bold px-1 py-1 rounded text-sm text-center">#${ev.eventNum}</div>
-                                </div>
-                                <div class="col-span-1 hidden md:block text-center pointer-events-none">
-                                    <div class="text-slate-500 font-mono font-bold text-sm">${ev.alpha || ''}</div>
-                                </div>
-                                <div class="col-span-3 hidden md:block pointer-events-none">
-                                    <div class="font-bold text-slate-800 text-base leading-tight">${ev.crew}</div>
-                                    <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
-                                </div>
-
-                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none">
-                                    <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
-                                    <div class="val-warmup text-slate-600 font-mono text-sm"></div>
-                                </div>
-                                
-                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none">
-                                    <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
-                                    <div class="val-onwater text-blue-700 font-bold font-mono text-lg md:text-xl"></div>
-                                    <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
-                                </div>
-                                
-                                <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 pointer-events-none">
-                                    <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
-                                    <div class="val-start text-xl font-bold font-mono text-slate-800"></div>
-                                </div>
+                                <div class="col-span-1 hidden md:block pointer-events-none"><div class="bg-slate-100 text-slate-600 font-bold px-1 py-1 rounded text-sm text-center">#${ev.eventNum}</div></div>
+                                <div class="col-span-1 hidden md:block text-center pointer-events-none"><div class="text-slate-500 font-mono font-bold text-sm">${ev.alpha || ''}</div></div>
+                                <div class="col-span-3 hidden md:block pointer-events-none"><div class="font-bold text-slate-800 text-base leading-tight">${ev.crew}</div></div>
+                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none"><span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span><div class="val-warmup text-slate-600 font-mono text-sm"></div></div>
+                                <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none"><span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span><div class="val-onwater text-blue-700 font-bold font-mono text-lg md:text-xl"></div><div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div></div>
+                                <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 pointer-events-none"><span class="md:hidden text-sm font-bold text-slate-700">Race Start</span><div class="val-start text-xl font-bold font-mono text-slate-800"></div></div>
                             </div>
-
-                            <!-- Delete Button -->
-                            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 md:block hidden">
-                                <button onclick="window.deleteEvent(event, '${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition z-10 relative">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                             <div class="absolute right-4 top-4 md:hidden">
-                                <button onclick="window.deleteEvent(event, '${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition z-10 relative">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
+                            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 md:block hidden"><button onclick="window.deleteEvent(event, '${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition z-10 relative"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+                            <div class="absolute right-4 top-4 md:hidden"><button onclick="window.deleteEvent(event, '${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition z-10 relative"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
                         `;
-                        el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 fade-in ${statusClass}`;
                     }
+                    el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 ${isPast ? 'bg-slate-50 border-slate-200 opacity-60 grayscale' : 'bg-white shadow-sm border-slate-200'} ${isActive ? 'ring-2 ring-blue-400 shadow-md transform scale-[1.01]' : ''}`;
                     
-                    const baseClasses = "relative overflow-hidden rounded-xl border transition-all duration-300";
-                    const targetClass = `${baseClasses} ${statusClass}`;
-                    if (!el.className.includes(statusClass)) el.className = targetClass;
-
-                    const updateText = (sel, txt) => { const n = el.querySelector(sel); if(n && n.textContent !== txt) n.textContent = txt; };
-                    updateText('.val-warmup', formatDisplayTime(warmUpStartMins));
-                    updateText('.val-onwater', formatDisplayTime(onWaterMins));
-                    updateText('.val-start', formatDisplayTime(delayedMins));
-
-                    const toggle = (sel, condition) => {
-                        const n = el.querySelector(sel);
-                        if(n) { if(condition && n.classList.contains('hidden')) n.classList.remove('hidden'); else if(!condition && !n.classList.contains('hidden')) n.classList.add('hidden'); }
-                    };
-                    toggle('.indicator-bar', isActive);
-                    toggle('.original-time', showOriginal);
-
+                    el.querySelector('.indicator-bar').classList.toggle('hidden', !isActive);
+                    el.querySelector('.val-warmup').textContent = formatDisplayTime(warmUp);
+                    el.querySelector('.val-onwater').textContent = formatDisplayTime(onWater);
+                    el.querySelector('.val-start').textContent = formatDisplayTime(delayed);
+                    
                     const startNode = el.querySelector('.val-start');
-                    if(startNode) {
-                        if(state.delay > 0) {
-                            if(!startNode.classList.contains('text-red-600')) { startNode.classList.remove('text-slate-800'); startNode.classList.add('text-red-600'); }
-                        } else {
-                            if(!startNode.classList.contains('text-slate-800')) { startNode.classList.remove('text-red-600'); startNode.classList.add('text-slate-800'); }
-                        }
-                    }
+                    if(state.delay > 0) { startNode.classList.remove('text-slate-800'); startNode.classList.add('text-red-600'); }
+                    else { startNode.classList.remove('text-red-600'); startNode.classList.add('text-slate-800'); }
 
-                    const currentChildAtIndex = container.children[index];
-                    if (currentChildAtIndex !== el) {
-                        if (currentChildAtIndex) container.insertBefore(el, currentChildAtIndex);
-                        else container.appendChild(el);
-                    }
+                    fragment.appendChild(el);
                 });
-
-                [...container.children].forEach(child => { if (!processedIds.has(child.id)) child.remove(); });
+                els.eventsContainer.replaceChildren(fragment);
                 lucide.createIcons();
             }
         }
 
-        // --- Auth & Setup ---
-        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error("Auth Error:", e); return e; } };
+        // --- Listeners ---
+        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
         initAuth();
 
-        els.connectionBtn.onclick = async () => {
-            const currentIcon = els.connectionBtn.querySelector('svg') || els.connectionBtn.querySelector('i');
-
-            if (!state.user) {
-                if(currentIcon) currentIcon.classList.add('animate-spin');
-                if(confirm("Database is disconnected. Attempt to reconnect?")) {
-                    const error = await initAuth();
-                    if(currentIcon) currentIcon.classList.remove('animate-spin');
-                    if(!auth.currentUser) {
-                        const errKey = error?.code || 'unknown';
-                        alert(`Connection Failed (${errKey}).\n\nTroubleshooting:\n1. Check internet.\n2. GitHub Pages? Add domain to Firebase Console > Auth > Settings > Authorized Domains.`);
-                    }
-                } else {
-                     if(currentIcon) currentIcon.classList.remove('animate-spin');
-                }
-            } else {
-                alert(`✅ Connected to Database\nProject: ${firebaseConfig.projectId}\nUser ID: ${state.user.uid}`);
-            }
-        };
-
-        let unsubscribeEvents = null;
-        let unsubscribeConfig = null;
-        let unsubscribeTrailer = null; // Added variable for trailer listener
+        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer;
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
             if(u) {
                 els.submitBtn.textContent = "Add to Schedule";
                 els.submitBtn.disabled = false;
-                
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
                 lucide.createIcons();
-                
                 if(state.groupCode) els.groupInput.value = state.groupCode;
                 setupListeners();
-                
                 els.weatherWidget.select.value = state.locationKey;
                 fetchWeather();
-                setInterval(fetchWeather, 900000); 
-
+                setInterval(fetchWeather, 900000);
             } else {
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
                 lucide.createIcons();
@@ -924,28 +525,23 @@
         });
 
         function setupListeners() {
-            if (unsubscribeEvents) unsubscribeEvents();
-            if (unsubscribeConfig) unsubscribeConfig();
-            if (unsubscribeTrailer) unsubscribeTrailer(); // Cleanup previous listener
+            if(unsubscribeEvents) unsubscribeEvents();
+            if(unsubscribeConfig) unsubscribeConfig();
+            if(unsubscribeTrailer) unsubscribeTrailer();
 
             state.events = [];
             render();
 
-            const eventsRef = getEventsRef();
-            const configRef = getConfigRef();
-            const trailerRef = getTrailerRef(); // Get correct path based on code
-
-            unsubscribeEvents = onSnapshot(eventsRef, (snap) => {
+            unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => {
                 state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 render();
             });
 
-            unsubscribeConfig = onSnapshot(configRef, (snap) => {
+            unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
                 if(snap.exists()) {
                     const d = snap.data();
                     if(d.delay !== undefined) state.delay = d.delay;
                     if(d.settings) state.settings = d.settings;
-                    
                     document.getElementById('input-offset').value = state.settings.onWaterOffset;
                     document.getElementById('input-warmup').value = state.settings.warmUpDuration;
                     render();
@@ -955,198 +551,118 @@
                 }
             });
 
-            // New Trailer Listener
-            unsubscribeTrailer = onSnapshot(trailerRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    // Server has data, sync local state
-                    trailerState = docSnap.data().layout;
-                    
-                    // Also update local storage so it survives if we go offline momentarily
+            unsubscribeTrailer = onSnapshot(getTrailerRef(), (snap) => {
+                if(snap.exists()) {
+                    trailerState = snap.data().layout;
                     localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
-                    
-                    // If user is currently viewing the trailer page, re-render it
-                    if (!document.getElementById('view-trailer').classList.contains('hidden')) {
-                        renderTrailer();
-                    }
+                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
                 } else {
-                    // No data on server yet for this code? 
-                    // We can choose to upload default, or just wait.
-                    // For safety, we won't overwrite local work immediately, 
-                    // but we won't pull anything either.
+                    // Reset to default if switching to a new group that has no data
+                    trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
+                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
                 }
             });
         }
 
-        // --- Interaction Listeners ---
-
-        els.weatherWidget.select.onchange = (e) => {
-            const newLoc = e.target.value;
-            state.locationKey = newLoc;
-            localStorage.setItem('regatta_location', newLoc);
-            els.weatherWidget.temp.textContent = "--";
-            fetchWeather();
-        };
-
-        document.getElementById('btn-join-group').onclick = () => {
-            const code = document.getElementById('input-group-code').value.trim().toLowerCase();
-            if(code !== state.groupCode) {
-                state.groupCode = code;
-                localStorage.setItem('regatta_group_code', code);
-                setupListeners();
-            }
-        };
-
-        // Modal Logic
-        window.openModal = (id) => {
+        // Global Handlers
+        els.weatherWidget.select.onchange = (e) => { state.locationKey = e.target.value; localStorage.setItem('regatta_location', e.target.value); els.weatherWidget.temp.textContent = "--"; fetchWeather(); };
+        document.getElementById('btn-join-group').onclick = () => { const code = document.getElementById('input-group-code').value.trim().toLowerCase(); if(code !== state.groupCode) { state.groupCode = code; localStorage.setItem('regatta_group_code', code); setupListeners(); } };
+        window.openModal = (id) => { 
             const ev = state.events.find(e => e.id === id);
             if(!ev) return;
-            
             els.modal.eventNum.textContent = `#${ev.eventNum}`;
             els.modal.alpha.textContent = ev.alpha || '-';
             els.modal.crew.textContent = ev.crew;
-            
-            const baseMins = timeToMinutes(ev.originalTime);
-            const delayedMins = baseMins + state.delay;
-            const onWaterMins = delayedMins - state.settings.onWaterOffset;
-            const warmUpStartMins = onWaterMins - state.settings.warmUpDuration;
-            
-            els.modal.warmup.textContent = formatDisplayTime(warmUpStartMins);
-            els.modal.onwater.textContent = formatDisplayTime(onWaterMins);
-            els.modal.start.textContent = formatDisplayTime(delayedMins);
-            
+            const base = timeToMinutes(ev.originalTime);
+            const delayed = base + state.delay;
+            const onWater = delayed - state.settings.onWaterOffset;
+            const warmUp = onWater - state.settings.warmUpDuration;
+            els.modal.warmup.textContent = formatDisplayTime(warmUp);
+            els.modal.onwater.textContent = formatDisplayTime(onWater);
+            els.modal.start.textContent = formatDisplayTime(delayed);
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
-            
             els.modal.el.classList.remove('hidden');
         };
-
-        window.closeModal = () => {
-            els.modal.el.classList.add('hidden');
-        };
-
-        document.getElementById('btn-toggle-details').onclick = () => {
-            const panel = document.getElementById('add-details-panel');
-            panel.classList.toggle('hidden');
-        };
-
+        window.closeModal = () => els.modal.el.classList.add('hidden');
+        document.getElementById('btn-toggle-details').onclick = () => document.getElementById('add-details-panel').classList.toggle('hidden');
         document.getElementById('add-event-form').onsubmit = async (e) => {
             e.preventDefault();
             if(!state.user) return;
-            const eventNum = document.getElementById('input-event-num').value;
-            const alpha = document.getElementById('input-alpha').value;
-            const crew = document.getElementById('input-crew').value;
-            const time = document.getElementById('input-time').value;
-            const cox = document.getElementById('input-cox').value;
-            const rowers = document.getElementById('input-rowers').value;
-
-            await addDoc(getEventsRef(), { 
-                eventNum: eventNum || 'N/A', 
-                alpha: alpha || '',
-                crew, 
-                originalTime: time,
-                cox: cox || '',
-                rowers: rowers || ''
-            });
+            const d = {
+                eventNum: document.getElementById('input-event-num').value,
+                alpha: document.getElementById('input-alpha').value,
+                crew: document.getElementById('input-crew').value,
+                originalTime: document.getElementById('input-time').value,
+                cox: document.getElementById('input-cox').value,
+                rowers: document.getElementById('input-rowers').value
+            };
+            await addDoc(getEventsRef(), { ...d, eventNum: d.eventNum || 'N/A' });
             e.target.reset();
             document.getElementById('add-details-panel').classList.add('hidden');
         };
-
-        window.deleteEvent = async (e, id) => {
-            e.stopPropagation(); 
-            if(!state.user) return;
-            if(confirm("Delete this event?")) {
-                await deleteDoc(doc(getEventsRef(), id));
-            }
-        };
-
-        const updateDelay = async (delta) => {
-            if(!state.user) return;
-            const newDelay = Math.max(0, state.delay + delta);
-            await setDoc(getConfigRef(), { delay: newDelay, settings: state.settings }, { merge: true });
-        };
-        document.getElementById('btn-delay-plus').onclick = () => updateDelay(5);
-        document.getElementById('btn-delay-minus').onclick = () => updateDelay(-5);
-
+        window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
+        document.getElementById('btn-delay-plus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay + 5), settings: state.settings }, { merge: true }); };
+        document.getElementById('btn-delay-minus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay - 5), settings: state.settings }, { merge: true }); };
         document.getElementById('btn-toggle-config').onclick = () => els.configPanel.classList.toggle('hidden');
-
         const updateSettings = async () => {
             if(!state.user) return;
-            const newSettings = {
-                onWaterOffset: Number(document.getElementById('input-offset').value),
-                warmUpDuration: Number(document.getElementById('input-warmup').value)
-            };
-            await setDoc(getConfigRef(), { delay: state.delay, settings: newSettings }, { merge: true });
+            const s = { onWaterOffset: Number(document.getElementById('input-offset').value), warmUpDuration: Number(document.getElementById('input-warmup').value) };
+            await setDoc(getConfigRef(), { delay: state.delay, settings: s }, { merge: true });
         };
         document.getElementById('input-offset').onchange = updateSettings;
         document.getElementById('input-warmup').onchange = updateSettings;
-
         document.getElementById('btn-clear').onclick = async () => {
-            if(!state.user || !confirm(`Delete all events for ${state.groupCode || 'myself'}?`)) return;
+            if(!state.user || !confirm("Delete all events?")) return;
             const batch = writeBatch(db);
             state.events.forEach(ev => batch.delete(doc(getEventsRef(), ev.id)));
             batch.set(getConfigRef(), { delay: 0, settings: state.settings });
             await batch.commit();
         };
-
         document.getElementById('input-csv').onchange = (e) => {
             const file = e.target.files[0];
             if(!file || !state.user) return;
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
+            const r = new FileReader();
+            r.onload = async (evt) => {
                 const lines = evt.target.result.split('\n');
                 const batch = writeBatch(db);
-                const colRef = getEventsRef();
+                const ref = getEventsRef();
                 let count = 0;
                 lines.forEach((line, idx) => {
                     if(!line.trim()) return;
-                    
-                    const rawCols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    const cols = rawCols.map(c => c.trim().replace(/^"|"$/g, ''));
-
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
-                    
-                    let eventNum='', alpha='', crew='', time='', cox='', rowers='';
-                    
-                    if(cols.length >= 6) { eventNum=cols[0]; alpha=cols[1]; crew=cols[2]; time=cols[3]; cox=cols[4]; rowers=cols[5]; }
-                    else if(cols.length >= 4) { eventNum=cols[0]; alpha=cols[1]; crew=cols[2]; time=cols[3]; }
-                    else if(cols.length === 3) { eventNum=cols[0]; crew=cols[1]; time=cols[2]; }
-                    else if(cols.length === 2) { crew=cols[0]; time=cols[1]; }
-
-                    if(time && time.match(/\d{1,2}:\d{2}/)) {
-                        batch.set(doc(colRef), { eventNum, alpha, crew, originalTime: time, cox, rowers });
-                        count++;
-                    }
+                    let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'' };
+                    if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
+                    else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
+                    else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
+                    else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
+                    if(d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
                 });
                 if(count > 0) await batch.commit();
-                else alert("No valid rows found. \nFormat: Event, Alpha, Crew, Time, Cox, Rowers");
+                else alert("No valid rows found.");
             };
-            reader.readAsText(file);
+            r.readAsText(file);
             e.target.value = null;
         };
-
         document.getElementById('btn-template').onclick = () => {
-            const csvContent = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2;Rower3...";
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const content = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2...";
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "regatta_template.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            link.href = URL.createObjectURL(new Blob([content], { type: 'text/csv;charset=utf-8;' }));
+            link.download = "regatta_template.csv";
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         };
-
         document.getElementById('btn-demo').onclick = async () => {
             if(!state.user) return;
-            const demo = [
-                { eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark, Sam' },
-                { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry, Mike' },
-                { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny' }
-            ];
             const batch = writeBatch(db);
-            const colRef = getEventsRef();
-            demo.forEach(d => batch.set(doc(colRef), d));
+            const ref = getEventsRef();
+            const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny' }];
+            d.forEach(i => batch.set(doc(ref), i));
             await batch.commit();
+        };
+        window.switchView = (v) => {
+            if(v==='regatta') { document.getElementById('view-regatta').classList.remove('hidden'); document.getElementById('view-trailer').classList.add('hidden'); }
+            else { document.getElementById('view-regatta').classList.add('hidden'); document.getElementById('view-trailer').classList.remove('hidden'); if(document.getElementById('trailer-container').children.length===0) renderTrailer(); }
         };
 
         setInterval(() => { state.currentTime = new Date(); render(); }, 1000);
