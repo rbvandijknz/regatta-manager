@@ -40,7 +40,7 @@
             justify-content: center;
             background-color: white;
             transition: background-color 0.2s;
-            cursor: pointer; /* Indicates clickable/editable */
+            cursor: pointer;
         }
         .trailer-cell.drag-over {
             background-color: #eff6ff; /* blue-50 */
@@ -162,7 +162,7 @@
     <!-- VIEW 1: REGATTA PROGRAMME -->
     <div id="view-regatta" class="max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in">
 
-        <!-- List Header (Moved to Top) -->
+        <!-- List Header -->
         <div class="flex items-center justify-between mb-2">
             <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
             <div class="text-sm text-slate-500" id="status-summary">Loading...</div>
@@ -189,7 +189,7 @@
             <p class="text-sm">Add manually or upload a CSV.</p>
         </div>
 
-        <!-- Controls Grid (Moved to Bottom) -->
+        <!-- Controls Grid -->
         <div class="pt-8 border-t border-slate-200">
             <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Admin Controls</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -397,12 +397,10 @@
             ruataniwha: { name: 'Ruataniwha', lat: -44.218, lon: 170.086 }
         };
 
-        // UPDATED: Header rows are now standard draggable content cells
         const INITIAL_TRAILER = {
             bc: {
                 title: "BC Trailer",
                 rows: [
-                    // UPDATED: 4 standard cells for the top row
                     [{t:"Red", id:"bc-h1"}, {id:"bc-h2"}, {t:"Wairoa", id:"bc-h3"}, {id:"bc-h4"}],
                     [{t:"Lee", id:"bc-1"}, {t:"Peggy", id:"bc-2"}, {t:"Peter", id:"bc-3"}, {t:"Kopu", id:"bc-4"}],
                     [{t:"Snowdrop", id:"bc-5"}, {t:"Bean", id:"bc-6"}, {t:"Te Poi", id:"bc-7"}, {t:"Wetini", id:"bc-8"}],
@@ -489,6 +487,15 @@
             }
         };
 
+        // New: Trailer Ref Helper
+        const getTrailerRef = () => {
+            if (state.groupCode) {
+                return doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main');
+            } else {
+                return doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
+            }
+        };
+
         // --- Navigation Logic ---
         window.switchView = (view) => {
             const regattaView = document.getElementById('view-regatta');
@@ -558,11 +565,25 @@
         };
 
         // --- Trailer Logic & Handlers ---
+        
+        // New Helper: Save Trailer State to Firestore
+        const saveTrailer = async () => {
+            if(!state.user) return;
+            // Also update local storage for immediate feedback or offline backup
+            localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
+            
+            try {
+                await setDoc(getTrailerRef(), { layout: trailerState }, { merge: true });
+            } catch (err) {
+                console.error("Error saving trailer layout:", err);
+            }
+        };
+
         window.resetTrailer = () => {
-            if(confirm("Reset trailer layout to default?")) {
+            if(confirm("Reset trailer layout to default? This will update for everyone.")) {
                 trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
-                localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
                 renderTrailer();
+                saveTrailer(); // Sync to DB
             }
         };
 
@@ -584,11 +605,8 @@
                         const font = cell.font || '';
                         
                         if(cell.h) {
-                            // Header cells (if any remain)
                             html += `<div class="${span} trailer-header py-2 border-r border-slate-200 last:border-r-0">${cell.t}</div>`;
                         } else {
-                            // Content Cell (Droppable)
-                            // FIX: Moved ondblclick to the parent wrapper div to ensure clicks work on empty cells
                             const content = cell.t 
                                 ? `<div class="boat-card" draggable="true" ondragstart="dragStart(event)" id="item-${cell.id}">${cell.t}</div>`
                                 : ``;
@@ -674,8 +692,8 @@
                 sData.t = tData.t; 
                 tData.t = temp;
 
-                localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
                 renderTrailer();
+                saveTrailer(); // Sync to DB
             }
         };
 
@@ -689,8 +707,8 @@
                         break;
                     }
                 }
-                localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
                 renderTrailer();
+                saveTrailer(); // Sync to DB
             }
         };
 
@@ -881,6 +899,7 @@
 
         let unsubscribeEvents = null;
         let unsubscribeConfig = null;
+        let unsubscribeTrailer = null; // Added variable for trailer listener
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
@@ -907,11 +926,14 @@
         function setupListeners() {
             if (unsubscribeEvents) unsubscribeEvents();
             if (unsubscribeConfig) unsubscribeConfig();
+            if (unsubscribeTrailer) unsubscribeTrailer(); // Cleanup previous listener
+
             state.events = [];
             render();
 
             const eventsRef = getEventsRef();
             const configRef = getConfigRef();
+            const trailerRef = getTrailerRef(); // Get correct path based on code
 
             unsubscribeEvents = onSnapshot(eventsRef, (snap) => {
                 state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -930,6 +952,27 @@
                 } else {
                     state.delay = 0;
                     render();
+                }
+            });
+
+            // New Trailer Listener
+            unsubscribeTrailer = onSnapshot(trailerRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    // Server has data, sync local state
+                    trailerState = docSnap.data().layout;
+                    
+                    // Also update local storage so it survives if we go offline momentarily
+                    localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
+                    
+                    // If user is currently viewing the trailer page, re-render it
+                    if (!document.getElementById('view-trailer').classList.contains('hidden')) {
+                        renderTrailer();
+                    }
+                } else {
+                    // No data on server yet for this code? 
+                    // We can choose to upload default, or just wait.
+                    // For safety, we won't overwrite local work immediately, 
+                    // but we won't pull anything either.
                 }
             });
         }
