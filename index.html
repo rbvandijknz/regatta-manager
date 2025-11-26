@@ -117,55 +117,37 @@
         </div>
     </div>
 
-    <!-- APP CONTENT (Hidden until landing passed) -->
+    <!-- APP CONTENT -->
     <div id="app-content" class="hidden">
-        
-        <!-- Sticky Header -->
+        <!-- Header -->
         <div class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-700">
             <div class="max-w-6xl mx-auto px-4 py-3">
                 <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-                    
-                    <!-- Brand -->
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <svg class="text-yellow-500 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>
                             <h1 class="text-2xl font-bold tracking-tight flex items-center h-full pt-1">RegattaMaster</h1>
                             <div class="flex items-center ml-2 pt-1">
                                 <span id="group-badge" class="hidden text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono border border-blue-400 mr-2 uppercase"></span>
-                                <button id="connection-btn" class="p-1 rounded hover:bg-slate-800 transition-colors" title="Connection Status">
-                                    <i id="connection-icon" data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>
-                                </button>
-                                <button onclick="logout()" class="ml-2 p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Exit / Logout">
-                                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                                </button>
+                                <button id="connection-btn" class="p-1 rounded hover:bg-slate-800 transition-colors" title="Connection Status"><i id="connection-icon" data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i></button>
+                                <button onclick="logout()" class="ml-2 p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition" title="Exit / Logout"><i data-lucide="log-out" class="w-5 h-5"></i></button>
                             </div>
                         </div>
                         <div class="xl:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
                     </div>
-
-                    <!-- Widgets -->
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
                         <div id="weather-widget" class="h-12 flex items-center gap-3 bg-slate-800/80 px-4 rounded-lg border border-slate-700 text-slate-300 text-sm w-full sm:w-auto min-w-[240px] justify-between shadow-sm">
                             <div class="flex items-center gap-1 relative group cursor-pointer">
                                 <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i>
                                 <select id="weather-location" class="weather-select bg-transparent font-semibold text-xs uppercase tracking-wider text-slate-300 focus:text-white focus:outline-none cursor-pointer border-b border-transparent hover:border-slate-500 transition-colors">
-                                    <option value="karapiro" class="bg-slate-800">Karapiro</option>
-                                    <option value="bluelake" class="bg-slate-800">Blue Lake</option>
-                                    <option value="ruataniwha" class="bg-slate-800">Ruataniwha</option>
+                                    <option value="karapiro" class="bg-slate-800">Karapiro</option><option value="bluelake" class="bg-slate-800">Blue Lake</option><option value="ruataniwha" class="bg-slate-800">Ruataniwha</option>
                                 </select>
                             </div>
                             <div class="h-6 w-px bg-slate-700"></div>
-                            <div class="flex items-center gap-1">
-                                <i id="weather-icon" data-lucide="cloud" class="w-5 h-5 text-blue-300"></i>
-                                <span id="weather-temp" class="font-mono font-bold text-white text-lg">--°</span>
-                            </div>
+                            <div class="flex items-center gap-1"><i id="weather-icon" data-lucide="cloud" class="w-5 h-5 text-blue-300"></i><span id="weather-temp" class="font-mono font-bold text-white text-lg">--°</span></div>
                             <div class="h-6 w-px bg-slate-700"></div>
-                            <div class="flex items-center gap-1 min-w-[60px] justify-end">
-                                <i data-lucide="wind" class="w-4 h-4 text-slate-400"></i>
-                                <span id="weather-wind" class="font-mono text-xs">--</span>
-                            </div>
+                            <div class="flex items-center gap-1 min-w-[60px] justify-end"><i data-lucide="wind" class="w-4 h-4 text-slate-400"></i><span id="weather-wind" class="font-mono text-xs">--</span></div>
                         </div>
-
                         <div class="h-12 flex items-center justify-between gap-4 bg-slate-800 px-4 rounded-lg border border-slate-700 w-full sm:w-auto min-w-[240px] shadow-sm">
                             <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Delay</div>
                             <div class="flex items-center gap-3">
@@ -180,44 +162,32 @@
             </div>
         </div>
 
-        <!-- VIEW 1: REGATTA PROGRAMME -->
+        <!-- Programme View -->
         <div id="view-regatta" class="max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
                 <div class="flex items-center gap-3">
                     <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
                     <div class="relative">
-                        <select id="filter-coach" class="appearance-none bg-white border border-slate-300 text-slate-700 py-1 pl-3 pr-8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Coaches</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                            <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                        </div>
+                        <select id="filter-coach" class="appearance-none bg-white border border-slate-300 text-slate-700 py-1 pl-3 pr-8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">All Coaches</option></select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500"><i data-lucide="chevron-down" class="w-3 h-3"></i></div>
                     </div>
                 </div>
                 <div class="text-sm text-slate-500" id="status-summary">Loading...</div>
             </div>
-
             <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <div class="col-span-1">#</div><div class="col-span-1">Alpha</div><div class="col-span-3">Crew</div>
-                <div class="col-span-2 text-center">Warm Up</div><div class="col-span-2 text-center text-blue-600">On Water</div><div class="col-span-2 text-right">Start Time</div><div class="col-span-1"></div>
+                <div class="col-span-1">#</div><div class="col-span-1">Alpha</div><div class="col-span-3">Crew</div><div class="col-span-2 text-center">Warm Up</div><div class="col-span-2 text-center text-blue-600">On Water</div><div class="col-span-2 text-right">Start Time</div><div class="col-span-1"></div>
             </div>
-
             <div id="events-container" class="space-y-3"></div>
-
             <div id="empty-state" class="hidden text-center py-20 bg-white rounded-xl border-2 border-dashed border-slate-200 text-slate-400">
-                <i data-lucide="timer" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                <p class="text-lg font-medium">No events scheduled</p>
+                <i data-lucide="timer" class="w-12 h-12 mx-auto mb-2 opacity-50"></i><p class="text-lg font-medium">No events scheduled</p>
             </div>
-
-            <!-- Admin Controls (Hidden in Parent Mode) -->
+            
+            <!-- Admin Controls -->
             <div class="admin-only pt-8 border-t border-slate-200">
                 <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Admin Controls</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <form id="add-event-form" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="play-circle" class="w-4 h-4"></i> Add Event</h3>
-                            <button type="button" id="btn-toggle-details" class="text-xs text-blue-600 hover:text-blue-800 font-medium">+ Details</button>
-                        </div>
+                        <div class="flex justify-between items-center"><h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="play-circle" class="w-4 h-4"></i> Add Event</h3><button type="button" id="btn-toggle-details" class="text-xs text-blue-600 hover:text-blue-800 font-medium">+ Details</button></div>
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input type="text" id="input-event-num" placeholder="Ev #" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
                             <input type="text" id="input-alpha" placeholder="Alpha" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
@@ -225,44 +195,25 @@
                             <input type="time" id="input-time" class="w-full sm:w-auto p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
                         </div>
                         <div id="add-details-panel" class="hidden grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-                            <input type="text" id="input-cox" placeholder="Coxswain Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="input-rowers" placeholder="Rowers" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="input-boat" placeholder="Boat Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="input-coach" placeholder="Coach Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="text" id="input-cox" placeholder="Cox Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded">
+                            <input type="text" id="input-rowers" placeholder="Rowers" class="col-span-1 p-2 text-sm border border-slate-300 rounded">
+                            <input type="text" id="input-boat" placeholder="Boat Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded">
+                            <input type="text" id="input-coach" placeholder="Coach Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded">
                         </div>
-                        <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">Connecting...</button>
+                        <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50">Connecting...</button>
                     </form>
-
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4"></i> Tools</h3>
                             <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline">Config</button>
                         </div>
                         <div id="config-panel" class="hidden mb-4 space-y-4 border-b border-slate-100 pb-4">
-                            <!-- Share Link Generator -->
-                            <div class="bg-indigo-50 p-3 rounded border border-indigo-100 flex flex-col gap-2">
-                                <div class="text-xs font-bold text-indigo-700 uppercase">Share with Parents</div>
-                                <button onclick="copyParentLink()" class="text-sm bg-white border border-indigo-200 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-50 flex items-center justify-center gap-2">
-                                    <i data-lucide="share-2" class="w-3 h-3"></i> Copy 'Read-Only' Link
-                                </button>
-                            </div>
-                            
-                            <div class="bg-blue-50 p-3 rounded border border-blue-100">
-                                <div class="text-xs font-bold text-blue-700 uppercase mb-1">Switch Group</div>
-                                <div class="flex gap-2">
-                                    <input type="text" id="input-group-code" placeholder="e.g. baycoast" class="flex-1 p-1 text-sm border rounded">
-                                    <button id="btn-join-group" class="bg-blue-600 text-white text-xs px-3 rounded font-medium hover:bg-blue-700">Join</button>
-                                </div>
-                            </div>
-                            <!-- Notification Button -->
-                            <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
-                                <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full">
-                                    <i data-lucide="bell" class="w-4 h-4"></i> Enable Alerts
-                                </button>
-                            </div>
+                            <div class="bg-indigo-50 p-3 rounded border border-indigo-100 flex flex-col gap-2"><div class="text-xs font-bold text-indigo-700 uppercase">Share</div><button onclick="copyParentLink()" class="text-sm bg-white border border-indigo-200 text-indigo-600 px-3 py-1 rounded flex items-center justify-center gap-2"><i data-lucide="share-2" class="w-3 h-3"></i> Copy Link</button></div>
+                            <div class="bg-blue-50 p-3 rounded border border-blue-100"><div class="text-xs font-bold text-blue-700 uppercase mb-1">Switch Group</div><div class="flex gap-2"><input type="text" id="input-group-code" placeholder="code" class="flex-1 p-1 text-sm border rounded"><button id="btn-join-group" class="bg-blue-600 text-white text-xs px-3 rounded">Join</button></div></div>
+                            <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center"><button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full"><i data-lucide="bell" class="w-4 h-4"></i> Enable Alerts</button></div>
                             <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
-                                <div class="flex justify-between items-center"><span>On Water (mins):</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
-                                <div class="flex justify-between items-center"><span>Warm Up (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
+                                <div class="flex justify-between"><span>On Water:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
+                                <div class="flex justify-between"><span>Warm Up:</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 mt-2">
@@ -275,230 +226,111 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Parent Only Footer -->
+            <!-- Parent Footer -->
             <div class="parent-only hidden pt-8 border-t border-slate-200 text-center">
-                <button onclick="window.switchView('trailer')" class="bg-indigo-600 text-white py-3 px-6 rounded-lg font-bold shadow-lg hover:bg-indigo-700 transition inline-flex items-center gap-2">
-                    <i data-lucide="truck" class="w-5 h-5"></i> View Trailer Loading
-                </button>
+                <button onclick="window.switchView('trailer')" class="bg-indigo-600 text-white py-3 px-6 rounded-lg font-bold shadow-lg hover:bg-indigo-700 transition inline-flex items-center gap-2"><i data-lucide="truck" class="w-5 h-5"></i> View Trailer Loading</button>
                 <p class="text-xs text-slate-400 mt-4">Read Only Mode Enabled</p>
             </div>
         </div>
 
-        <!-- VIEW 2: TRAILER DIAGRAM -->
+        <!-- Trailer View -->
         <div id="view-trailer" class="hidden max-w-6xl mx-auto px-4 py-6 fade-in pb-20">
             <div class="flex justify-between items-center mb-6">
                 <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
-                <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading</h2>
-                    <span id="trailer-status" class="text-xs font-medium text-slate-400 italic transition-opacity opacity-0">Saved</span>
-                </div>
+                <div class="flex items-center gap-3"><h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading</h2><span id="trailer-status" class="text-xs font-medium text-slate-400 italic transition-opacity opacity-0">Saved</span></div>
                 <button onclick="resetTrailer()" class="admin-only text-xs text-red-500 hover:underline">Reset Layout</button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="trailer-container"></div>
         </div>
     </div>
 
-    <!-- Crew Details Modal -->
-    <div id="crew-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100">
-            <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start">
-                <div>
-                    <div class="flex items-center gap-2 mb-1"><span id="modal-event-num" class="bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded text-xs">#101</span><span id="modal-alpha" class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-xs font-mono">A</span></div>
-                    <h3 id="modal-crew-name" class="text-xl font-bold text-slate-800 leading-tight">Crew Name</h3>
-                </div>
-                <button onclick="window.closeModal()" class="text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
-            </div>
-            <div class="p-5 space-y-4">
-                <div class="grid grid-cols-3 gap-2 text-center bg-slate-50 rounded-lg p-3 border border-slate-100">
-                    <div><div class="text-[10px] uppercase text-slate-400 font-bold">Warm Up</div><div id="modal-time-warmup" class="font-mono font-bold text-slate-600">--:--</div></div>
-                    <div><div class="text-[10px] uppercase text-blue-500 font-bold">On Water</div><div id="modal-time-onwater" class="font-mono font-bold text-blue-600 text-lg">--:--</div></div>
-                    <div><div class="text-[10px] uppercase text-slate-400 font-bold">Start</div><div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div></div>
-                </div>
-                <div class="space-y-3">
-                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
-                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
-                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="anchor" class="w-3 h-3"></i> Boat</div><div id="modal-boat" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
-                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="user" class="w-3 h-3"></i> Coach</div><div id="modal-coach" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
-                </div>
-            </div>
-            <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end"><button onclick="window.closeModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 transition">Close</button></div>
-        </div>
-    </div>
-
-    <!-- Logic -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
         import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, setDoc, getDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbQE9pdiPYP1BdUb4T6AaEnMQwmfe2s3k",
-            authDomain: "regatta-manager-d6101.firebaseapp.com",
-            projectId: "regatta-manager-d6101",
-            storageBucket: "regatta-manager-d6101.firebasestorage.app",
-            messagingSenderId: "1023336958830",
-            appId: "1:1023336958830:web:19f0cfc62274189d8b8f7f",
-            measurementId: "G-0Y0FELH6KE"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyAbQE9pdiPYP1BdUb4T6AaEnMQwmfe2s3k", authDomain: "regatta-manager-d6101.firebaseapp.com", projectId: "regatta-manager-d6101", storageBucket: "regatta-manager-d6101.firebasestorage.app", messagingSenderId: "1023336958830", appId: "1:1023336958830:web:19f0cfc62274189d8b8f7f", measurementId: "G-0Y0FELH6KE" };
         const appId = 'regatta-manager-d6101';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const LOCATIONS = {
-            karapiro: { name: 'Karapiro', lat: -37.9265, lon: 175.5435 },
-            bluelake: { name: 'Blue Lake', lat: -38.196, lon: 176.327 },
-            ruataniwha: { name: 'Ruataniwha', lat: -44.218, lon: 170.086 }
-        };
-
-        const INITIAL_TRAILER = {
-            bc: {
-                title: "BC Trailer",
-                rows: [
-                    [{t:"Red", id:"bc-h1"}, {id:"bc-h2"}, {t:"Wairoa", id:"bc-h3"}, {id:"bc-h4"}],
-                    [{t:"Lee", id:"bc-1"}, {t:"Peggy", id:"bc-2"}, {t:"Peter", id:"bc-3"}, {t:"Kopu", id:"bc-4"}],
-                    [{t:"Snowdrop", id:"bc-5"}, {t:"Bean", id:"bc-6"}, {t:"Te Poi", id:"bc-7"}, {t:"Wetini", id:"bc-8"}],
-                    [{id:"bc-9"}, {id:"bc-10"}, {id:"bc-11"}, {id:"bc-12"}],
-                    [{id:"bc-13"}, {id:"bc-14"}, {id:"bc-15"}, {id:"bc-16"}],
-                    [{t:"Sweep Riggers", bg:"bg-slate-50", span:2, font:"font-semibold", id:"bc-rig1"}, {id:"bc-17"}, {id:"bc-18"}],
-                    [{t:"Beth", id:"bc-19"}, {t:"Riggers", font:"font-semibold", id:"bc-rig2"}, {id:"bc-20"}, {id:"bc-21"}],
-                    [{t:"Wairoa", id:"bc-22"}, {id:"bc-23"}, {id:"bc-24"}, {id:"bc-25"}]
-                ]
-            },
-            otc: {
-                title: "OTC Trailer",
-                rows: [
-                    [{t:"Beth", id:"otc-h1"}, {t:"Taki", id:"otc-h2"}, {t:"Nick", id:"otc-h3"}, {t:"Albie", id:"otc-h4"}],
-                    [{id:"otc-1"}, {t:"Trudy", id:"otc-2"}, {t:"Aat", id:"otc-3"}, {t:"Kati", id:"otc-4"}],
-                    [{id:"otc-5"}, {id:"otc-6"}, {id:"otc-7"}, {id:"otc-8"}],
-                    [{t:"tent", font:"font-bold text-slate-600", id:"otc-9"}, {t:"Wairoa End", id:"otc-10"}, {t:"Red End", id:"otc-11"}, {t:"Tent", font:"font-bold text-slate-600", id:"otc-12"}],
-                    [{id:"otc-13"}, {id:"otc-14"}, {id:"otc-15"}, {id:"otc-16"}],
-                    [{id:"otc-17"}, {id:"otc-18"}, {t:"Sweep", bg:"bg-slate-50", font:"font-semibold", id:"otc-19"}, {id:"otc-20"}],
-                    [{id:"otc-21"}, {t:"Oars", bg:"bg-slate-50", font:"font-semibold", id:"otc-22"}, {t:"All 8", bg:"bg-slate-50", font:"font-semibold", id:"otc-23"}, {id:"otc-24"}]
-                ]
-            }
-        };
+        const LOCATIONS = { karapiro: { name: 'Karapiro', lat: -37.9265, lon: 175.5435 }, bluelake: { name: 'Blue Lake', lat: -38.196, lon: 176.327 }, ruataniwha: { name: 'Ruataniwha', lat: -44.218, lon: 170.086 } };
+        const INITIAL_TRAILER = { bc: { title: "BC Trailer", rows: [[{t:"Red", id:"bc-h1"}, {id:"bc-h2"}, {t:"Wairoa", id:"bc-h3"}, {id:"bc-h4"}], [{t:"Lee", id:"bc-1"}, {t:"Peggy", id:"bc-2"}, {t:"Peter", id:"bc-3"}, {t:"Kopu", id:"bc-4"}], [{t:"Snowdrop", id:"bc-5"}, {t:"Bean", id:"bc-6"}, {t:"Te Poi", id:"bc-7"}, {t:"Wetini", id:"bc-8"}], [{id:"bc-9"}, {id:"bc-10"}, {id:"bc-11"}, {id:"bc-12"}], [{id:"bc-13"}, {id:"bc-14"}, {id:"bc-15"}, {id:"bc-16"}], [{t:"Sweep Riggers", bg:"bg-slate-50", span:2, font:"font-semibold", id:"bc-rig1"}, {id:"bc-17"}, {id:"bc-18"}], [{t:"Beth", id:"bc-19"}, {t:"Riggers", font:"font-semibold", id:"bc-rig2"}, {id:"bc-20"}, {id:"bc-21"}], [{t:"Wairoa", id:"bc-22"}, {id:"bc-23"}, {id:"bc-24"}, {id:"bc-25"}]] }, otc: { title: "OTC Trailer", rows: [[{t:"Beth", id:"otc-h1"}, {t:"Taki", id:"otc-h2"}, {t:"Nick", id:"otc-h3"}, {t:"Albie", id:"otc-h4"}], [{id:"otc-1"}, {t:"Trudy", id:"otc-2"}, {t:"Aat", id:"otc-3"}, {t:"Kati", id:"otc-4"}], [{id:"otc-5"}, {id:"otc-6"}, {id:"otc-7"}, {id:"otc-8"}], [{t:"tent", font:"font-bold text-slate-600", id:"otc-9"}, {t:"Wairoa End", id:"otc-10"}, {t:"Red End", id:"otc-11"}, {t:"Tent", font:"font-bold text-slate-600", id:"otc-12"}], [{id:"otc-13"}, {id:"otc-14"}, {id:"otc-15"}, {id:"otc-16"}], [{id:"otc-17"}, {id:"otc-18"}, {t:"Sweep", bg:"bg-slate-50", font:"font-semibold", id:"otc-19"}, {id:"otc-20"}], [{id:"otc-21"}, {t:"Oars", bg:"bg-slate-50", font:"font-semibold", id:"otc-22"}, {t:"All 8", bg:"bg-slate-50", font:"font-semibold", id:"otc-23"}, {id:"otc-24"}]] } };
 
         let state = { user: null, events: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', readOnly: false };
         let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
-        let previousDelay = null;
-        let pendingCode = null;
-
-        const els = {
-            landing: document.getElementById('landing-screen'),
-            appContent: document.getElementById('app-content'),
-            landingCode: document.getElementById('landing-code'),
-            eventsContainer: document.getElementById('events-container'),
-            emptyState: document.getElementById('empty-state'),
-            delayDisplay: document.getElementById('delay-display'),
-            statusSummary: document.getElementById('status-summary'),
-            connectionBtn: document.getElementById('connection-btn'),
-            submitBtn: document.getElementById('btn-submit'),
-            configPanel: document.getElementById('config-panel'),
-            clockDisplays: document.querySelectorAll('.clock-display'),
-            groupBadge: document.getElementById('group-badge'),
-            groupInput: document.getElementById('input-group-code'),
-            filterCoach: document.getElementById('filter-coach'),
-            weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon') },
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach') },
-            saveStatus: document.getElementById('trailer-status'),
-            toastContainer: document.getElementById('toast-container'),
-            passwordModal: document.getElementById('password-modal'),
-            passwordInput: document.getElementById('admin-password-input'),
-            passwordTitle: document.getElementById('password-title'),
-            passwordDesc: document.getElementById('password-desc')
-        };
+        let previousDelay = null; let pendingCode = null;
+        const els = { landing: document.getElementById('landing-screen'), appContent: document.getElementById('app-content'), landingCode: document.getElementById('landing-code'), eventsContainer: document.getElementById('events-container'), emptyState: document.getElementById('empty-state'), delayDisplay: document.getElementById('delay-display'), statusSummary: document.getElementById('status-summary'), connectionBtn: document.getElementById('connection-btn'), submitBtn: document.getElementById('btn-submit'), configPanel: document.getElementById('config-panel'), clockDisplays: document.querySelectorAll('.clock-display'), groupBadge: document.getElementById('group-badge'), groupInput: document.getElementById('input-group-code'), filterCoach: document.getElementById('filter-coach'), weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon') }, modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach') }, saveStatus: document.getElementById('trailer-status'), toastContainer: document.getElementById('toast-container'), passwordModal: document.getElementById('password-modal'), passwordInput: document.getElementById('admin-password-input'), passwordTitle: document.getElementById('password-title'), passwordDesc: document.getElementById('password-desc') };
 
         const getEventsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
         const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
         const getTrailerRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
 
-        // --- LOGIN / LANDING LOGIC ---
-        
+        // URL PARAMS
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.has('code')) {
             const code = urlParams.get('code');
-            const role = urlParams.get('role'); 
-            if(code) {
-                enterApp(code, role === 'parent');
-            }
+            const role = urlParams.get('role');
+            if(code) enterApp(code, role === 'parent');
         } else if (localStorage.getItem('regatta_group_code')) {
             els.landingCode.value = localStorage.getItem('regatta_group_code');
         }
 
+        // BUTTON HANDLERS
         document.getElementById('btn-enter-parent').onclick = () => {
             const code = els.landingCode.value.trim().toLowerCase();
             if(!code) return alert("Please enter a Regatta Code");
             enterApp(code, true);
         };
-
         document.getElementById('btn-enter-coach').onclick = async () => {
             const code = els.landingCode.value.trim().toLowerCase();
             if(!code) return alert("Please enter a Regatta Code");
-            
             pendingCode = code;
             els.passwordModal.classList.remove('hidden');
             
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', `${code}_config`, 'main');
-            try {
-                const snap = await getDoc(docRef);
-                if (snap.exists() && snap.data().adminPassword) {
-                    els.passwordTitle.textContent = "Enter Password";
-                    els.passwordDesc.textContent = "This regatta code is locked.";
-                    els.passwordInput.value = "";
-                    els.passwordInput.focus();
-                } else {
-                    els.passwordTitle.textContent = "Create Password";
-                    els.passwordDesc.textContent = "New regatta code detected. Set a password to secure Coach access.";
-                    els.passwordInput.value = "";
-                    els.passwordInput.focus();
-                }
-            } catch (e) {
-                els.passwordTitle.textContent = "Create Password";
-                els.passwordDesc.textContent = "Set a password to secure Coach access.";
+            // Attempt to check if password exists (require connection)
+            if (!auth.currentUser) {
+               // Wait for anon auth or assume new if offline? 
+               // Better to assume new if just entering name first time
+               // We can handle logic in submit
             }
+            
+            // For quick UI responsiveness, just show modal first, verify in submit
+            els.passwordTitle.textContent = "Coach Access";
+            els.passwordDesc.textContent = "Enter password or create one if new.";
+            els.passwordInput.value = "";
+            els.passwordInput.focus();
         };
-        
         document.getElementById('btn-submit-password').onclick = async () => {
             const pass = els.passwordInput.value.trim();
             if (!pass) return alert("Please enter a password");
-            
             const code = pendingCode;
+            // Ensure we are connected before checking password
+            if (!auth.currentUser) {
+                try { await signInAnonymously(auth); } catch(e) { return alert("Offline: Cannot verify password."); }
+            }
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', `${code}_config`, 'main');
-            
             try {
                 const snap = await getDoc(docRef);
-                
                 if (snap.exists() && snap.data().adminPassword) {
-                    if (snap.data().adminPassword === pass) {
-                        closePasswordModal();
-                        enterApp(code, false);
-                    } else {
-                        alert("Incorrect password");
-                    }
+                    if (snap.data().adminPassword === pass) { closePasswordModal(); enterApp(code, false); }
+                    else alert("Incorrect password");
                 } else {
                     await setDoc(docRef, { adminPassword: pass }, { merge: true });
                     closePasswordModal();
                     enterApp(code, false);
                 }
-            } catch(e) {
-                alert("Connection error. Please try again.");
-            }
+            } catch(e) { alert("Connection error."); }
         };
-        
-        window.closePasswordModal = () => {
-            els.passwordModal.classList.add('hidden');
-        };
+        window.closePasswordModal = () => els.passwordModal.classList.add('hidden');
 
         function enterApp(code, isReadOnly) {
             state.groupCode = code;
             state.readOnly = isReadOnly;
             localStorage.setItem('regatta_group_code', code);
-            
             els.landing.classList.add('hidden');
             els.appContent.classList.remove('hidden');
-            
             if (isReadOnly) {
                 document.body.classList.add('read-only');
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
@@ -508,10 +340,14 @@
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
                 document.querySelector('.parent-only').classList.add('hidden');
             }
-
-            setupListeners();
-            fetchWeather();
-            setInterval(fetchWeather, 900000);
+            
+            // Trigger data load ONLY if user is already authed. 
+            // If not, onAuthStateChanged will handle it.
+            if (state.user) {
+                setupListeners();
+                fetchWeather();
+                setInterval(fetchWeather, 900000);
+            }
         }
 
         window.logout = () => {
@@ -522,94 +358,100 @@
             els.landing.classList.remove('hidden');
             try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
         };
-
         window.copyParentLink = () => {
-            if(!state.groupCode) return alert("You must join a group code first.");
+            if(!state.groupCode) return alert("Join a group first.");
             const url = `${window.location.origin}${window.location.pathname}?code=${state.groupCode}&role=parent`;
-            navigator.clipboard.writeText(url).then(() => showToast("Parent Link Copied to Clipboard!"));
+            navigator.clipboard.writeText(url).then(() => showToast("Link Copied!"));
         };
-
         const showToast = (msg, type='info') => {
             const toast = document.createElement('div');
-            const colorClass = type === 'warn' ? 'bg-yellow-500 text-white' : 'bg-slate-800 text-white';
-            toast.className = `toast pointer-events-auto px-4 py-2 rounded shadow-lg text-sm font-medium mb-2 ${colorClass}`;
+            toast.className = `toast pointer-events-auto px-4 py-2 rounded shadow-lg text-sm font-medium mb-2 ${type === 'warn' ? 'bg-yellow-500 text-white' : 'bg-slate-800 text-white'}`;
             toast.innerHTML = msg;
             els.toastContainer.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('hiding');
-                toast.addEventListener('animationend', () => toast.remove());
-            }, 4000);
+            setTimeout(() => { toast.classList.add('hiding'); toast.addEventListener('animationend', () => toast.remove()); }, 4000);
         };
-
         const triggerNotification = (newDelay, oldDelay) => {
-            if (oldDelay === null) return; 
-            const diff = newDelay - oldDelay;
-            if (diff === 0) return;
-
-            const direction = diff > 0 ? "Increased" : "Decreased";
-            const msg = `Delay ${direction} to +${newDelay}m`;
+            if (oldDelay === null || newDelay - oldDelay === 0) return;
+            const msg = `Delay ${newDelay - oldDelay > 0 ? "Increased" : "Decreased"} to +${newDelay}m`;
             showToast(`<i class="inline-block mr-2 w-4 h-4" data-lucide="clock"></i> ${msg}`, 'warn');
             lucide.createIcons();
-
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try { new Notification("RegattaMaster Update", { body: msg }); } catch(e) {}
-            }
+            if ('Notification' in window && Notification.permission === 'granted') { try { new Notification("RegattaMaster Update", { body: msg }); } catch(e) {} }
         };
-
         document.getElementById('btn-enable-notifications').onclick = async () => {
             if (!('Notification' in window)) return alert("Not supported.");
-            try {
-                const p = await Notification.requestPermission();
-                if (p === 'granted') { new Notification("RegattaMaster", { body: "Notifications enabled!" }); alert("Success!"); }
-                else alert("Denied.");
-            } catch (e) { alert("Error"); }
+            try { const p = await Notification.requestPermission(); if (p === 'granted') alert("Enabled!"); else alert("Denied."); } catch (e) { alert("Error"); }
         };
+        
+        // --- AUTH & SYNC ---
+        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
+        initAuth();
 
-        const fetchWeather = async () => {
-            try {
-                const loc = LOCATIONS[state.locationKey] || LOCATIONS['karapiro'];
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=kmh&timezone=Pacific%2FAuckland`);
-                const data = await res.json();
-                if (data.current) {
-                    state.weather = { temp: Math.round(data.current.temperature_2m), wind: Math.round(data.current.wind_speed_10m), dir: getWindDir(data.current.wind_direction_10m), code: data.current.weather_code };
-                    renderWeather();
+        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer;
+
+        onAuthStateChanged(auth, (u) => {
+            state.user = u;
+            if(u) {
+                els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
+                lucide.createIcons();
+                // Only trigger listeners if we are inside the app (group code set)
+                if (state.groupCode) {
+                    setupListeners();
+                    fetchWeather();
+                    setInterval(fetchWeather, 900000);
                 }
-            } catch (e) { els.weatherWidget.temp.textContent = "--"; }
-        };
-        const getWindDir = (d) => ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8];
-        const getWeatherIconName = (code) => { if(code<=1) return 'sun'; if(code<=3) return 'cloud'; if(code<=67) return 'cloud-rain'; return 'cloud-lightning'; };
-        const renderWeather = () => {
-            if(state.weather.temp !== null) {
-                els.weatherWidget.temp.textContent = `${state.weather.temp}°`;
-                els.weatherWidget.wind.textContent = `${state.weather.wind}kmh ${state.weather.dir}`;
-                els.weatherWidget.icon.setAttribute('data-lucide', getWeatherIconName(state.weather.code));
+            } else {
+                els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
                 lucide.createIcons();
             }
-            els.weatherWidget.select.value = state.locationKey;
-        };
+        });
 
+        function setupListeners() {
+            if(unsubscribeEvents) unsubscribeEvents();
+            if(unsubscribeConfig) unsubscribeConfig();
+            if(unsubscribeTrailer) unsubscribeTrailer();
+
+            state.events = [];
+            previousDelay = null;
+            render();
+
+            unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => {
+                state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                render();
+            }, (err) => { console.error("Events Error (Permission?)", err); });
+
+            unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
+                if(snap.exists()) {
+                    const d = snap.data();
+                    if(d.delay !== undefined) { triggerNotification(d.delay, previousDelay); previousDelay = d.delay; state.delay = d.delay; }
+                    if(d.settings) state.settings = d.settings;
+                    document.getElementById('input-offset').value = state.settings.onWaterOffset;
+                    document.getElementById('input-warmup').value = state.settings.warmUpDuration;
+                    render();
+                } else { state.delay = 0; previousDelay = 0; render(); }
+            });
+
+            unsubscribeTrailer = onSnapshot(getTrailerRef(), (snap) => {
+                if(snap.exists()) {
+                    const rawLayout = snap.data().layout;
+                    trailerState = typeof rawLayout === 'string' ? JSON.parse(rawLayout) : rawLayout;
+                    localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
+                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
+                } else {
+                    trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
+                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
+                }
+            });
+        }
+
+        // --- HELPERS ---
         const saveTrailer = async () => {
             if(!state.user || state.readOnly) return;
-            els.saveStatus.textContent = "Saving...";
-            els.saveStatus.classList.remove('opacity-0', 'text-green-500');
-            els.saveStatus.classList.add('text-slate-400');
+            els.saveStatus.textContent = "Saving..."; els.saveStatus.classList.remove('opacity-0', 'text-green-500'); els.saveStatus.classList.add('text-slate-400');
             const cleanState = JSON.parse(JSON.stringify(trailerState, (k, v) => v === undefined ? null : v));
             localStorage.setItem('regatta_trailer_layout', JSON.stringify(cleanState));
-            try { 
-                await setDoc(getTrailerRef(), { layout: JSON.stringify(cleanState) }, { merge: true }); 
-                els.saveStatus.textContent = "Saved";
-                els.saveStatus.classList.replace('text-slate-400', 'text-green-500');
-                setTimeout(() => els.saveStatus.classList.add('opacity-0'), 2000);
-            } catch(e) { console.error(e); }
-        };
-
-        window.resetTrailer = () => {
-            if(state.readOnly) return;
-            if(confirm("Reset trailer layout to default?")) {
-                trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
-                renderTrailer();
-                saveTrailer();
-            }
+            try { await setDoc(getTrailerRef(), { layout: JSON.stringify(cleanState) }, { merge: true }); 
+                  els.saveStatus.textContent = "Saved"; els.saveStatus.classList.replace('text-slate-400', 'text-green-500'); setTimeout(() => els.saveStatus.classList.add('opacity-0'), 2000); } 
+            catch(e) { console.error(e); }
         };
 
         const renderTrailer = () => {
@@ -642,42 +484,26 @@
             });
         };
 
-        window.dragStart = (e) => { if(state.readOnly) return; e.dataTransfer.setData("text/plain", e.target.id); setTimeout(() => e.target.classList.add('dragging'), 0); };
-        window.dragOver = (e) => { if(state.readOnly) return; e.preventDefault(); e.target.closest('.trailer-cell')?.classList.add('drag-over'); };
+        window.resetTrailer = () => { if(!state.readOnly && confirm("Reset?")) { trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER)); renderTrailer(); saveTrailer(); } };
+        window.dragStart = (e) => { if(!state.readOnly) { e.dataTransfer.setData("text/plain", e.target.id); setTimeout(() => e.target.classList.add('dragging'), 0); } };
+        window.dragOver = (e) => { if(!state.readOnly) { e.preventDefault(); e.target.closest('.trailer-cell')?.classList.add('drag-over'); } };
         document.addEventListener('dragend', (e) => { e.target.classList.remove('dragging'); document.querySelectorAll('.trailer-cell').forEach(c => c.classList.remove('drag-over')); });
-        
         window.drop = (e) => {
             if(state.readOnly) return;
             e.preventDefault();
-            const targetCell = e.target.closest('.trailer-cell');
-            if(!targetCell) return;
-            const draggedId = e.dataTransfer.getData("text/plain");
-            const draggedEl = document.getElementById(draggedId);
-            if(!draggedEl) return;
-            const sourceCell = draggedEl.parentElement;
-            if(sourceCell === targetCell) return;
-
-            const findCell = (k, id) => trailerState[k].rows.flat().find(c => c.id === id);
-            const sData = findCell(sourceCell.dataset.key, sourceCell.id);
-            const tData = findCell(targetCell.dataset.key, targetCell.id);
-
-            if(sData && tData) {
-                const temp = sData.t;
-                sData.t = tData.t; tData.t = temp;
-                if(sData.t === undefined) sData.t = null;
-                if(tData.t === undefined) tData.t = null;
-                renderTrailer();
-                saveTrailer();
-            }
+            const target = e.target.closest('.trailer-cell');
+            const dragged = document.getElementById(e.dataTransfer.getData("text/plain"));
+            if(!target || !dragged || dragged.parentElement === target) return;
+            const sKey = dragged.parentElement.dataset.key; const sId = dragged.parentElement.id;
+            const tKey = target.dataset.key; const tId = target.id;
+            const find = (k, i) => trailerState[k].rows.flat().find(c => c.id === i);
+            const sData = find(sKey, sId); const tData = find(tKey, tId);
+            if(sData && tData) { const tmp = sData.t; sData.t = tData.t; tData.t = tmp; if(sData.t===undefined)sData.t=null; if(tData.t===undefined)tData.t=null; renderTrailer(); saveTrailer(); }
         };
-
         window.editCell = (key, id) => {
             if(state.readOnly) return;
-            const newText = prompt("Enter name:");
-            if(newText !== null) {
-                const cell = trailerState[key].rows.flat().find(c => c.id === id);
-                if(cell) { cell.t = newText.trim() === "" ? null : newText; renderTrailer(); saveTrailer(); }
-            }
+            const txt = prompt("Name:");
+            if(txt !== null) { const c = trailerState[key].rows.flat().find(r => r.id === id); if(c) { c.t = txt.trim() === "" ? null : txt; renderTrailer(); saveTrailer(); } }
         };
 
         const timeToMinutes = (str) => { if(!str) return 0; const [h,m]=str.split(':').map(Number); return h*60+m; };
@@ -752,7 +578,6 @@
                         `;
                     }
                     el.className = `relative overflow-hidden rounded-xl border transition-all duration-300 ${isPast ? 'bg-slate-50 border-slate-200 opacity-60 grayscale' : 'bg-white shadow-sm border-slate-200'} ${isActive ? 'ring-2 ring-blue-400 shadow-md transform scale-[1.01]' : ''}`;
-                    
                     if(state.readOnly) { el.querySelectorAll('.admin-only').forEach(b => b.style.display = 'none'); } 
                     else { el.querySelectorAll('.admin-only').forEach(b => b.style.display = ''); }
 
@@ -762,12 +587,8 @@
                     el.querySelector('.val-start').textContent = formatDisplayTime(delayed);
                     
                     const weighInEl = el.querySelector('.val-weighin');
-                    if (hasCox) {
-                        weighInEl.textContent = `Weigh-in: ${formatDisplayTime(weighInMins)}`;
-                        weighInEl.classList.remove('hidden');
-                    } else {
-                        weighInEl.classList.add('hidden');
-                    }
+                    if (hasCox) { weighInEl.textContent = `Weigh-in: ${formatDisplayTime(weighInMins)}`; weighInEl.classList.remove('hidden'); } 
+                    else { weighInEl.classList.add('hidden'); }
                     
                     const startNode = el.querySelector('.val-start');
                     if(state.delay > 0) { startNode.classList.remove('text-slate-800'); startNode.classList.add('text-red-600'); }
@@ -780,123 +601,11 @@
             }
         }
 
-        const initAuth = async () => { 
-            try { 
-                await signInAnonymously(auth); 
-            } catch(e) { 
-                console.error(e);
-                els.submitBtn.textContent = "Connection Failed (Retry)";
-                els.submitBtn.disabled = false; 
-                els.submitBtn.onclick = (e) => {
-                    e.preventDefault();
-                    els.submitBtn.textContent = "Connecting...";
-                    els.submitBtn.disabled = true;
-                    initAuth();
-                };
-            } 
-        };
-        initAuth();
-
-        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer;
-
-        onAuthStateChanged(auth, (u) => {
-            state.user = u;
-            if(u) {
-                els.submitBtn.textContent = "Add to Schedule";
-                els.submitBtn.disabled = false;
-                els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
-                lucide.createIcons();
-            } else {
-                els.submitBtn.textContent = "Offline";
-                els.submitBtn.disabled = true;
-                els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
-                lucide.createIcons();
-            }
-        });
-
-        function setupListeners() {
-            if(unsubscribeEvents) unsubscribeEvents();
-            if(unsubscribeConfig) unsubscribeConfig();
-            if(unsubscribeTrailer) unsubscribeTrailer();
-
-            state.events = [];
-            previousDelay = null;
-            render();
-
-            unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => {
-                state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                render();
-            });
-
-            unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
-                if(snap.exists()) {
-                    const d = snap.data();
-                    if(d.delay !== undefined) {
-                        triggerNotification(d.delay, previousDelay);
-                        previousDelay = d.delay;
-                        state.delay = d.delay;
-                    }
-                    if(d.settings) state.settings = d.settings;
-                    document.getElementById('input-offset').value = state.settings.onWaterOffset;
-                    document.getElementById('input-warmup').value = state.settings.warmUpDuration;
-                    render();
-                } else {
-                    state.delay = 0;
-                    previousDelay = 0;
-                    render();
-                }
-            });
-
-            unsubscribeTrailer = onSnapshot(getTrailerRef(), (snap) => {
-                if(snap.exists()) {
-                    const rawLayout = snap.data().layout;
-                    trailerState = typeof rawLayout === 'string' ? JSON.parse(rawLayout) : rawLayout;
-                    localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
-                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
-                } else {
-                    trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
-                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
-                }
-            });
-        }
-
-        els.weatherWidget.select.onchange = (e) => { state.locationKey = e.target.value; localStorage.setItem('regatta_location', e.target.value); els.weatherWidget.temp.textContent = "--"; fetchWeather(); };
-        
-        els.filterCoach.onchange = (e) => {
-            state.filterCoach = e.target.value;
-            render();
-        };
-
-        document.getElementById('btn-join-group').onclick = () => { const code = document.getElementById('input-group-code').value.trim().toLowerCase(); if(code !== state.groupCode) { enterApp(code, false); } };
-        window.openModal = (id) => { 
-            const ev = state.events.find(e => e.id === id);
-            if(!ev) return;
-            els.modal.eventNum.textContent = `#${ev.eventNum}`;
-            els.modal.alpha.textContent = ev.alpha || '-';
-            els.modal.crew.textContent = ev.crew;
-            const base = timeToMinutes(ev.originalTime);
-            const delayed = base + state.delay;
-            const onWater = delayed - state.settings.onWaterOffset;
-            const warmUp = onWater - state.settings.warmUpDuration;
-            els.modal.warmup.textContent = formatDisplayTime(warmUp);
-            els.modal.onwater.textContent = formatDisplayTime(onWater);
-            els.modal.start.textContent = formatDisplayTime(delayed);
-            els.modal.cox.textContent = ev.cox || 'Not specified';
-            els.modal.rowers.textContent = ev.rowers || 'Not specified';
-            els.modal.boat.textContent = ev.boat || 'Not specified';
-            els.modal.coach.textContent = ev.coach || 'Not specified';
-            els.modal.el.classList.remove('hidden');
-        };
-        window.closeModal = () => els.modal.el.classList.add('hidden');
-        document.getElementById('btn-toggle-details').onclick = () => document.getElementById('add-details-panel').classList.toggle('hidden');
-        
         document.getElementById('add-event-form').onsubmit = async (e) => {
             e.preventDefault();
             if(!state.user) return;
-            
             els.submitBtn.textContent = "Saving...";
             els.submitBtn.disabled = true;
-            
             const d = {
                 eventNum: document.getElementById('input-event-num').value,
                 alpha: document.getElementById('input-alpha').value,
@@ -907,20 +616,13 @@
                 boat: document.getElementById('input-boat').value,
                 coach: document.getElementById('input-coach').value
             };
-            
             try {
                 await addDoc(getEventsRef(), { ...d, eventNum: d.eventNum || 'N/A' });
                 e.target.reset();
                 document.getElementById('add-details-panel').classList.add('hidden');
-            } catch(err) {
-                console.error(err);
-                alert("Failed to save event.");
-            } finally {
-                els.submitBtn.textContent = "Add to Schedule";
-                els.submitBtn.disabled = false;
-            }
+            } catch(err) { console.error(err); alert("Failed to save event."); } 
+            finally { els.submitBtn.textContent = "Add to Schedule"; els.submitBtn.disabled = false; }
         };
-        
         window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
         document.getElementById('btn-delay-plus').onclick = async () => { if(!state.user || state.readOnly) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay + 5), settings: state.settings }, { merge: true }); };
         document.getElementById('btn-delay-minus').onclick = async () => { if(!state.user || state.readOnly) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay - 5), settings: state.settings }, { merge: true }); };
@@ -933,7 +635,7 @@
         document.getElementById('input-offset').onchange = updateSettings;
         document.getElementById('input-warmup').onchange = updateSettings;
         document.getElementById('btn-clear').onclick = async () => {
-            if(!state.user || !confirm("Delete all events?")) return;
+            if(!state.user || !confirm("Delete all?")) return;
             const batch = writeBatch(db);
             state.events.forEach(ev => batch.delete(doc(getEventsRef(), ev.id)));
             batch.set(getConfigRef(), { delay: 0, settings: state.settings });
@@ -953,7 +655,6 @@
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                     let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
-                    
                     if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; d.coach=cols[7]; }
                     else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
                     else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
@@ -962,8 +663,7 @@
                     else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
                     if(d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
                 });
-                if(count > 0) await batch.commit();
-                else alert("No valid rows found.");
+                if(count > 0) await batch.commit(); else alert("No valid rows found.");
             };
             r.readAsText(file);
             e.target.value = null;
@@ -979,11 +679,7 @@
             if(!state.user) return;
             const batch = writeBatch(db);
             const ref = getEventsRef();
-            const d = [
-                { eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl', coach: 'Steve' }, 
-                { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise', coach: 'Mike' }, 
-                { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager', coach: 'Steve' }
-            ];
+            const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl', coach: 'Steve' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise', coach: 'Mike' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager', coach: 'Steve' }];
             d.forEach(i => batch.set(doc(ref), i));
             await batch.commit();
         };
