@@ -147,8 +147,18 @@
 
     <!-- VIEW 1: REGATTA PROGRAMME -->
     <div id="view-regatta" class="max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in">
-        <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
+            <div class="flex items-center gap-3">
+                <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
+                <div class="relative">
+                    <select id="filter-coach" class="appearance-none bg-white border border-slate-300 text-slate-700 py-1 pl-3 pr-8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Coaches</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                    </div>
+                </div>
+            </div>
             <div class="text-sm text-slate-500" id="status-summary">Loading...</div>
         </div>
 
@@ -183,7 +193,8 @@
                     <div id="add-details-panel" class="hidden grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                         <input type="text" id="input-cox" placeholder="Coxswain Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                         <input type="text" id="input-rowers" placeholder="Rowers" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                        <input type="text" id="input-boat" placeholder="Boat Name" class="col-span-2 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="input-boat" placeholder="Boat Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="input-coach" placeholder="Coach Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">Connecting...</button>
                 </form>
@@ -258,6 +269,7 @@
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="anchor" class="w-3 h-3"></i> Boat</div><div id="modal-boat" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="user" class="w-3 h-3"></i> Coach</div><div id="modal-coach" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                 </div>
             </div>
             <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end"><button onclick="window.closeModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 transition">Close</button></div>
@@ -318,7 +330,7 @@
             }
         };
 
-        let state = { user: null, events: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro' };
+        let state = { user: null, events: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '' };
         let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
         let previousDelay = null; // Track changes
 
@@ -333,8 +345,9 @@
             clockDisplays: document.querySelectorAll('.clock-display'),
             groupBadge: document.getElementById('group-badge'),
             groupInput: document.getElementById('input-group-code'),
+            filterCoach: document.getElementById('filter-coach'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon') },
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat') },
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container')
         };
@@ -364,25 +377,50 @@
             const direction = diff > 0 ? "Increased" : "Decreased";
             const msg = `Delay ${direction} to +${newDelay}m`;
 
-            // 1. Visual Toast
+            // 1. Visual Toast (Always works)
             showToast(`<i class="inline-block mr-2 w-4 h-4" data-lucide="clock"></i> ${msg}`, 'warn');
             lucide.createIcons();
 
-            // 2. Browser Notification
-            if (Notification.permission === 'granted') {
-                new Notification("RegattaMaster Update", { body: msg, icon: 'https://cdn-icons-png.flaticon.com/512/2972/2972123.png' });
+            // 2. Browser Notification (If supported/allowed)
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification("RegattaMaster Update", { body: msg });
+                } catch(e) {
+                    console.log("System notification failed (likely mobile constraint)");
+                }
             }
         };
 
-        document.getElementById('btn-enable-notifications').onclick = () => {
-            Notification.requestPermission().then(perm => {
-                if (perm === 'granted') {
-                    alert("Notifications Enabled! You will be alerted when the delay changes.");
-                    new Notification("Test Notification", { body: "This is how alerts will look." });
+        document.getElementById('btn-enable-notifications').onclick = async () => {
+            if (!('Notification' in window)) {
+                alert("This browser does not support system notifications.");
+                return;
+            }
+
+            // Mobile Hint
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+            if (isIOS && !isStandalone) {
+                alert("On iPhone, you must tap 'Share' -> 'Add to Home Screen' before notifications will work.");
+                return;
+            }
+
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    try {
+                        new Notification("RegattaMaster", { body: "Notifications enabled!" });
+                        alert("Success! You will be notified of delay changes.");
+                    } catch(e) {
+                        alert("Permission granted, but your phone blocked the test popup. (Try adding to Home Screen).");
+                    }
                 } else {
-                    alert("Notifications denied. Please enable them in your browser settings.");
+                    alert("Notifications denied. Please check your phone settings for this browser.");
                 }
-            });
+            } catch (e) {
+                alert("Error enabling notifications.");
+            }
         };
 
         const fetchWeather = async () => {
@@ -517,13 +555,38 @@
 
             els.delayDisplay.textContent = `+${state.delay}m`;
             els.delayDisplay.className = state.delay > 0 ? "min-w-[3.5rem] text-center font-mono text-xl font-bold text-red-400 border-b-2 border-red-500/50" : "min-w-[3.5rem] text-center font-mono text-xl font-bold text-slate-200";
-            els.statusSummary.textContent = `${state.events.length} Events | ${state.delay > 0 ? `Delayed ${state.delay}m` : 'On Time'}`;
+            
+            // Populate Coach Filter
+            const allCoaches = [...new Set(state.events.map(ev => ev.coach).filter(Boolean))].sort();
+            const currentSelection = els.filterCoach.value;
+            
+            let optionsHTML = '<option value="">All Coaches</option>';
+            allCoaches.forEach(c => {
+                optionsHTML += `<option value="${c}" ${c === state.filterCoach ? 'selected' : ''}>${c}</option>`;
+            });
+            // Only update innerHTML if options changed to prevent focus loss/reset issues
+            if(els.filterCoach.innerHTML !== optionsHTML) {
+                els.filterCoach.innerHTML = optionsHTML;
+            }
 
-            if (state.events.length === 0) { els.eventsContainer.innerHTML = ''; els.emptyState.classList.remove('hidden'); }
+            // Filter Events
+            let displayEvents = state.events;
+            if(state.filterCoach) {
+                displayEvents = displayEvents.filter(ev => ev.coach === state.filterCoach);
+            }
+
+            els.statusSummary.textContent = `${displayEvents.length} Events | ${state.delay > 0 ? `Delayed ${state.delay}m` : 'On Time'}`;
+
+            if (displayEvents.length === 0) { 
+                els.eventsContainer.innerHTML = ''; 
+                els.emptyState.classList.remove('hidden'); 
+                if(state.events.length > 0) els.emptyState.querySelector('p').textContent = "No events for this coach";
+                else els.emptyState.querySelector('p').textContent = "No events scheduled";
+            }
             else {
                 els.emptyState.classList.add('hidden');
                 const currentMins = timeToMinutes(`${state.currentTime.getHours()}:${state.currentTime.getMinutes()}`);
-                const sortedEvents = [...state.events].sort((a,b) => timeToMinutes(a.originalTime) - timeToMinutes(b.originalTime));
+                const sortedEvents = [...displayEvents].sort((a,b) => timeToMinutes(a.originalTime) - timeToMinutes(b.originalTime));
                 
                 const fragment = document.createDocumentFragment();
                 sortedEvents.forEach(ev => {
@@ -650,6 +713,13 @@
 
         // Global Handlers
         els.weatherWidget.select.onchange = (e) => { state.locationKey = e.target.value; localStorage.setItem('regatta_location', e.target.value); els.weatherWidget.temp.textContent = "--"; fetchWeather(); };
+        
+        // Filter Handler
+        els.filterCoach.onchange = (e) => {
+            state.filterCoach = e.target.value;
+            render();
+        };
+
         document.getElementById('btn-join-group').onclick = () => { const code = document.getElementById('input-group-code').value.trim().toLowerCase(); if(code !== state.groupCode) { state.groupCode = code; localStorage.setItem('regatta_group_code', code); setupListeners(); } };
         window.openModal = (id) => { 
             const ev = state.events.find(e => e.id === id);
@@ -667,6 +737,7 @@
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
             els.modal.boat.textContent = ev.boat || 'Not specified';
+            els.modal.coach.textContent = ev.coach || 'Not specified';
             els.modal.el.classList.remove('hidden');
         };
         window.closeModal = () => els.modal.el.classList.add('hidden');
@@ -681,7 +752,8 @@
                 originalTime: document.getElementById('input-time').value,
                 cox: document.getElementById('input-cox').value,
                 rowers: document.getElementById('input-rowers').value,
-                boat: document.getElementById('input-boat').value
+                boat: document.getElementById('input-boat').value,
+                coach: document.getElementById('input-coach').value
             };
             await addDoc(getEventsRef(), { ...d, eventNum: d.eventNum || 'N/A' });
             e.target.reset();
@@ -718,9 +790,10 @@
                     if(!line.trim()) return;
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
-                    let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'' };
+                    let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
                     
-                    if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
+                    if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; d.coach=cols[7]; }
+                    else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
                     else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
                     else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
                     else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
@@ -734,7 +807,7 @@
             e.target.value = null;
         };
         document.getElementById('btn-template').onclick = () => {
-            const content = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers,Boat Name\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2...,The Black Pearl";
+            const content = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers,Boat Name,Coach\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2...,The Black Pearl,Coach Steve";
             const link = document.createElement("a");
             link.href = URL.createObjectURL(new Blob([content], { type: 'text/csv;charset=utf-8;' }));
             link.download = "regatta_template.csv";
@@ -744,7 +817,11 @@
             if(!state.user) return;
             const batch = writeBatch(db);
             const ref = getEventsRef();
-            const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager' }];
+            const d = [
+                { eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl', coach: 'Steve' }, 
+                { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise', coach: 'Mike' }, 
+                { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager', coach: 'Steve' }
+            ];
             d.forEach(i => batch.set(doc(ref), i));
             await batch.commit();
         };
