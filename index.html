@@ -27,9 +27,60 @@
             background-image: none; text-align: center; text-align-last: center;
         }
         select.weather-select::-ms-expand { display: none; }
+        
+        /* Trailer Grid Styles */
+        .trailer-cell {
+            border: 1px solid #e2e8f0;
+            padding: 2px;
+            text-align: center;
+            font-size: 0.875rem;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            transition: background-color 0.2s;
+            cursor: pointer; /* Indicates clickable/editable */
+        }
+        .trailer-cell.drag-over {
+            background-color: #eff6ff; /* blue-50 */
+            border: 2px dashed #3b82f6;
+        }
+        /* Header styling used only for labels like 'tent' now */
+        .trailer-label {
+            background-color: #f8fafc;
+            font-weight: bold;
+            color: #64748b;
+        }
+        .trailer-section-title {
+            background-color: #1e293b;
+            color: white;
+            font-weight: bold;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        
+        /* Draggable Item */
+        .boat-card {
+            cursor: grab;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        .boat-card:active {
+            cursor: grabbing;
+        }
+        .boat-card.dragging {
+            opacity: 0.5;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans pb-20">
+<body class="bg-slate-50 text-slate-900 font-sans pb-24">
 
     <!-- Sticky Header -->
     <div class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-700">
@@ -108,8 +159,8 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <!-- VIEW 1: REGATTA PROGRAMME -->
+    <div id="view-regatta" class="max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in">
 
         <!-- Controls Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -227,6 +278,35 @@
 
     </div>
 
+    <!-- VIEW 2: TRAILER DIAGRAM -->
+    <div id="view-trailer" class="hidden max-w-6xl mx-auto px-4 py-6 fade-in pb-20">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading
+            </h2>
+            <button onclick="resetTrailer()" class="text-xs text-red-500 hover:underline">Reset Layout</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="trailer-container">
+            <!-- Trailer grids injected via JS -->
+        </div>
+    </div>
+
+    <!-- Fixed Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-50 pb-safe">
+        <div class="flex justify-around items-center max-w-6xl mx-auto">
+            <button onclick="window.switchView('regatta')" id="nav-regatta" class="flex-1 py-3 flex flex-col items-center gap-1 text-blue-600 border-t-2 border-blue-600 bg-blue-50/50 transition-colors">
+                <i data-lucide="list" class="w-6 h-6"></i>
+                <span class="text-xs font-bold">Programme</span>
+            </button>
+            <button onclick="window.switchView('trailer')" id="nav-trailer" class="flex-1 py-3 flex flex-col items-center gap-1 text-slate-400 border-t-2 border-transparent hover:bg-slate-50 hover:text-slate-600 transition-colors">
+                <i data-lucide="truck" class="w-6 h-6"></i>
+                <span class="text-xs font-bold">Trailer</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Crew Details Modal -->
     <div id="crew-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100">
@@ -313,11 +393,41 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- Locations Data ---
+        // --- Constants ---
         const LOCATIONS = {
             karapiro: { name: 'Karapiro', lat: -37.9265, lon: 175.5435 },
             bluelake: { name: 'Blue Lake', lat: -38.196, lon: 176.327 },
             ruataniwha: { name: 'Ruataniwha', lat: -44.218, lon: 170.086 }
+        };
+
+        // UPDATED: Header rows are now standard draggable content cells
+        const INITIAL_TRAILER = {
+            bc: {
+                title: "BC Trailer",
+                rows: [
+                    // UPDATED: 4 standard cells for the top row
+                    [{t:"Red", id:"bc-h1"}, {id:"bc-h2"}, {t:"Wairoa", id:"bc-h3"}, {id:"bc-h4"}],
+                    [{t:"Lee", id:"bc-1"}, {t:"Peggy", id:"bc-2"}, {t:"Peter", id:"bc-3"}, {t:"Kopu", id:"bc-4"}],
+                    [{t:"Snowdrop", id:"bc-5"}, {t:"Bean", id:"bc-6"}, {t:"Te Poi", id:"bc-7"}, {t:"Wetini", id:"bc-8"}],
+                    [{id:"bc-9"}, {id:"bc-10"}, {id:"bc-11"}, {id:"bc-12"}],
+                    [{id:"bc-13"}, {id:"bc-14"}, {id:"bc-15"}, {id:"bc-16"}],
+                    [{t:"Sweep Riggers", bg:"bg-slate-50", span:2, font:"font-semibold", id:"bc-rig1"}, {id:"bc-17"}, {id:"bc-18"}],
+                    [{t:"Beth", id:"bc-19"}, {t:"Riggers", font:"font-semibold", id:"bc-rig2"}, {id:"bc-20"}, {id:"bc-21"}],
+                    [{t:"Wairoa", id:"bc-22"}, {id:"bc-23"}, {id:"bc-24"}, {id:"bc-25"}]
+                ]
+            },
+            otc: {
+                title: "OTC Trailer",
+                rows: [
+                    [{t:"Beth", id:"otc-h1"}, {t:"Taki", id:"otc-h2"}, {t:"Nick", id:"otc-h3"}, {t:"Albie", id:"otc-h4"}],
+                    [{id:"otc-1"}, {t:"Trudy", id:"otc-2"}, {t:"Aat", id:"otc-3"}, {t:"Kati", id:"otc-4"}],
+                    [{id:"otc-5"}, {id:"otc-6"}, {id:"otc-7"}, {id:"otc-8"}],
+                    [{t:"tent", font:"font-bold text-slate-600", id:"otc-9"}, {t:"Wairoa End", id:"otc-10"}, {t:"Red End", id:"otc-11"}, {t:"Tent", font:"font-bold text-slate-600", id:"otc-12"}],
+                    [{id:"otc-13"}, {id:"otc-14"}, {id:"otc-15"}, {id:"otc-16"}],
+                    [{id:"otc-17"}, {id:"otc-18"}, {t:"Sweep", bg:"bg-slate-50", font:"font-semibold", id:"otc-19"}, {id:"otc-20"}],
+                    [{id:"otc-21"}, {t:"Oars", bg:"bg-slate-50", font:"font-semibold", id:"otc-22"}, {t:"All 8", bg:"bg-slate-50", font:"font-semibold", id:"otc-23"}, {id:"otc-24"}]
+                ]
+            }
         };
 
         // --- State ---
@@ -331,6 +441,8 @@
             weather: { temp: null, wind: null, dir: null, code: null },
             locationKey: localStorage.getItem('regatta_location') || 'karapiro'
         };
+
+        let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
 
         // --- DOM Elements ---
         const els = {
@@ -377,6 +489,33 @@
                 return doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main');
             } else {
                 return doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
+            }
+        };
+
+        // --- Navigation Logic ---
+        window.switchView = (view) => {
+            const regattaView = document.getElementById('view-regatta');
+            const trailerView = document.getElementById('view-trailer');
+            const navRegatta = document.getElementById('nav-regatta');
+            const navTrailer = document.getElementById('nav-trailer');
+
+            if (view === 'regatta') {
+                regattaView.classList.remove('hidden');
+                trailerView.classList.add('hidden');
+                
+                navRegatta.className = "flex-1 py-3 flex flex-col items-center gap-1 text-blue-600 border-t-2 border-blue-600 bg-blue-50/50 transition-colors";
+                navTrailer.className = "flex-1 py-3 flex flex-col items-center gap-1 text-slate-400 border-t-2 border-transparent hover:bg-slate-50 hover:text-slate-600 transition-colors";
+            } else {
+                regattaView.classList.add('hidden');
+                trailerView.classList.remove('hidden');
+                
+                navTrailer.className = "flex-1 py-3 flex flex-col items-center gap-1 text-blue-600 border-t-2 border-blue-600 bg-blue-50/50 transition-colors";
+                navRegatta.className = "flex-1 py-3 flex flex-col items-center gap-1 text-slate-400 border-t-2 border-transparent hover:bg-slate-50 hover:text-slate-600 transition-colors";
+                
+                // Initialize Trailer if empty
+                if(document.getElementById('trailer-container').children.length === 0) {
+                    renderTrailer();
+                }
             }
         };
 
@@ -429,7 +568,144 @@
             els.weatherWidget.select.value = state.locationKey;
         };
 
-        // --- Rendering & Logic ---
+        // --- Trailer Logic & Handlers ---
+        window.resetTrailer = () => {
+            if(confirm("Reset trailer layout to default?")) {
+                trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
+                localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
+                renderTrailer();
+            }
+        };
+
+        const renderTrailer = () => {
+            const container = document.getElementById('trailer-container');
+            container.innerHTML = '';
+
+            ['bc', 'otc'].forEach(key => {
+                const section = trailerState[key];
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-lg shadow-sm overflow-hidden border border-slate-200";
+                
+                let html = `<div class="trailer-section-title">${section.title}</div><div class="grid grid-cols-4">`;
+                
+                section.rows.forEach(row => {
+                    row.forEach(cell => {
+                        const span = cell.span ? `col-span-${cell.span}` : 'col-span-1';
+                        const bg = cell.bg || 'bg-white';
+                        const font = cell.font || '';
+                        
+                        if(cell.h) {
+                            // Header cells (if any remain)
+                            html += `<div class="${span} trailer-header py-2 border-r border-slate-200 last:border-r-0">${cell.t}</div>`;
+                        } else {
+                            // Content Cell (Droppable)
+                            // FIX: Moved ondblclick to the parent wrapper div to ensure clicks work on empty cells
+                            const content = cell.t 
+                                ? `<div class="boat-card" draggable="true" ondragstart="dragStart(event)" id="item-${cell.id}">${cell.t}</div>`
+                                : ``;
+
+                            html += `
+                                <div id="${cell.id}" 
+                                     class="${span} trailer-cell ${bg} ${font}" 
+                                     ondragover="dragOver(event)" 
+                                     ondrop="drop(event)"
+                                     ondblclick="editCell('${key}', '${cell.id}')"
+                                     data-key="${key}">
+                                    ${content}
+                                </div>`;
+                        }
+                    });
+                });
+                
+                html += `</div>`;
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        };
+
+        window.dragStart = (e) => {
+            e.dataTransfer.setData("text/plain", e.target.id);
+            e.dataTransfer.effectAllowed = "move";
+            setTimeout(() => e.target.classList.add('dragging'), 0);
+        };
+
+        window.dragOver = (e) => {
+            e.preventDefault();
+            const cell = e.target.closest('.trailer-cell');
+            if(cell) {
+                cell.classList.add('drag-over');
+                e.dataTransfer.dropEffect = "move";
+            }
+        };
+
+        document.addEventListener('dragend', (e) => {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.trailer-cell').forEach(c => c.classList.remove('drag-over'));
+        });
+        
+        document.addEventListener('dragleave', (e) => {
+             if(e.target.classList && e.target.classList.contains('trailer-cell')) {
+                 e.target.classList.remove('drag-over');
+             }
+        });
+
+        window.drop = (e) => {
+            e.preventDefault();
+            const targetCell = e.target.closest('.trailer-cell');
+            document.querySelectorAll('.trailer-cell').forEach(c => c.classList.remove('drag-over'));
+
+            if (!targetCell) return;
+
+            const draggedId = e.dataTransfer.getData("text/plain");
+            const draggedEl = document.getElementById(draggedId);
+            if (!draggedEl) return;
+
+            const sourceCell = draggedEl.parentElement;
+            
+            if (sourceCell === targetCell) return;
+
+            const sourceKey = sourceCell.dataset.key;
+            const sourceId = sourceCell.id;
+            const targetKey = targetCell.dataset.key;
+            const targetId = targetCell.id;
+
+            const findCellData = (key, id) => {
+                for (let row of trailerState[key].rows) {
+                    const c = row.find(x => x.id === id);
+                    if(c) return c;
+                }
+                return null;
+            };
+
+            const sData = findCellData(sourceKey, sourceId);
+            const tData = findCellData(targetKey, targetId);
+
+            if(sData && tData) {
+                const temp = sData.t;
+                sData.t = tData.t; 
+                tData.t = temp;
+
+                localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
+                renderTrailer();
+            }
+        };
+
+        window.editCell = (key, id) => {
+            const newText = prompt("Enter boat/item name (or leave empty to clear):");
+            if(newText !== null) {
+                for(let row of trailerState[key].rows) {
+                    const c = row.find(x => x.id === id);
+                    if(c) {
+                        c.t = newText.trim() === "" ? undefined : newText;
+                        break;
+                    }
+                }
+                localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
+                renderTrailer();
+            }
+        };
+
+        // --- Regatta Rendering & Logic ---
         const timeToMinutes = (str) => { if(!str) return 0; const [h, m] = str.split(':').map(Number); return h * 60 + m; };
         const minutesToTime = (total) => { let m = total % 60; let h = Math.floor(total / 60); if (h >= 24) h %= 24; if (h < 0) h = 24 + (h % 24); return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
         const formatDisplayTime = (mins) => {
@@ -499,8 +775,7 @@
                             <!-- Main Clickable Area -->
                             <div onclick="window.openModal('${ev.id}')" class="p-4 grid grid-cols-2 md:grid-cols-12 gap-4 items-center cursor-pointer hover:bg-slate-50 transition-colors">
                                 
-                                <!-- MOBILE LAYOUT (md:hidden) -->
-                                <!-- This spans the full width of the mobile grid (2 cols) -->
+                                <!-- MOBILE LAYOUT -->
                                 <div class="col-span-2 md:hidden flex items-start gap-3 pointer-events-none">
                                     <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
                                     <div class="bg-slate-50 text-slate-500 border border-slate-200 px-2 py-1 rounded text-sm font-mono font-bold ${!ev.alpha ? 'hidden' : ''}">${ev.alpha || '-'}</div>
@@ -510,53 +785,41 @@
                                     </div>
                                 </div>
                                 
-                                <!-- DESKTOP LAYOUT (hidden md:block) -->
-                                
-                                <!-- Event # (Col 1) -->
+                                <!-- DESKTOP LAYOUT -->
                                 <div class="col-span-1 hidden md:block pointer-events-none">
                                     <div class="bg-slate-100 text-slate-600 font-bold px-1 py-1 rounded text-sm text-center">#${ev.eventNum}</div>
                                 </div>
-                                
-                                <!-- Alpha (Col 2) -->
                                 <div class="col-span-1 hidden md:block text-center pointer-events-none">
                                     <div class="text-slate-500 font-mono font-bold text-sm">${ev.alpha || ''}</div>
                                 </div>
-                                
-                                <!-- Crew Name (Col 3-5) -->
                                 <div class="col-span-3 hidden md:block pointer-events-none">
                                     <div class="font-bold text-slate-800 text-base leading-tight">${ev.crew}</div>
                                     <div class="original-time text-xs text-red-500 font-medium mt-1 hidden">Original: ${ev.originalTime}</div>
                                 </div>
 
-                                <!-- Times (Shared placement logic, adjusted spans) -->
-                                <!-- Warmup (Col 6-7 on Desktop) -->
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none">
                                     <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
                                     <div class="val-warmup text-slate-600 font-mono text-sm"></div>
                                 </div>
                                 
-                                <!-- On Water (Col 8-9 on Desktop) -->
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none">
                                     <span class="md:hidden text-xs text-blue-400 uppercase font-bold mb-1">On Water By</span>
                                     <div class="val-onwater text-blue-700 font-bold font-mono text-lg md:text-xl"></div>
                                     <div class="text-[10px] text-slate-400 hidden md:block">-${state.settings.onWaterOffset} min</div>
                                 </div>
                                 
-                                <!-- Start Time (Col 10-11 on Desktop) -->
                                 <div class="col-span-2 md:col-span-2 flex flex-row md:flex-col justify-between md:items-end items-center border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 pointer-events-none">
                                     <span class="md:hidden text-sm font-bold text-slate-700">Race Start</span>
                                     <div class="val-start text-xl font-bold font-mono text-slate-800"></div>
                                 </div>
                             </div>
 
-                            <!-- Delete Button (Absolute, outside grid flow) -->
+                            <!-- Delete Button -->
                             <div class="absolute right-4 top-1/2 transform -translate-y-1/2 md:block hidden">
                                 <button onclick="window.deleteEvent(event, '${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition z-10 relative">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
-                            
-                            <!-- Mobile Delete Button (Inside grid flow for layout ease?) -->
                              <div class="absolute right-4 top-4 md:hidden">
                                 <button onclick="window.deleteEvent(event, '${ev.id}')" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition z-10 relative">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -682,7 +945,7 @@
             });
         }
 
-        // --- Interaction ---
+        // --- Interaction Listeners ---
 
         els.weatherWidget.select.onchange = (e) => {
             const newLoc = e.target.value;
@@ -710,7 +973,6 @@
             els.modal.alpha.textContent = ev.alpha || '-';
             els.modal.crew.textContent = ev.crew;
             
-            // Times
             const baseMins = timeToMinutes(ev.originalTime);
             const delayedMins = baseMins + state.delay;
             const onWaterMins = delayedMins - state.settings.onWaterOffset;
@@ -720,7 +982,6 @@
             els.modal.onwater.textContent = formatDisplayTime(onWaterMins);
             els.modal.start.textContent = formatDisplayTime(delayedMins);
             
-            // Details
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
             
@@ -731,7 +992,6 @@
             els.modal.el.classList.add('hidden');
         };
 
-        // Add Details Toggle
         document.getElementById('btn-toggle-details').onclick = () => {
             const panel = document.getElementById('add-details-panel');
             panel.classList.toggle('hidden');
@@ -756,12 +1016,11 @@
                 rowers: rowers || ''
             });
             e.target.reset();
-            // keep details hidden default for next
             document.getElementById('add-details-panel').classList.add('hidden');
         };
 
         window.deleteEvent = async (e, id) => {
-            e.stopPropagation(); // Stop opening modal
+            e.stopPropagation(); 
             if(!state.user) return;
             if(confirm("Delete this event?")) {
                 await deleteDoc(doc(getEventsRef(), id));
@@ -809,24 +1068,16 @@
                 lines.forEach((line, idx) => {
                     if(!line.trim()) return;
                     
-                    // FIXED: Use Regex to split by comma ONLY if not inside quotes
-                    // This allows "Smith, John" to be treated as one column
                     const rawCols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    
-                    // Clean up: trim whitespace and remove surrounding quotes if present
                     const cols = rawCols.map(c => c.trim().replace(/^"|"$/g, ''));
 
                     if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                     
                     let eventNum='', alpha='', crew='', time='', cox='', rowers='';
                     
-                    // 6 Cols: Event, Alpha, Crew, Time, Cox, Rowers
                     if(cols.length >= 6) { eventNum=cols[0]; alpha=cols[1]; crew=cols[2]; time=cols[3]; cox=cols[4]; rowers=cols[5]; }
-                    // 4 Cols: Event, Alpha, Crew, Time
                     else if(cols.length >= 4) { eventNum=cols[0]; alpha=cols[1]; crew=cols[2]; time=cols[3]; }
-                    // 3 Cols: Event, Crew, Time
                     else if(cols.length === 3) { eventNum=cols[0]; crew=cols[1]; time=cols[2]; }
-                    // 2 Cols: Crew, Time
                     else if(cols.length === 2) { crew=cols[0]; time=cols[1]; }
 
                     if(time && time.match(/\d{1,2}:\d{2}/)) {
