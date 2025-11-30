@@ -253,6 +253,9 @@
                     <div><div class="text-[10px] uppercase text-slate-400 font-bold">Start</div><div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div></div>
                 </div>
                 <div class="space-y-3">
+                    <!-- Added Progression Field -->
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="git-merge" class="w-3 h-3"></i> Progression</div><div id="modal-progression" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200 italic">-</div></div>
+                    
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="anchor" class="w-3 h-3"></i> Boat</div><div id="modal-boat" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
@@ -324,7 +327,8 @@
             groupInput: document.getElementById('input-group-code'),
             filterCoach: document.getElementById('filter-coach'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach') },
+            // Added progression to modal elements
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container')
         };
@@ -523,7 +527,11 @@
 
         // --- Coach Filter Update Logic ---
         function updateCoachDropdown() {
-            const allCoaches = [...new Set(state.events.map(ev => ev.coach).filter(Boolean))].sort();
+            // Split coach strings by comma to handle multiple coaches (Coach 1, Coach 2)
+            const allCoaches = [...new Set(state.events.flatMap(ev => 
+                ev.coach ? ev.coach.split(',').map(c => c.trim()) : []
+            ).filter(Boolean))].sort();
+            
             const currentOptions = Array.from(els.filterCoach.options).map(o => o.value).filter(v => v);
             
             // If options list matches, don't rebuild (prevents sticky UI)
@@ -554,7 +562,12 @@
             // Filter Events for Display
             let displayEvents = state.events;
             if(state.filterCoach) {
-                displayEvents = displayEvents.filter(ev => ev.coach === state.filterCoach);
+                // Check if the selected coach is one of the coaches listed for this event
+                displayEvents = displayEvents.filter(ev => {
+                    if (!ev.coach) return false;
+                    const coaches = ev.coach.split(',').map(c => c.trim());
+                    return coaches.includes(state.filterCoach);
+                });
             }
 
             els.statusSummary.textContent = `${displayEvents.length} Events | ${state.delay > 0 ? `Delayed ${state.delay}m` : 'On Time'}`;
@@ -739,6 +752,8 @@
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
             els.modal.boat.textContent = ev.boat || 'Not specified';
             els.modal.coach.textContent = ev.coach || 'Not specified';
+            // Populate Progression
+            els.modal.progression.textContent = ev.progression || 'None/Final';
             els.modal.el.classList.remove('hidden');
         };
         window.closeModal = () => els.modal.el.classList.add('hidden');
@@ -769,24 +784,82 @@
             if(!file || !state.user) return;
             const r = new FileReader();
             r.onload = async (evt) => {
-                const lines = evt.target.result.split('\n');
+                const text = evt.target.result;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                
                 const batch = writeBatch(db);
                 const ref = getEventsRef();
                 let count = 0;
-                lines.forEach((line, idx) => {
-                    if(!line.trim()) return;
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
-                    let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
-                    if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; d.coach=cols[7]; }
-                    else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
-                    else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
-                    else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
-                    else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
-                    else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
-                    if(d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
-                });
-                if(count > 0) await batch.commit(); else alert("No valid rows found.");
+
+                // 1. Check for Specific Regatta Format (Race,Day,Time...)
+                let headerIndex = -1;
+                let isRegattaFormat = false;
+
+                // Scan first few lines to find the specific header
+                for(let i=0; i<Math.min(10, lines.length); i++) {
+                    if(lines[i].toLowerCase().startsWith('race,day,time')) {
+                        headerIndex = i;
+                        isRegattaFormat = true;
+                        break;
+                    }
+                }
+
+                if (isRegattaFormat) {
+                    // Process specific regatta file
+                    for (let i = headerIndex + 1; i < lines.length; i++) {
+                        const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                        if (cols.length < 10) continue; 
+
+                        // Mapping based on your file structure
+                        // Col 0: Race, Col 2: Time, Col 3: Event#, Col 4: EventCode, Col 6: Progression, Col 8: Lane, Col 11: Rowers, Col 12: Cox, Col 13: Coach1, Col 14: Coach2
+                        let d = {
+                            eventNum: cols[3],       // Event Number (Col 3)
+                            alpha: cols[8],          // Lane (Mapped to Alpha)
+                            crew: cols[4],           // Event Name
+                            originalTime: cols[2],   // Time
+                            progression: cols[6] || '', // Progression
+                            cox: cols[12] || '',     
+                            rowers: cols[11] || '',
+                            // Combine Coach 1 and Coach 2
+                            coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
+                            boat: cols[24] || ''     // Boat Class/Name
+                        };
+
+                        if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) {
+                            batch.set(doc(ref), d);
+                            count++;
+                        }
+                    }
+                } else {
+                    // 2. Fallback to Generic Simple CSV
+                    lines.forEach((line, idx) => {
+                        if(!line.trim()) return;
+                        const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                        if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
+                        
+                        let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
+                        
+                        // Heuristic mapping for simple CSVs
+                        if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; d.coach=cols[7]; }
+                        else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
+                        else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
+                        else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
+                        else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
+                        else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
+                        
+                        if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { 
+                            batch.set(doc(ref), d); 
+                            count++; 
+                        }
+                    });
+                }
+
+                if(count > 0) {
+                    await batch.commit();
+                    alert(`Successfully imported ${count} events.`);
+                } else {
+                    alert("No valid rows found. Please check the CSV format.");
+                }
             };
             r.readAsText(file);
             e.target.value = null;
