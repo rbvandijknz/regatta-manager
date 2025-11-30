@@ -85,11 +85,11 @@
         
         <!-- Sticky Header -->
         <div class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-700">
-            <div class="max-w-6xl mx-auto px-4 py-3">
-                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div class="max-w-7xl mx-auto px-4 py-3">
+                <div class="flex flex-col xl:flex-row items-center justify-between gap-4 relative">
                     
-                    <!-- Brand -->
-                    <div class="flex items-center justify-between">
+                    <!-- Brand (Left) -->
+                    <div class="flex items-center justify-between w-full xl:w-auto z-10">
                         <div class="flex items-center gap-3">
                             <svg class="text-yellow-500 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>
                             <h1 class="text-2xl font-bold tracking-tight flex items-center h-full pt-1">RegattaMaster</h1>
@@ -100,11 +100,16 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="xl:hidden font-mono text-xl text-blue-300 clock-display">00:00</div>
                     </div>
 
-                    <!-- Widgets -->
-                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+                    <!-- CENTERED CLOCK -->
+                    <div class="xl:absolute xl:left-1/2 xl:-translate-x-1/2 flex flex-col items-center justify-center z-0 my-2 xl:my-0">
+                        <div class="font-mono text-4xl xl:text-5xl font-bold text-blue-400 tracking-widest leading-none clock-display drop-shadow-md">00:00</div>
+                        <div class="text-[10px] text-slate-400 uppercase tracking-[0.2em] mt-1 font-bold">Official Time</div>
+                    </div>
+
+                    <!-- Widgets (Right) -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto z-10">
                         
                         <!-- Updated Weather Widget with Wind Direction -->
                         <div id="weather-widget" class="h-12 flex items-center gap-3 bg-slate-800/80 px-4 rounded-lg border border-slate-700 text-slate-300 text-sm w-full sm:w-auto min-w-[280px] justify-between shadow-sm">
@@ -143,7 +148,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="hidden xl:block font-mono text-3xl text-blue-300 font-semibold w-32 text-right clock-display">00:00</div>
                 </div>
             </div>
         </div>
@@ -177,63 +181,43 @@
                 <p class="text-lg font-medium">No events scheduled</p>
             </div>
 
-            <!-- Admin Controls -->
+            <!-- Admin Controls (Add Event Form REMOVED as requested) -->
             <div class="pt-8 border-t border-slate-200">
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Admin Controls</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <form id="add-event-form" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="play-circle" class="w-4 h-4"></i> Add Event</h3>
-                            <button type="button" id="btn-toggle-details" class="text-xs text-blue-600 hover:text-blue-800 font-medium">+ Details</button>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input type="text" id="input-event-num" placeholder="Ev #" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
-                            <input type="text" id="input-alpha" placeholder="Alpha" class="w-full sm:w-16 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="input-crew" placeholder="Crew Name" class="w-full sm:flex-1 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
-                            <input type="time" id="input-time" class="w-full sm:w-auto p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" required>
-                        </div>
-                        <div id="add-details-panel" class="hidden grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-                            <input type="text" id="input-cox" placeholder="Coxswain Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="input-rowers" placeholder="Rowers" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="input-boat" placeholder="Boat Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="input-coach" placeholder="Coach Name" class="col-span-1 p-2 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <button type="submit" id="btn-submit" disabled class="bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">Connecting...</button>
-                    </form>
-
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4"></i> Tools</h3>
-                            <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline">Config</button>
-                        </div>
-                        <div id="config-panel" class="hidden mb-4 space-y-4 border-b border-slate-100 pb-4">
-                            <div class="bg-blue-50 p-3 rounded border border-blue-100">
-                                <div class="text-xs font-bold text-blue-700 uppercase mb-1">Shared Regatta Code</div>
-                                <div class="flex gap-2">
-                                    <input type="text" id="input-group-code" placeholder="e.g. baycoast" class="flex-1 p-1 text-sm border rounded">
-                                    <button id="btn-join-group" class="bg-blue-600 text-white text-xs px-3 rounded font-medium hover:bg-blue-700">Join</button>
-                                </div>
-                                <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Configuration & Tools</h3>
+                
+                <!-- Expanded Tools Panel to fill space -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-slate-700 flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4"></i> Settings</h3>
+                        <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline">Config</button>
+                    </div>
+                    <div id="config-panel" class="hidden mb-4 space-y-4 border-b border-slate-100 pb-4">
+                        <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                            <div class="text-xs font-bold text-blue-700 uppercase mb-1">Shared Regatta Code</div>
+                            <div class="flex gap-2">
+                                <input type="text" id="input-group-code" placeholder="e.g. baycoast" class="flex-1 p-1 text-sm border rounded">
+                                <button id="btn-join-group" class="bg-blue-600 text-white text-xs px-3 rounded font-medium hover:bg-blue-700">Join</button>
                             </div>
-                            <!-- New Notification Button -->
-                            <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
-                                <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full">
-                                    <i data-lucide="bell" class="w-4 h-4"></i> Enable Alerts
-                                </button>
-                            </div>
-                            <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
-                                <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
-                                <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
-                            </div>
+                            <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 mt-2">
-                            <label class="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded cursor-pointer transition text-sm font-medium border border-blue-200"><i data-lucide="upload" class="w-4 h-4"></i> Upload CSV<input type="file" id="input-csv" accept=".csv" class="hidden"></label>
-                            <button id="btn-template" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200"><i data-lucide="download" class="w-4 h-4"></i> Get Template</button>
-                            <button id="btn-demo" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200">Demo Data</button>
-                            <button id="btn-clear" class="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 rounded transition border border-red-100" title="Clear All"><i data-lucide="trash-2" class="w-4 h-4"></i> Clear</button>
-                            <button onclick="window.switchView('trailer')" class="col-span-2 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200 mt-1"><i data-lucide="truck" class="w-4 h-4"></i> View Trailer Plan</button>
+                        <!-- Notification Button -->
+                        <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
+                            <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full">
+                                <i data-lucide="bell" class="w-4 h-4"></i> Enable Alerts
+                            </button>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
+                            <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
+                            <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
                         </div>
                     </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                        <label class="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded cursor-pointer transition text-sm font-medium border border-blue-200"><i data-lucide="upload" class="w-4 h-4"></i> Upload CSV<input type="file" id="input-csv" accept=".csv" class="hidden"></label>
+                        <button id="btn-template" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200"><i data-lucide="download" class="w-4 h-4"></i> Template</button>
+                        <button id="btn-demo" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-sm font-medium transition border border-slate-200">Demo Data</button>
+                        <button id="btn-clear" class="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 rounded transition border border-red-100" title="Clear All"><i data-lucide="trash-2" class="w-4 h-4"></i> Clear</button>
+                    </div>
+                    <button onclick="window.switchView('trailer')" class="w-full flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200 mt-2"><i data-lucide="truck" class="w-4 h-4"></i> View Trailer Plan</button>
                 </div>
             </div>
         </div>
@@ -334,7 +318,6 @@
             delayDisplay: document.getElementById('delay-display'),
             statusSummary: document.getElementById('status-summary'),
             connectionBtn: document.getElementById('connection-btn'),
-            submitBtn: document.getElementById('btn-submit'),
             configPanel: document.getElementById('config-panel'),
             clockDisplays: document.querySelectorAll('.clock-display'),
             groupBadge: document.getElementById('group-badge'),
@@ -559,7 +542,7 @@
 
         // --- Main Render Loop ---
         function render() {
-            const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             els.clockDisplays.forEach(el => el.textContent = timeStr);
             
             if(state.groupCode) { els.groupBadge.textContent = state.groupCode; els.groupBadge.classList.remove('hidden'); } 
@@ -660,8 +643,7 @@
         onAuthStateChanged(auth, (u) => {
             state.user = u;
             if(u) {
-                els.submitBtn.textContent = "Add to Schedule";
-                els.submitBtn.disabled = false;
+                // Connection status update
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
                 lucide.createIcons();
                 if(state.groupCode) els.groupInput.value = state.groupCode;
@@ -670,8 +652,6 @@
                 fetchWeather();
                 setInterval(fetchWeather, 900000);
             } else {
-                els.submitBtn.textContent = "Offline - Check Connection";
-                els.submitBtn.disabled = true;
                 els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
                 lucide.createIcons();
             }
@@ -762,43 +742,14 @@
             els.modal.el.classList.remove('hidden');
         };
         window.closeModal = () => els.modal.el.classList.add('hidden');
-        document.getElementById('btn-toggle-details').onclick = () => document.getElementById('add-details-panel').classList.toggle('hidden');
+        document.getElementById('btn-toggle-config').onclick = () => els.configPanel.classList.toggle('hidden');
         
-        document.getElementById('add-event-form').onsubmit = async (e) => {
-            e.preventDefault();
-            if(!state.user) return;
-            
-            els.submitBtn.textContent = "Saving...";
-            els.submitBtn.disabled = true;
-            
-            const d = {
-                eventNum: document.getElementById('input-event-num').value,
-                alpha: document.getElementById('input-alpha').value,
-                crew: document.getElementById('input-crew').value,
-                originalTime: document.getElementById('input-time').value,
-                cox: document.getElementById('input-cox').value,
-                rowers: document.getElementById('input-rowers').value,
-                boat: document.getElementById('input-boat').value,
-                coach: document.getElementById('input-coach').value
-            };
-            
-            try {
-                await addDoc(getEventsRef(), { ...d, eventNum: d.eventNum || 'N/A' });
-                e.target.reset();
-                document.getElementById('add-details-panel').classList.add('hidden');
-            } catch(err) {
-                console.error(err);
-                alert("Failed to save event.");
-            } finally {
-                els.submitBtn.textContent = "Add to Schedule";
-                els.submitBtn.disabled = false;
-            }
-        };
+        // Manual Add Event form handler REMOVED as requested.
         
         window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
         document.getElementById('btn-delay-plus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay + 5), settings: state.settings }, { merge: true }); };
         document.getElementById('btn-delay-minus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay - 5), settings: state.settings }, { merge: true }); };
-        document.getElementById('btn-toggle-config').onclick = () => els.configPanel.classList.toggle('hidden');
+        
         const updateSettings = async () => {
             if(!state.user) return;
             const s = { onWaterOffset: Number(document.getElementById('input-offset').value), warmUpDuration: Number(document.getElementById('input-warmup').value) };
