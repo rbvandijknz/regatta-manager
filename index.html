@@ -812,6 +812,21 @@
                         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                         if (cols.length < 10) continue; 
 
+                        // Determine Progression
+                        let rawProgression = cols[6] || '';
+                        let computedProgression = rawProgression;
+                        
+                        if (!computedProgression.trim()) {
+                            // If progression is empty, combine Division (Col 7) and Round (Col 5)
+                            const round = cols[5] || '';
+                            const division = cols[7] || '';
+                            if(round) {
+                                // Capitalize Round (e.g. final -> Final)
+                                const fmtRound = round.charAt(0).toUpperCase() + round.slice(1);
+                                computedProgression = division ? `${division} ${fmtRound}` : fmtRound;
+                            }
+                        }
+
                         // Mapping based on your file structure
                         // Col 0: Race, Col 2: Time, Col 3: Event#, Col 4: EventCode, Col 6: Progression, Col 8: Lane, Col 11: Rowers, Col 12: Cox, Col 13: Coach1, Col 14: Coach2
                         let d = {
@@ -819,7 +834,7 @@
                             alpha: cols[8],          // Lane (Mapped to Alpha)
                             crew: cols[4],           // Event Name
                             originalTime: cols[2],   // Time
-                            progression: cols[6] || '', // Progression
+                            progression: computedProgression, // Calculated Progression
                             cox: cols[12] || '',     
                             rowers: cols[11] || '',
                             // Combine Coach 1 and Coach 2
