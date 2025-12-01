@@ -207,8 +207,9 @@
                         <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline font-medium">Config</button>
                     </div>
                     
-                    <!-- HIDDEN CONFIG PANEL (Requires Code) -->
-                    <div id="config-panel" class="hidden mb-4 space-y-4 border-b border-slate-100 pb-4">
+                    <!-- VISIBLE TOOLS (No Code Required) -->
+                    <div class="mb-4 space-y-2">
+                         <!-- Group Code -->
                         <div class="bg-blue-50 p-3 rounded border border-blue-100">
                             <div class="text-xs font-bold text-blue-700 uppercase mb-1">Shared Regatta Code</div>
                             <div class="flex gap-2">
@@ -217,12 +218,17 @@
                             </div>
                             <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                         </div>
+                        
                         <!-- Notification Button -->
                         <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
                             <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full">
                                 <i data-lucide="bell" class="w-4 h-4"></i> Enable Alerts
                             </button>
                         </div>
+                    </div>
+
+                    <!-- HIDDEN CONFIG PANEL (Requires Code) -->
+                    <div id="config-panel" class="hidden mb-4 space-y-4 border-t border-slate-100 pt-4">
                         <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
                             <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
                             <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
@@ -842,7 +848,7 @@
         
         // PASSCODE PROTECTION for Config
         document.getElementById('btn-toggle-config').onclick = () => {
-            const panel = els.configPanel;
+            const panel = document.getElementById('config-panel');
             if (panel.classList.contains('hidden')) {
                 // Try to open
                 const code = prompt("Enter Admin Passcode:");
