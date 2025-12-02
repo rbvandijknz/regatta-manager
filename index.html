@@ -230,8 +230,14 @@
                     <!-- HIDDEN CONFIG PANEL (Requires Code) -->
                     <div id="config-panel" class="hidden mb-4 space-y-4 border-t border-slate-100 pt-4">
                         <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
+                            <div class="font-bold text-slate-600 uppercase text-xs mb-2">Settings</div>
                             <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
                             <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
+                            <!-- Passcode Change Field -->
+                            <div class="flex justify-between items-center mt-2 border-t border-slate-200 pt-2">
+                                <span>Admin Passcode:</span>
+                                <input type="text" id="input-admin-passcode" placeholder="Default: 1992" class="w-32 p-1 border rounded text-center text-xs">
+                            </div>
                         </div>
                         
                         <!-- RACE PROGRAMME DATA TOOLS -->
@@ -383,7 +389,7 @@
             }
         };
 
-        let state = { user: null, events: [], crews: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '' };
+        let state = { user: null, events: [], crews: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
         let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
         let previousDelay = null;
 
@@ -893,6 +899,10 @@
             unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
                 if(snap.exists()) {
                     const d = snap.data();
+                    // Load Passcode
+                    state.configPasscode = d.passcode;
+                    document.getElementById('input-admin-passcode').value = d.passcode || '';
+
                     if(d.delay !== undefined) {
                         triggerNotification(d.delay, previousDelay);
                         previousDelay = d.delay;
@@ -905,6 +915,7 @@
                 } else {
                     state.delay = 0;
                     previousDelay = 0;
+                    state.configPasscode = null;
                     render();
                 }
             });
@@ -984,9 +995,10 @@
         document.getElementById('btn-toggle-config').onclick = () => {
             const panel = document.getElementById('config-panel');
             if (panel.classList.contains('hidden')) {
-                // Try to open
+                // Try to open - Check against stored passcode (or default 1992)
+                const storedPass = state.configPasscode || "1992";
                 const code = prompt("Enter Admin Passcode:");
-                if (code === "1992") {
+                if (code === storedPass) {
                     panel.classList.remove('hidden');
                 } else if (code !== null) {
                     alert("Incorrect passcode.");
@@ -998,24 +1010,26 @@
         };
         
         window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
-        document.getElementById('btn-delay-plus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay + 5), settings: state.settings }, { merge: true }); };
-        document.getElementById('btn-delay-minus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay - 5), settings: state.settings }, { merge: true }); };
+        document.getElementById('btn-delay-plus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay + 5), settings: state.settings, passcode: state.configPasscode }, { merge: true }); };
+        document.getElementById('btn-delay-minus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay - 5), settings: state.settings, passcode: state.configPasscode }, { merge: true }); };
         
         const updateSettings = async () => {
             if(!state.user) return;
             const s = { onWaterOffset: Number(document.getElementById('input-offset').value), warmUpDuration: Number(document.getElementById('input-warmup').value) };
-            await setDoc(getConfigRef(), { delay: state.delay, settings: s }, { merge: true });
+            const newPasscode = document.getElementById('input-admin-passcode').value || null;
+            await setDoc(getConfigRef(), { delay: state.delay, settings: s, passcode: newPasscode }, { merge: true });
         };
         document.getElementById('input-offset').onchange = updateSettings;
         document.getElementById('input-warmup').onchange = updateSettings;
-        
+        document.getElementById('input-admin-passcode').onchange = updateSettings;
+
         // Clear Events Handler
         document.getElementById('btn-clear').onclick = async () => {
             if(!state.user || !confirm("Delete all EVENTS from the schedule?")) return;
             const batch = writeBatch(db);
             state.events.forEach(ev => batch.delete(doc(getEventsRef(), ev.id)));
             // Reset delay too
-            batch.set(getConfigRef(), { delay: 0, settings: state.settings });
+            batch.set(getConfigRef(), { delay: 0, settings: state.settings, passcode: state.configPasscode });
             await batch.commit();
         };
 
