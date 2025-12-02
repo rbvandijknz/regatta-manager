@@ -243,8 +243,11 @@
                         </div>
                     </div>
                     
-                    <!-- Visible Button -->
-                    <button onclick="window.switchView('trailer')" class="w-full flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200 mt-2"><i data-lucide="truck" class="w-4 h-4"></i> View Trailer Plan</button>
+                    <!-- Visible Buttons -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                        <button onclick="window.switchView('trailer')" class="flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200"><i data-lucide="truck" class="w-4 h-4"></i> View Trailer Plan</button>
+                        <button onclick="window.switchView('crews')" class="flex items-center justify-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 py-2 rounded text-sm font-medium transition border border-teal-200"><i data-lucide="users" class="w-4 h-4"></i> View Crew List</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -260,6 +263,38 @@
                 <button onclick="resetTrailer()" class="admin-only text-xs text-red-500 hover:underline">Reset Layout</button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="trailer-container"></div>
+        </div>
+
+        <!-- VIEW 3: CREW LIST -->
+        <div id="view-crews" class="hidden max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
+            <div class="flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" class="w-6 h-6 text-slate-600"></i> Crew List</h2>
+                    <!-- Upload specific to Crew List -->
+                    <label class="cursor-pointer text-blue-600 hover:text-blue-800" title="Upload Crew CSV"><i data-lucide="upload-cloud" class="w-5 h-5"></i><input type="file" id="input-crew-csv" accept=".csv" class="hidden"></label>
+                </div>
+                
+                <!-- Crew Filters -->
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-grow">
+                        <select id="filter-crew-athlete" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm font-medium">
+                            <option value="">Find Athlete...</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="crews-container" class="space-y-3">
+                <div class="text-center py-20 text-slate-400">
+                    <i data-lucide="users" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                    <p>No crew data loaded.</p>
+                    <p class="text-xs mt-2">Upload CSV: Event#, EventCode, CrewCode, 2ndEntity, Rowers, Cox</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -338,12 +373,13 @@
             }
         };
 
-        let state = { user: null, events: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '' };
+        let state = { user: null, events: [], crews: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '' };
         let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
         let previousDelay = null;
 
         const els = {
             eventsContainer: document.getElementById('events-container'),
+            crewsContainer: document.getElementById('crews-container'),
             emptyState: document.getElementById('empty-state'),
             delayDisplay: document.getElementById('delay-display'),
             statusSummary: document.getElementById('status-summary'),
@@ -354,6 +390,7 @@
             groupInput: document.getElementById('input-group-code'),
             filterCoach: document.getElementById('filter-coach'),
             filterAthlete: document.getElementById('filter-athlete'),
+            filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
             // Added progression to modal elements
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
@@ -362,6 +399,7 @@
         };
 
         const getEventsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
+        const getCrewsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_crew_list`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_crew_list');
         const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
         const getTrailerRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
 
@@ -604,6 +642,28 @@
             }
         }
 
+        // Update Crew List Filters
+        function updateCrewFilters() {
+            const allAthletes = new Set();
+            state.crews.forEach(crew => {
+                if (crew.rowers) {
+                    crew.rowers.split(',').forEach(r => {
+                        let name = r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '');
+                        if (name) allAthletes.add(name);
+                    });
+                }
+                if (crew.cox && crew.cox.trim()) {
+                    let name = crew.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '');
+                    if(name) allAthletes.add(name);
+                }
+            });
+            const sorted = [...allAthletes].sort();
+            let html = '<option value="">Find Athlete...</option>';
+            sorted.forEach(a => html += `<option value="${a}">${a}</option>`);
+            els.filterCrewAthlete.innerHTML = html;
+            els.filterCrewAthlete.value = state.filterCrewAthlete;
+        }
+
         // --- Main Render Loop ---
         function render() {
             const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -720,11 +780,64 @@
             }
         }
 
+        function renderCrews() {
+            let displayCrews = state.crews;
+            if (state.filterCrewAthlete) {
+                displayCrews = displayCrews.filter(c => {
+                    const term = state.filterCrewAthlete;
+                    // Check rowers
+                    if(c.rowers && c.rowers.split(',').some(r => r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term)) return true;
+                    // Check cox
+                    if(c.cox && c.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term) return true;
+                    return false;
+                });
+            }
+
+            // Sort by Event Num
+            displayCrews.sort((a,b) => {
+                const nA = parseInt(a.eventNum) || 0;
+                const nB = parseInt(b.eventNum) || 0;
+                return nA - nB;
+            });
+
+            if (displayCrews.length === 0) {
+                els.crewsContainer.innerHTML = `
+                    <div class="text-center py-20 text-slate-400">
+                        <i data-lucide="users" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                        <p>${state.crews.length > 0 ? "No crews found for this athlete." : "No crew data loaded."}</p>
+                    </div>`;
+            } else {
+                els.crewsContainer.innerHTML = displayCrews.map(c => `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-start mb-2 border-b border-slate-100 pb-2">
+                            <div>
+                                <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
+                                <span class="font-bold text-slate-800">${c.eventCode}</span>
+                            </div>
+                            <div class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">${c.crewCode}</div>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span class="text-slate-700 leading-relaxed">${c.rowers || 'No rowers listed'}</span>
+                            </div>
+                            ${c.cox ? `
+                            <div class="flex gap-2">
+                                <i data-lucide="megaphone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span class="text-slate-700 font-medium">${c.cox} (Cox)</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
         // --- Listeners ---
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
         initAuth();
 
-        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer;
+        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer, unsubscribeCrews;
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
@@ -747,16 +860,24 @@
             if(unsubscribeEvents) unsubscribeEvents();
             if(unsubscribeConfig) unsubscribeConfig();
             if(unsubscribeTrailer) unsubscribeTrailer();
+            if(unsubscribeCrews) unsubscribeCrews();
 
             state.events = [];
+            state.crews = [];
             previousDelay = null;
             // First render to clear/show loading
             render();
 
             unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => {
                 state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                updateFilters(); // Update filters only when data actually changes
+                updateFilters(); 
                 render();
+            });
+
+            unsubscribeCrews = onSnapshot(getCrewsRef(), (snap) => {
+                state.crews = snap.docs.map(d => d.data());
+                updateCrewFilters();
+                if(!document.getElementById('view-crews').classList.contains('hidden')) renderCrews();
             });
 
             unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
@@ -796,7 +917,6 @@
         
         els.filterCoach.onchange = (e) => {
             state.filterCoach = e.target.value;
-            // Clear athlete filter if coach is selected to avoid confusion (or keep both? usually mutually exclusive views)
             if(state.filterCoach) {
                 state.filterAthlete = '';
                 els.filterAthlete.value = '';
@@ -806,13 +926,17 @@
 
         els.filterAthlete.onchange = (e) => {
             state.filterAthlete = e.target.value;
-            // Clear coach filter if athlete is selected
             if(state.filterAthlete) {
                 state.filterCoach = '';
                 els.filterCoach.value = '';
             }
             render();
         };
+
+        els.filterCrewAthlete.onchange = (e) => {
+            state.filterCrewAthlete = e.target.value;
+            renderCrews();
+        }
 
         document.getElementById('btn-join-group').onclick = () => { 
             const code = document.getElementById('input-group-code').value.trim().toLowerCase(); 
@@ -863,8 +987,6 @@
             }
         };
         
-        // Manual Add Event form handler REMOVED as requested.
-        
         window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
         document.getElementById('btn-delay-plus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay + 5), settings: state.settings }, { merge: true }); };
         document.getElementById('btn-delay-minus').onclick = async () => { if(!state.user) return; await setDoc(getConfigRef(), { delay: Math.max(0, state.delay - 5), settings: state.settings }, { merge: true }); };
@@ -890,16 +1012,11 @@
             r.onload = async (evt) => {
                 const text = evt.target.result;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                
                 const batch = writeBatch(db);
                 const ref = getEventsRef();
                 let count = 0;
-
-                // 1. Check for Specific Regatta Format (Race,Day,Time...)
                 let headerIndex = -1;
                 let isRegattaFormat = false;
-
-                // Scan first few lines to find the specific header
                 for(let i=0; i<Math.min(10, lines.length); i++) {
                     if(lines[i].toLowerCase().startsWith('race,day,time')) {
                         headerIndex = i;
@@ -907,72 +1024,54 @@
                         break;
                     }
                 }
-
                 if (isRegattaFormat) {
-                    // Process specific regatta file
                     for (let i = headerIndex + 1; i < lines.length; i++) {
                         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                         if (cols.length < 10) continue; 
-
-                        // Determine Progression
                         let rawProgression = cols[6] || '';
                         let computedProgression = rawProgression;
-                        
                         if (!computedProgression.trim()) {
-                            // If progression is empty, combine Division (Col 7) and Round (Col 5)
                             const round = cols[5] || '';
                             const division = cols[7] || '';
                             if(round) {
-                                // Capitalize Round (e.g. final -> Final)
                                 const fmtRound = round.charAt(0).toUpperCase() + round.slice(1);
                                 computedProgression = division ? `${division} ${fmtRound}` : fmtRound;
                             }
                         }
-
-                        // Mapping based on your file structure
-                        // Col 0: Race, Col 2: Time, Col 3: Event#, Col 4: EventCode, Col 6: Progression, Col 8: Lane, Col 11: Rowers, Col 12: Cox, Col 13: Coach1, Col 14: Coach2
                         let d = {
-                            eventNum: cols[3],       // Event Number (Col 3)
-                            alpha: cols[8],          // Lane (Mapped to Alpha)
-                            crew: cols[4],           // Event Name
-                            originalTime: cols[2],   // Time
-                            progression: computedProgression, // Calculated Progression
+                            eventNum: cols[3],
+                            alpha: cols[8],
+                            crew: cols[4],
+                            originalTime: cols[2],
+                            progression: computedProgression,
                             cox: cols[12] || '',     
                             rowers: cols[11] || '',
-                            // Combine Coach 1 and Coach 2
                             coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
-                            boat: cols[24] || ''     // Boat Class/Name
+                            boat: cols[24] || ''
                         };
-
                         if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) {
                             batch.set(doc(ref), d);
                             count++;
                         }
                     }
                 } else {
-                    // 2. Fallback to Generic Simple CSV
                     lines.forEach((line, idx) => {
                         if(!line.trim()) return;
                         const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                         if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
-                        
                         let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
-                        
-                        // Heuristic mapping for simple CSVs
                         if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; d.coach=cols[7]; }
                         else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
                         else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
                         else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
                         else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
                         else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
-                        
                         if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { 
                             batch.set(doc(ref), d); 
                             count++; 
                         }
                     });
                 }
-
                 if(count > 0) {
                     await batch.commit();
                     alert(`Successfully imported ${count} events.`);
@@ -983,6 +1082,57 @@
             r.readAsText(file);
             e.target.value = null;
         };
+
+        // NEW: CREW LIST CSV UPLOAD
+        document.getElementById('input-crew-csv').onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file || !state.user) return;
+            const r = new FileReader();
+            r.onload = async (evt) => {
+                const text = evt.target.result;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                const batch = writeBatch(db);
+                const ref = getCrewsRef(); // Use separate collection
+                let count = 0;
+                
+                // Clear existing crews first? Ideally, yes, or overwrite.
+                // For simplicity, we just add. A clear button for crews might be needed later.
+                
+                // Headers: Event#, EventCode, CrewCode, 2ndEntity, Rowers, Cox
+                // Indices: 0, 1, 2, 3, 4, 5
+                
+                lines.forEach((line, idx) => {
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                    // Skip header row if present
+                    if(idx === 0 && (cols[0].includes('Event') || cols[0].includes('#'))) return;
+                    
+                    if (cols.length >= 5) {
+                        const d = {
+                            eventNum: cols[0],
+                            eventCode: cols[1],
+                            crewCode: cols[2],
+                            entity: cols[3],
+                            rowers: cols[4],
+                            cox: cols[5] || ''
+                        };
+                        // Use a composite ID or let Firestore generate one
+                        const docId = `${d.eventNum}_${d.crewCode}`.replace(/\W/g, '_');
+                        batch.set(doc(ref, docId), d);
+                        count++;
+                    }
+                });
+
+                if(count > 0) {
+                    await batch.commit();
+                    alert(`Imported ${count} crews successfully.`);
+                } else {
+                    alert("No valid crew rows found.");
+                }
+            };
+            r.readAsText(file);
+            e.target.value = null;
+        };
+
         document.getElementById('btn-template').onclick = () => {
             const content = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers,Boat Name,Coach\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2...,The Black Pearl,Coach Steve";
             const link = document.createElement("a");
@@ -999,8 +1149,19 @@
             await batch.commit();
         };
         window.switchView = (v) => {
-            if(v==='regatta') { document.getElementById('view-regatta').classList.remove('hidden'); document.getElementById('view-trailer').classList.add('hidden'); }
-            else { document.getElementById('view-regatta').classList.add('hidden'); document.getElementById('view-trailer').classList.remove('hidden'); if(document.getElementById('trailer-container').children.length===0) renderTrailer(); }
+            // Hide all views first
+            ['view-regatta', 'view-trailer', 'view-crews'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            // Show selected view
+            if (v === 'regatta') {
+                document.getElementById('view-regatta').classList.remove('hidden');
+            } else if (v === 'trailer') {
+                document.getElementById('view-trailer').classList.remove('hidden');
+                if(document.getElementById('trailer-container').children.length === 0) renderTrailer();
+            } else if (v === 'crews') {
+                document.getElementById('view-crews').classList.remove('hidden');
+                renderCrews(); // Ensure crews are rendered
+            }
         };
 
         setInterval(() => { state.currentTime = new Date(); render(); }, 1000);
