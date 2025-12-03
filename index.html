@@ -110,11 +110,6 @@
                                 <div class="font-mono text-xl sm:text-2xl font-bold text-blue-400 tracking-widest leading-none clock-display drop-shadow-md">00:00</div>
                                 <div class="text-[8px] sm:text-[9px] text-slate-400 uppercase tracking-wider font-bold leading-none mt-0.5">Official Time</div>
                             </div>
-
-                            <!-- MANUAL REFRESH BUTTON (For PWA) -->
-                            <button onclick="window.location.reload()" class="sm:hidden text-slate-400 hover:text-white p-1 ml-2">
-                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                            </button>
                         </div>
                     </div>
 
@@ -158,10 +153,7 @@
                             </div>
                         </div>
                         
-                        <!-- Desktop Refresh Button -->
-                        <button onclick="window.location.reload()" class="hidden sm:block text-slate-500 hover:text-white transition-colors" title="Force Refresh">
-                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                        </button>
+                        <!-- Desktop Refresh Button (Removed Manual Refresh as requested) -->
                     </div>
                 </div>
             </div>
