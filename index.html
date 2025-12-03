@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RegattaMaster</title>
+    <title>CrewCommand</title>
     
     <!-- App Icon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eab308' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>">
@@ -92,7 +92,7 @@
                     <div class="flex items-center justify-between w-full xl:w-auto z-10">
                         <div class="flex items-center gap-2 sm:gap-3">
                             <svg class="text-yellow-500 w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>
-                            <h1 class="text-lg sm:text-2xl font-bold tracking-tight flex items-center h-full pt-1">RegattaMaster</h1>
+                            <h1 class="text-lg sm:text-2xl font-bold tracking-tight flex items-center h-full pt-1">CrewCommand</h1>
                             
                             <!-- Connection & Badge -->
                             <div class="flex items-center ml-1 sm:ml-2 pt-1 border-r border-slate-700 pr-2 sm:pr-4 mr-1 sm:mr-2">
@@ -240,6 +240,24 @@
                             </div>
                         </div>
                         
+                        <!-- NOTICE BOARD ADMIN -->
+                        <div class="p-3 bg-indigo-50 rounded border border-indigo-100">
+                            <div class="text-xs font-bold text-indigo-700 uppercase mb-2">Notice Board Admin</div>
+                            <form id="form-post-notice" class="flex flex-col gap-2">
+                                <input type="text" id="input-notice-title" placeholder="Title (e.g. Delay)" class="p-2 text-sm border rounded" required>
+                                <textarea id="input-notice-msg" placeholder="Message..." class="p-2 text-sm border rounded h-16" required></textarea>
+                                <div class="flex gap-2">
+                                    <select id="input-notice-type" class="p-2 text-sm border rounded bg-white">
+                                        <option value="info">Info (Blue)</option>
+                                        <option value="warn">Warning (Orange)</option>
+                                        <option value="alert">Urgent (Red)</option>
+                                    </select>
+                                    <button type="submit" class="flex-1 bg-indigo-600 text-white text-xs font-bold uppercase rounded hover:bg-indigo-700">Post</button>
+                                </div>
+                            </form>
+                            <button id="btn-clear-notices" class="w-full mt-2 text-xs text-red-500 hover:underline text-center">Clear All Notices</button>
+                        </div>
+
                         <!-- RACE PROGRAMME DATA TOOLS -->
                         <div class="p-3 bg-slate-50 rounded border border-slate-100">
                             <div class="text-xs font-bold text-slate-500 uppercase mb-2">Race Programme Management</div>
@@ -262,9 +280,10 @@
                     </div>
                     
                     <!-- Visible Buttons -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                        <button onclick="window.switchView('trailer')" class="flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200"><i data-lucide="truck" class="w-4 h-4"></i> View Trailer Plan</button>
-                        <button onclick="window.switchView('crews')" class="flex items-center justify-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 py-2 rounded text-sm font-medium transition border border-teal-200"><i data-lucide="users" class="w-4 h-4"></i> View Crew List</button>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                        <button onclick="window.switchView('trailer')" class="flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200"><i data-lucide="truck" class="w-4 h-4"></i> Trailer</button>
+                        <button onclick="window.switchView('crews')" class="flex items-center justify-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 py-2 rounded text-sm font-medium transition border border-teal-200"><i data-lucide="users" class="w-4 h-4"></i> Crew List</button>
+                        <button onclick="window.switchView('notices')" class="flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded text-sm font-medium transition border border-amber-200"><i data-lucide="bell" class="w-4 h-4"></i> Notices</button>
                     </div>
                 </div>
             </div>
@@ -309,6 +328,21 @@
                     <i data-lucide="users" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
                     <p>No crew data loaded.</p>
                     <p class="text-xs mt-2">Go to Config > Crew List Management to upload data.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: NOTICES -->
+        <div id="view-notices" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bell-ring" class="w-6 h-6 text-slate-600"></i> Notice Board</h2>
+            </div>
+            <div id="notices-container" class="space-y-4">
+                <!-- Dynamic Content -->
+                <div class="text-center py-20 text-slate-400">
+                    <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                    <p>No notices posted.</p>
                 </div>
             </div>
         </div>
@@ -389,13 +423,14 @@
             }
         };
 
-        let state = { user: null, events: [], crews: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
+        let state = { user: null, events: [], crews: [], notices: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
         let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
         let previousDelay = null;
 
         const els = {
             eventsContainer: document.getElementById('events-container'),
             crewsContainer: document.getElementById('crews-container'),
+            noticesContainer: document.getElementById('notices-container'),
             emptyState: document.getElementById('empty-state'),
             delayDisplay: document.getElementById('delay-display'),
             statusSummary: document.getElementById('status-summary'),
@@ -416,6 +451,7 @@
 
         const getEventsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
         const getCrewsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_crew_list`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_crew_list');
+        const getNoticesRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_notices`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_notices');
         const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
         const getTrailerRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
 
@@ -449,7 +485,7 @@
             lucide.createIcons();
 
             if ('Notification' in window && Notification.permission === 'granted') {
-                try { new Notification("RegattaMaster Update", { body: msg }); } catch(e) {}
+                try { new Notification("CrewCommand Update", { body: msg }); } catch(e) {}
             }
         };
 
@@ -457,7 +493,7 @@
             if (!('Notification' in window)) return alert("Not supported.");
             try {
                 const p = await Notification.requestPermission();
-                if (p === 'granted') { new Notification("RegattaMaster", { body: "Notifications enabled!" }); alert("Success!"); }
+                if (p === 'granted') { new Notification("CrewCommand", { body: "Notifications enabled!" }); alert("Success!"); }
                 else alert("Denied.");
             } catch (e) { alert("Error"); }
         };
@@ -680,7 +716,7 @@
             els.filterCrewAthlete.value = state.filterCrewAthlete;
         }
 
-        // --- Main Render Loop ---
+        // --- Render Loops ---
         function render() {
             const timeStr = state.currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             els.clockDisplays.forEach(el => el.textContent = timeStr);
@@ -691,10 +727,8 @@
             els.delayDisplay.textContent = `+${state.delay}m`;
             els.delayDisplay.className = state.delay > 0 ? "min-w-[3.5rem] text-center font-mono text-xl font-bold text-red-400 border-b-2 border-red-500/50" : "min-w-[3.5rem] text-center font-mono text-xl font-bold text-slate-200";
             
-            // Filter Events for Display
+            // Filter Events
             let displayEvents = state.events;
-            
-            // Apply Coach Filter
             if(state.filterCoach) {
                 displayEvents = displayEvents.filter(ev => {
                     if (!ev.coach) return false;
@@ -702,17 +736,13 @@
                     return coaches.includes(state.filterCoach);
                 });
             }
-
-            // Apply Athlete Filter
             if(state.filterAthlete) {
                 displayEvents = displayEvents.filter(ev => {
                     const athlete = state.filterAthlete;
-                    // Check Rowers
                     if (ev.rowers) {
                         const rowers = ev.rowers.split(',').map(r => r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, ''));
                         if (rowers.includes(athlete)) return true;
                     }
-                    // Check Cox
                     if (ev.cox) {
                         const cox = ev.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '');
                         if (cox === athlete) return true;
@@ -849,11 +879,57 @@
             lucide.createIcons();
         }
 
+        function renderNotices() {
+            const container = document.getElementById('notices-container');
+            if (state.notices.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-20 text-slate-400">
+                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                        <p>No notices posted.</p>
+                    </div>`;
+            } else {
+                // Sort by time descending
+                const sorted = [...state.notices].sort((a,b) => b.timestamp - a.timestamp);
+                
+                container.innerHTML = sorted.map(n => {
+                    const time = new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    let colors = "bg-white border-slate-200";
+                    let icon = "info";
+                    let iconColor = "text-blue-500";
+                    
+                    if(n.type === 'warn') { 
+                        colors = "bg-orange-50 border-orange-200"; 
+                        icon = "alert-triangle"; 
+                        iconColor = "text-orange-500"; 
+                    }
+                    if(n.type === 'alert') { 
+                        colors = "bg-red-50 border-red-200"; 
+                        icon = "megaphone"; 
+                        iconColor = "text-red-500"; 
+                    }
+
+                    return `
+                        <div class="p-4 rounded-xl border shadow-sm ${colors} flex gap-4">
+                            <div class="shrink-0 mt-1"><i data-lucide="${icon}" class="w-6 h-6 ${iconColor}"></i></div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-bold text-slate-800 text-lg">${n.title}</h3>
+                                    <span class="text-xs font-mono text-slate-500 bg-white/50 px-2 py-1 rounded">${time}</span>
+                                </div>
+                                <p class="text-slate-700 mt-1 whitespace-pre-wrap text-sm leading-relaxed">${n.message}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            lucide.createIcons();
+        }
+
         // --- Listeners ---
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
         initAuth();
 
-        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer, unsubscribeCrews;
+        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer, unsubscribeCrews, unsubscribeNotices;
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
@@ -877,9 +953,11 @@
             if(unsubscribeConfig) unsubscribeConfig();
             if(unsubscribeTrailer) unsubscribeTrailer();
             if(unsubscribeCrews) unsubscribeCrews();
+            if(unsubscribeNotices) unsubscribeNotices();
 
             state.events = [];
             state.crews = [];
+            state.notices = [];
             previousDelay = null;
             // First render to clear/show loading
             render();
@@ -894,6 +972,11 @@
                 state.crews = snap.docs.map(d => d.data());
                 updateCrewFilters();
                 if(!document.getElementById('view-crews').classList.contains('hidden')) renderCrews();
+            });
+
+            unsubscribeNotices = onSnapshot(getNoticesRef(), (snap) => {
+                state.notices = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                if(!document.getElementById('view-notices').classList.contains('hidden')) renderNotices();
             });
 
             unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
@@ -1037,8 +1120,6 @@
         document.getElementById('btn-clear-crews').onclick = async () => {
             if(!state.user || !confirm("Delete all CREW LIST data?")) return;
             const batch = writeBatch(db);
-            // We need query snapshot to get document refs since state.crews doesn't store IDs by default in the listener above (it just maps data)
-            // Let's modify the listener slightly to include ID or re-fetch here.
             // Re-fetching for safety:
             const snapshot = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js').then(mod => mod.getDocs(getCrewsRef()));
             snapshot.forEach(doc => {
@@ -1046,6 +1127,40 @@
             });
             await batch.commit();
             alert("Crew list cleared.");
+        };
+
+        // NEW: NOTICE BOARD HANDLERS
+        document.getElementById('form-post-notice').onsubmit = async (e) => {
+            e.preventDefault();
+            if (!state.user) return;
+            
+            const title = document.getElementById('input-notice-title').value;
+            const msg = document.getElementById('input-notice-msg').value;
+            const type = document.getElementById('input-notice-type').value;
+            
+            if(title && msg) {
+                await addDoc(getNoticesRef(), {
+                    title: title,
+                    message: msg,
+                    type: type,
+                    timestamp: Date.now()
+                });
+                // Reset form
+                document.getElementById('input-notice-title').value = '';
+                document.getElementById('input-notice-msg').value = '';
+                alert("Notice Posted");
+            }
+        };
+
+        document.getElementById('btn-clear-notices').onclick = async () => {
+            if(!state.user || !confirm("Clear ALL notices?")) return;
+            const batch = writeBatch(db);
+            const snapshot = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js').then(mod => mod.getDocs(getNoticesRef()));
+            snapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            alert("Notices cleared.");
         };
 
         document.getElementById('input-csv').onchange = (e) => {
@@ -1190,7 +1305,7 @@
         };
         window.switchView = (v) => {
             // Hide all views first
-            ['view-regatta', 'view-trailer', 'view-crews'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['view-regatta', 'view-trailer', 'view-crews', 'view-notices'].forEach(id => document.getElementById(id).classList.add('hidden'));
             
             // Show selected view
             if (v === 'regatta') {
@@ -1201,6 +1316,9 @@
             } else if (v === 'crews') {
                 document.getElementById('view-crews').classList.remove('hidden');
                 renderCrews(); // Ensure crews are rendered
+            } else if (v === 'notices') {
+                document.getElementById('view-notices').classList.remove('hidden');
+                renderNotices();
             }
         };
 
