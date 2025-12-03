@@ -250,7 +250,7 @@
                                     <select id="input-notice-type" class="p-2 text-sm border rounded bg-white">
                                         <option value="info">Info (Blue)</option>
                                         <option value="warn">Warning (Orange)</option>
-                                        <option value="alert">Urgent (Red)</option>
+                                        <option value="alert">Urgent (Red Popup)</option>
                                     </select>
                                     <button type="submit" class="flex-1 bg-indigo-600 text-white text-xs font-bold uppercase rounded hover:bg-indigo-700">Post</button>
                                 </div>
@@ -378,6 +378,28 @@
         </div>
     </div>
 
+    <!-- Urgent Alert Modal -->
+    <div id="urgent-modal" class="fixed inset-0 z-[110] bg-red-900/90 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-red-500 relative">
+            <div class="bg-red-500 p-4 text-white flex items-center justify-center gap-3">
+                <i data-lucide="siren" class="w-8 h-8 animate-pulse"></i>
+                <h2 class="text-2xl font-black uppercase tracking-widest">Urgent Notice</h2>
+            </div>
+            <div class="p-6 text-center space-y-4">
+                <div>
+                    <h3 id="urgent-title" class="text-xl font-bold text-slate-900 leading-tight"></h3>
+                    <div id="urgent-time" class="text-xs font-mono text-slate-400 mt-1 uppercase tracking-wide"></div>
+                </div>
+                <p id="urgent-message" class="text-lg text-slate-700 font-medium leading-relaxed"></p>
+                <div class="pt-4">
+                    <button id="btn-dismiss-alert" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i> Acknowledge & Dismiss
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
@@ -488,6 +510,33 @@
                 try { new Notification("CrewCommand Update", { body: msg }); } catch(e) {}
             }
         };
+
+        // NEW: Check for Urgent Notices Popup
+        function checkUrgentNotices() {
+            const dismissed = JSON.parse(localStorage.getItem('cc_dismissed_alerts') || '[]');
+            // Filter for type 'alert' and not in dismissed list
+            const alerts = state.notices
+                .filter(n => n.type === 'alert' && !dismissed.includes(n.id))
+                .sort((a,b) => b.timestamp - a.timestamp); // Newest first
+
+            if (alerts.length > 0) {
+                const alert = alerts[0]; // Show newest
+                document.getElementById('urgent-title').textContent = alert.title;
+                document.getElementById('urgent-message').textContent = alert.message;
+                document.getElementById('urgent-time').textContent = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('btn-dismiss-alert').onclick = () => {
+                    dismissed.push(alert.id);
+                    localStorage.setItem('cc_dismissed_alerts', JSON.stringify(dismissed));
+                    document.getElementById('urgent-modal').classList.add('hidden');
+                    // Check again in case there are more
+                    checkUrgentNotices();
+                };
+                document.getElementById('urgent-modal').classList.remove('hidden');
+                lucide.createIcons();
+            } else {
+                document.getElementById('urgent-modal').classList.add('hidden');
+            }
+        }
 
         document.getElementById('btn-enable-notifications').onclick = async () => {
             if (!('Notification' in window)) return alert("Not supported.");
@@ -976,6 +1025,7 @@
 
             unsubscribeNotices = onSnapshot(getNoticesRef(), (snap) => {
                 state.notices = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                checkUrgentNotices(); // Check for popups
                 if(!document.getElementById('view-notices').classList.contains('hidden')) renderNotices();
             });
 
