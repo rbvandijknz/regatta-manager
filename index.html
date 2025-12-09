@@ -152,8 +152,6 @@
                                 <button id="btn-delay-plus" class="admin-only w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded-full text-yellow-400 active:scale-95 transition bg-slate-700/50"><i data-lucide="plus" class="w-4 h-4"></i></button>
                             </div>
                         </div>
-                        
-                        <!-- Desktop Refresh Button (Removed Manual Refresh as requested) -->
                     </div>
                 </div>
             </div>
@@ -224,10 +222,10 @@
                             <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                         </div>
                         
-                        <!-- Notification Button -->
+                        <!-- Notification Button (Smart Toggle) -->
                         <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
-                            <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full">
-                                <i data-lucide="bell" class="w-4 h-4"></i> Enable Alerts
+                            <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full transition-all">
+                                <i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>
                             </button>
                         </div>
                     </div>
@@ -512,7 +510,7 @@
             lucide.createIcons();
 
             if ('Notification' in window && Notification.permission === 'granted') {
-                try { new Notification("CrewCommand Update", { body: msg }); } catch(e) {}
+                try { new Notification("RegattaManager Update", { body: msg }); } catch(e) {}
             }
         };
 
@@ -543,14 +541,52 @@
             }
         }
 
-        document.getElementById('btn-enable-notifications').onclick = async () => {
-            if (!('Notification' in window)) return alert("Not supported.");
-            try {
-                const p = await Notification.requestPermission();
-                if (p === 'granted') { new Notification("CrewCommand", { body: "Notifications enabled!" }); alert("Success!"); }
-                else alert("Denied.");
-            } catch (e) { alert("Error"); }
-        };
+        const btnNotifications = document.getElementById('btn-enable-notifications');
+        
+        // Function to update button state based on permission
+        function updateNotificationButton() {
+            if (!('Notification' in window)) {
+                btnNotifications.classList.add('hidden');
+                return;
+            }
+            
+            if (Notification.permission === 'granted') {
+                btnNotifications.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i> <span class="text-green-700">Test Alert</span>';
+                btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
+                btnNotifications.classList.add('bg-green-50', 'border-green-100');
+                
+                // Update click handler to send test alert
+                btnNotifications.onclick = () => {
+                    new Notification("RegattaManager Test", { 
+                        body: "System notifications are working!", 
+                        icon: "https://via.placeholder.com/128?text=RM"
+                    });
+                    showToast("Test notification sent", "success");
+                };
+            } else if (Notification.permission === 'denied') {
+                btnNotifications.innerHTML = '<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span class="text-red-700">Alerts Blocked</span>';
+                btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
+                btnNotifications.classList.add('bg-red-50', 'border-red-100');
+                btnNotifications.onclick = () => alert("Notifications are blocked in your browser settings. Please enable them manually.");
+            } else {
+                // Default state (ask for permission)
+                btnNotifications.innerHTML = '<i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>';
+                btnNotifications.onclick = async () => {
+                    try {
+                        const p = await Notification.requestPermission();
+                        updateNotificationButton();
+                        if (p === 'granted') { 
+                            new Notification("RegattaManager", { body: "Notifications enabled!" }); 
+                            showToast("Success!", "success");
+                        }
+                    } catch (e) { console.error(e); }
+                };
+            }
+            lucide.createIcons();
+        }
+
+        // Initialize button state on load
+        updateNotificationButton();
 
         // --- Weather ---
         const getWindDir = (d) => ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8];
@@ -913,8 +949,8 @@
                             <div>
                                 <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
                                 <span class="font-bold text-slate-800">${c.eventCode}</span>
+                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.crewCode}</span>
                             </div>
-                            <div class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">${c.crewCode}</div>
                         </div>
                         <div class="space-y-1 text-sm">
                             <div class="flex gap-2">
