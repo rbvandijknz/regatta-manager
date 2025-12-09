@@ -875,11 +875,19 @@
                                 <div class="col-span-2 md:hidden flex items-start gap-3 pointer-events-none">
                                     <div class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">#${ev.eventNum}</div>
                                     <div class="bg-slate-50 text-slate-500 border border-slate-200 px-2 py-1 rounded text-sm font-mono font-bold ${!ev.alpha ? 'hidden' : ''}">${ev.alpha || '-'}</div>
-                                    <div class="flex-1"><div class="font-bold text-slate-800 text-lg leading-tight">${ev.crew}</div></div>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-slate-800 text-lg leading-tight">
+                                            ${ev.crew} <span class="text-sm font-medium text-slate-500">${ev.crewCode ? `(${ev.crewCode})` : ''} ${ev.entity ? `[${ev.entity}]` : ''}</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-span-1 hidden md:block pointer-events-none"><div class="bg-slate-100 text-slate-600 font-bold px-1 py-1 rounded text-sm text-center">#${ev.eventNum}</div></div>
                                 <div class="col-span-1 hidden md:block text-center pointer-events-none"><div class="text-slate-500 font-mono font-bold text-sm">${ev.alpha || ''}</div></div>
-                                <div class="col-span-3 hidden md:block pointer-events-none"><div class="font-bold text-slate-800 text-base leading-tight">${ev.crew}</div></div>
+                                <div class="col-span-3 hidden md:block pointer-events-none">
+                                    <div class="font-bold text-slate-800 text-base leading-tight">
+                                        ${ev.crew} <span class="text-sm font-medium text-slate-500">${ev.crewCode ? `(${ev.crewCode})` : ''}</span>
+                                    </div>
+                                </div>
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none">
                                     <span class="md:hidden text-xs text-slate-400 uppercase font-bold mb-1">Begin Warm Up</span>
                                     <div class="val-warmup text-slate-600 font-mono text-sm"></div>
@@ -949,8 +957,8 @@
                             <div>
                                 <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
                                 <span class="font-bold text-slate-800">${c.eventCode}</span>
-                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.crewCode}</span>
                             </div>
+                            <div class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">${c.crewCode}</div>
                         </div>
                         <div class="space-y-1 text-sm">
                             <div class="flex gap-2">
@@ -965,52 +973,6 @@
                         </div>
                     </div>
                 `).join('');
-            }
-            lucide.createIcons();
-        }
-
-        function renderNotices() {
-            const container = document.getElementById('notices-container');
-            if (state.notices.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-20 text-slate-400">
-                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                        <p>No notices posted.</p>
-                    </div>`;
-            } else {
-                // Sort by time descending
-                const sorted = [...state.notices].sort((a,b) => b.timestamp - a.timestamp);
-                
-                container.innerHTML = sorted.map(n => {
-                    const time = new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    let colors = "bg-white border-slate-200";
-                    let icon = "info";
-                    let iconColor = "text-blue-500";
-                    
-                    if(n.type === 'warn') { 
-                        colors = "bg-orange-50 border-orange-200"; 
-                        icon = "alert-triangle"; 
-                        iconColor = "text-orange-500"; 
-                    }
-                    if(n.type === 'alert') { 
-                        colors = "bg-red-50 border-red-200"; 
-                        icon = "megaphone"; 
-                        iconColor = "text-red-500"; 
-                    }
-
-                    return `
-                        <div class="p-4 rounded-xl border shadow-sm ${colors} flex gap-4">
-                            <div class="shrink-0 mt-1"><i data-lucide="${icon}" class="w-6 h-6 ${iconColor}"></i></div>
-                            <div class="flex-grow">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="font-bold text-slate-800 text-lg">${n.title}</h3>
-                                    <span class="text-xs font-mono text-slate-500 bg-white/50 px-2 py-1 rounded">${time}</span>
-                                </div>
-                                <p class="text-slate-700 mt-1 whitespace-pre-wrap text-sm leading-relaxed">${n.message}</p>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
             }
             lucide.createIcons();
         }
@@ -1296,8 +1258,16 @@
                             cox: cols[12] || '',     
                             rowers: cols[11] || '',
                             coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
-                            boat: cols[24] || ''
+                            boat: cols[24] || '' // The 'Boat' column will actually be used for the CrewCode mapping logic in render() if needed, but per the prompt, we want CrewCode in brackets beside crew name. The CSV logic here maps 'Boat' (col 24) to the 'boat' property. 
+                            // Wait, looking at the previous prompt logic for Regatta Programme:
+                            // We need to capture the CrewCode (BPCC1 etc.) to display it in brackets.
+                            // In the 'Regatta Programme' CSV (first file provided), CrewCode is Column 9 (index 9).
+                            // Let's add that.
                         };
+                        // Add CrewCode specifically for the bracket display
+                        d.crewCode = cols[9] || '';
+                        d.entity = cols[10] || '';
+                        
                         if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) {
                             batch.set(doc(ref), d);
                             count++;
@@ -1347,26 +1317,64 @@
                 // Headers: Event#, EventCode, CrewCode, 2ndEntity, Rowers, Cox
                 // Indices: 0, 1, 2, 3, 4, 5
                 
-                lines.forEach((line, idx) => {
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    // Skip header row if present
-                    if(idx === 0 && (cols[0].includes('Event') || cols[0].includes('#'))) return;
-                    
-                    if (cols.length >= 5) {
+                let headerIndex = -1;
+                let isRegattaFormat = false;
+
+                // Scan first few lines to find the specific header for full CSV
+                for(let i=0; i<Math.min(10, lines.length); i++) {
+                    if(lines[i].toLowerCase().startsWith('race,day,time')) {
+                        headerIndex = i;
+                        isRegattaFormat = true;
+                        break;
+                    }
+                }
+
+                if (isRegattaFormat) {
+                    // Full Regatta Format for Crew List (Race,Day,Time... with 2ndEntity at index 10)
+                    for (let i = headerIndex + 1; i < lines.length; i++) {
+                        const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                         // Mapping based on your full file structure
+                        // Col 3: Event#, Col 4: EventCode, Col 9: CrewCode, Col 10: 2ndEntity, Col 11: Rowers, Col 12: Cox
+                        
+                        if (cols.length < 13) continue;
+
                         const d = {
-                            eventNum: cols[0],
-                            eventCode: cols[1],
-                            crewCode: cols[2],
-                            entity: cols[3],
-                            rowers: cols[4],
-                            cox: cols[5] || ''
+                            eventNum: cols[3],
+                            eventCode: cols[4],
+                            crewCode: cols[9],
+                            entity: cols[10], // 2ndEntity
+                            rowers: cols[11],
+                            cox: cols[12] || ''
                         };
-                        // Use a composite ID or let Firestore generate one
-                        const docId = `${d.eventNum}_${d.crewCode}`.replace(/\W/g, '_');
+                         // Use a composite ID or let Firestore generate one
+                        const docId = `${d.eventNum}_${d.crewCode}_${d.entity || 'x'}`.replace(/[^a-zA-Z0-9]/g, '_');
                         batch.set(doc(ref, docId), d);
                         count++;
                     }
-                });
+
+                } else {
+                    // Fallback to simple format if needed
+                    lines.forEach((line, idx) => {
+                        const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                        // Skip header row if present
+                        if(idx === 0 && (cols[0].includes('Event') || cols[0].includes('#'))) return;
+                        
+                        if (cols.length >= 5) {
+                            const d = {
+                                eventNum: cols[0],
+                                eventCode: cols[1],
+                                crewCode: cols[2],
+                                entity: cols[3],
+                                rowers: cols[4],
+                                cox: cols[5] || ''
+                            };
+                            // Use a composite ID or let Firestore generate one
+                            const docId = `${d.eventNum}_${d.crewCode}`.replace(/\W/g, '_');
+                            batch.set(doc(ref, docId), d);
+                            count++;
+                        }
+                    });
+                }
 
                 if(count > 0) {
                     await batch.commit();
