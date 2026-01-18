@@ -569,6 +569,13 @@
             els.weatherWidget.select.value = state.locationKey;
         };
 
+        window.editCell = (key, id) => {
+            const newText = prompt("Enter name:");
+            if(newText !== null) {
+                // Feature removed
+            }
+        };
+
         // --- Filter Update Logic ---
         function updateFilters() {
             // Update Coach Dropdown
@@ -1268,11 +1275,14 @@
         };
         window.switchView = (v) => {
             // Hide all views first
-            ['view-regatta', 'view-crews', 'view-notices'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['view-regatta', 'view-trailer', 'view-crews', 'view-notices'].forEach(id => document.getElementById(id).classList.add('hidden'));
             
             // Show selected view
             if (v === 'regatta') {
                 document.getElementById('view-regatta').classList.remove('hidden');
+            } else if (v === 'trailer') {
+                document.getElementById('view-trailer').classList.remove('hidden');
+                // if(document.getElementById('trailer-container').children.length === 0) renderTrailer(); // REMOVED as trailer code is gone
             } else if (v === 'crews') {
                 document.getElementById('view-crews').classList.remove('hidden');
                 renderCrews(); // Ensure crews are rendered
