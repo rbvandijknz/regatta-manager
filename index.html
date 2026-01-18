@@ -168,7 +168,7 @@
                 <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                     <!-- Coach Filter -->
                     <div class="relative flex-grow sm:flex-grow-0">
-                        <select id="filter-coach" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
+                        <select id="filter-coach" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
                             <option value="">Coach: All</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
@@ -178,7 +178,7 @@
 
                     <!-- Athlete Filter -->
                     <div class="relative flex-grow sm:flex-grow-0">
-                        <select id="filter-athlete" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
+                        <select id="filter-athlete" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
                             <option value="">Athlete: All</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
@@ -283,26 +283,12 @@
                     </div>
                     
                     <!-- Visible Buttons -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
-                        <button onclick="window.switchView('trailer')" class="flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded text-sm font-medium transition border border-indigo-200"><i data-lucide="truck" class="w-4 h-4"></i> Trailer</button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                         <button onclick="window.switchView('crews')" class="flex items-center justify-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 py-2 rounded text-sm font-medium transition border border-teal-200"><i data-lucide="users" class="w-4 h-4"></i> Crew List</button>
                         <button onclick="window.switchView('notices')" class="flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded text-sm font-medium transition border border-amber-200"><i data-lucide="bell" class="w-4 h-4"></i> Notices</button>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- VIEW 2: TRAILER DIAGRAM -->
-        <div id="view-trailer" class="hidden max-w-6xl mx-auto px-4 py-6 fade-in pb-20">
-            <div class="flex justify-between items-center mb-6">
-                <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
-                <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="truck" class="w-6 h-6 text-slate-600"></i> Trailer Loading</h2>
-                    <span id="trailer-status" class="text-xs font-medium text-slate-400 italic transition-opacity opacity-0">Saved</span>
-                </div>
-                <button onclick="resetTrailer()" class="admin-only text-xs text-red-500 hover:underline">Reset Layout</button>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="trailer-container"></div>
         </div>
 
         <!-- VIEW 3: CREW LIST -->
@@ -420,36 +406,7 @@
             ruataniwha: { name: 'Ruataniwha', lat: -44.218, lon: 170.086, bearing: 0 }
         };
 
-        const INITIAL_TRAILER = {
-            bc: {
-                title: "BC Trailer",
-                rows: [
-                    [{t:"Red", id:"bc-h1"}, {id:"bc-h2"}, {t:"Wairoa", id:"bc-h3"}, {id:"bc-h4"}],
-                    [{t:"Lee", id:"bc-1"}, {t:"Peggy", id:"bc-2"}, {t:"Peter", id:"bc-3"}, {t:"Kopu", id:"bc-4"}],
-                    [{t:"Snowdrop", id:"bc-5"}, {t:"Bean", id:"bc-6"}, {t:"Te Poi", id:"bc-7"}, {t:"Wetini", id:"bc-8"}],
-                    [{id:"bc-9"}, {id:"bc-10"}, {id:"bc-11"}, {id:"bc-12"}],
-                    [{id:"bc-13"}, {id:"bc-14"}, {id:"bc-15"}, {id:"bc-16"}],
-                    [{t:"Sweep Riggers", bg:"bg-slate-50", span:2, font:"font-semibold", id:"bc-rig1"}, {id:"bc-17"}, {id:"bc-18"}],
-                    [{t:"Beth", id:"bc-19"}, {t:"Riggers", font:"font-semibold", id:"bc-rig2"}, {id:"bc-20"}, {id:"bc-21"}],
-                    [{t:"Wairoa", id:"bc-22"}, {id:"bc-23"}, {id:"bc-24"}, {id:"bc-25"}]
-                ]
-            },
-            otc: {
-                title: "OTC Trailer",
-                rows: [
-                    [{t:"Beth", id:"otc-h1"}, {t:"Taki", id:"otc-h2"}, {t:"Nick", id:"otc-h3"}, {t:"Albie", id:"otc-h4"}],
-                    [{id:"otc-1"}, {t:"Trudy", id:"otc-2"}, {t:"Aat", id:"otc-3"}, {t:"Kati", id:"otc-4"}],
-                    [{id:"otc-5"}, {id:"otc-6"}, {id:"otc-7"}, {id:"otc-8"}],
-                    [{t:"tent", font:"font-bold text-slate-600", id:"otc-9"}, {t:"Wairoa End", id:"otc-10"}, {t:"Red End", id:"otc-11"}, {t:"Tent", font:"font-bold text-slate-600", id:"otc-12"}],
-                    [{id:"otc-13"}, {id:"otc-14"}, {id:"otc-15"}, {id:"otc-16"}],
-                    [{id:"otc-17"}, {id:"otc-18"}, {t:"Sweep", bg:"bg-slate-50", font:"font-semibold", id:"otc-19"}, {id:"otc-20"}],
-                    [{id:"otc-21"}, {t:"Oars", bg:"bg-slate-50", font:"font-semibold", id:"otc-22"}, {t:"All 8", bg:"bg-slate-50", font:"font-semibold", id:"otc-23"}, {id:"otc-24"}]
-                ]
-            }
-        };
-
         let state = { user: null, events: [], crews: [], notices: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
-        let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || JSON.parse(JSON.stringify(INITIAL_TRAILER));
         let previousDelay = null;
 
         const els = {
@@ -478,7 +435,6 @@
         const getCrewsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_crew_list`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_crew_list');
         const getNoticesRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_notices`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_notices');
         const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
-        const getTrailerRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_trailer`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'trailer_config', 'main');
 
         // --- Helper Functions ---
         const timeToMinutes = (str) => { if(!str) return 0; const [h,m]=str.split(':').map(Number); return h*60+m; };
@@ -634,91 +590,6 @@
                 lucide.createIcons();
             }
             els.weatherWidget.select.value = state.locationKey;
-        };
-
-        // --- Trailer Logic ---
-        const saveTrailer = async () => {
-            if(!state.user) return;
-            els.saveStatus.textContent = "Saving...";
-            els.saveStatus.classList.remove('opacity-0', 'text-green-500');
-            els.saveStatus.classList.add('text-slate-400');
-            const cleanState = JSON.parse(JSON.stringify(trailerState, (k, v) => v === undefined ? null : v));
-            localStorage.setItem('regatta_trailer_layout', JSON.stringify(cleanState));
-            try { 
-                await setDoc(getTrailerRef(), { layout: JSON.stringify(cleanState) }, { merge: true }); 
-                els.saveStatus.textContent = "Saved";
-                els.saveStatus.classList.replace('text-slate-400', 'text-green-500');
-                setTimeout(() => els.saveStatus.classList.add('opacity-0'), 2000);
-            } catch(e) { 
-                console.error("Save failed", e); 
-                els.saveStatus.textContent = "Error saving";
-                els.saveStatus.classList.replace('text-slate-400', 'text-red-500');
-            }
-        };
-
-        window.resetTrailer = () => {
-            if(confirm("Reset trailer layout to default?")) {
-                trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
-                renderTrailer();
-                saveTrailer();
-            }
-        };
-
-        const renderTrailer = () => {
-            const container = document.getElementById('trailer-container');
-            container.innerHTML = '';
-            ['bc', 'otc'].forEach(key => {
-                const section = trailerState[key];
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-lg shadow-sm overflow-hidden border border-slate-200";
-                let html = `<div class="trailer-section-title">${section.title}</div><div class="grid grid-cols-4">`;
-                section.rows.forEach(row => {
-                    row.forEach(cell => {
-                        const span = cell.span ? `col-span-${cell.span}` : 'col-span-1';
-                        const bg = cell.bg || 'bg-white';
-                        const font = cell.font || '';
-                        if(cell.h) {
-                            html += `<div class="${span} trailer-header py-2 border-r border-slate-200 last:border-r-0">${cell.t}</div>`;
-                        } else {
-                            const content = cell.t ? `<div class="boat-card" draggable="true" ondragstart="dragStart(event)" ondblclick="event.stopPropagation(); editCell('${key}', '${cell.id}')" id="item-${cell.id}">${cell.t}</div>` : ``;
-                            html += `<div id="${cell.id}" class="${span} trailer-cell ${bg} ${font}" ondragover="dragOver(event)" ondrop="drop(event)" ondblclick="editCell('${key}', '${cell.id}')" data-key="${key}">${content}</div>`;
-                        }
-                    });
-                });
-                html += `</div>`;
-                card.innerHTML = html;
-                container.appendChild(card);
-            });
-        };
-
-        window.dragStart = (e) => { e.dataTransfer.setData("text/plain", e.target.id); setTimeout(() => e.target.classList.add('dragging'), 0); };
-        window.dragOver = (e) => { e.preventDefault(); e.target.closest('.trailer-cell')?.classList.add('drag-over'); };
-        document.addEventListener('dragend', (e) => { e.target.classList.remove('dragging'); document.querySelectorAll('.trailer-cell').forEach(c => c.classList.remove('drag-over')); });
-        document.addEventListener('dragleave', (e) => e.target.classList?.remove('drag-over'));
-
-        window.drop = (e) => {
-            e.preventDefault();
-            const targetCell = e.target.closest('.trailer-cell');
-            if(!targetCell) return;
-            const draggedId = e.dataTransfer.getData("text/plain");
-            const draggedEl = document.getElementById(draggedId);
-            if(!draggedEl) return;
-            const sourceCell = draggedEl.parentElement;
-            if(sourceCell === targetCell) return;
-
-            const findCell = (k, id) => trailerState[k].rows.flat().find(c => c.id === id);
-            const sData = findCell(sourceCell.dataset.key, sourceCell.id);
-            const tData = findCell(targetCell.dataset.key, targetCell.id);
-
-            if(sData && tData) {
-                const temp = sData.t;
-                sData.t = tData.t;
-                tData.t = temp;
-                if(sData.t === undefined) sData.t = null;
-                if(tData.t === undefined) tData.t = null;
-                renderTrailer();
-                saveTrailer();
-            }
         };
 
         window.editCell = (key, id) => {
@@ -956,8 +827,8 @@
                         <div class="flex justify-between items-start mb-2 border-b border-slate-100 pb-2">
                             <div>
                                 <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
-                                <span class="font-bold text-slate-800">${c.eventCode}</span>
-                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.crewCode}</span>
+                                <span class="font-bold text-slate-800">${c.eventCode} (${c.crewCode})</span>
+                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.entity ? c.entity : ''}</span>
                             </div>
                         </div>
                         <div class="space-y-1 text-sm">
@@ -1027,7 +898,7 @@
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
         initAuth();
 
-        let unsubscribeEvents, unsubscribeConfig, unsubscribeTrailer, unsubscribeCrews, unsubscribeNotices;
+        let unsubscribeEvents, unsubscribeConfig, unsubscribeCrews, unsubscribeNotices;
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
@@ -1049,7 +920,6 @@
         function setupListeners() {
             if(unsubscribeEvents) unsubscribeEvents();
             if(unsubscribeConfig) unsubscribeConfig();
-            if(unsubscribeTrailer) unsubscribeTrailer();
             if(unsubscribeCrews) unsubscribeCrews();
             if(unsubscribeNotices) unsubscribeNotices();
 
@@ -1099,18 +969,6 @@
                     previousDelay = 0;
                     state.configPasscode = null;
                     render();
-                }
-            });
-
-            unsubscribeTrailer = onSnapshot(getTrailerRef(), (snap) => {
-                if(snap.exists()) {
-                    const rawLayout = snap.data().layout;
-                    trailerState = typeof rawLayout === 'string' ? JSON.parse(rawLayout) : rawLayout;
-                    localStorage.setItem('regatta_trailer_layout', JSON.stringify(trailerState));
-                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
-                } else {
-                    trailerState = JSON.parse(JSON.stringify(INITIAL_TRAILER));
-                    if(!document.getElementById('view-trailer').classList.contains('hidden')) renderTrailer();
                 }
             });
         }
@@ -1445,14 +1303,11 @@
         };
         window.switchView = (v) => {
             // Hide all views first
-            ['view-regatta', 'view-trailer', 'view-crews', 'view-notices'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['view-regatta', 'view-crews', 'view-notices'].forEach(id => document.getElementById(id).classList.add('hidden'));
             
             // Show selected view
             if (v === 'regatta') {
                 document.getElementById('view-regatta').classList.remove('hidden');
-            } else if (v === 'trailer') {
-                document.getElementById('view-trailer').classList.remove('hidden');
-                if(document.getElementById('trailer-container').children.length === 0) renderTrailer();
             } else if (v === 'crews') {
                 document.getElementById('view-crews').classList.remove('hidden');
                 renderCrews(); // Ensure crews are rendered
