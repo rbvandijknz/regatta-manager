@@ -39,32 +39,6 @@
         }
         select.weather-select::-ms-expand { display: none; }
         
-        .trailer-cell {
-            border: 1px solid #e2e8f0;
-            padding: 2px;
-            text-align: center;
-            font-size: 0.875rem;
-            min-height: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            transition: background-color 0.2s;
-            cursor: pointer;
-            user-select: none;
-        }
-        .trailer-cell.drag-over {
-            background-color: #eff6ff; border: 2px dashed #3b82f6;
-        }
-        .trailer-header {
-            background-color: #f1f5f9; font-weight: bold; text-transform: uppercase;
-            font-size: 0.75rem; color: #475569;
-        }
-        .trailer-section-title {
-            background-color: #1e293b; color: white; font-weight: bold;
-            padding: 0.5rem; text-align: center;
-        }
-        
         .boat-card {
             width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
             border-radius: 4px; font-weight: 500; color: #1e293b;
@@ -472,6 +446,9 @@
 
         // NEW: Check for Urgent Notices Popup
         function checkUrgentNotices() {
+            // Guard clause to prevent error if element doesn't exist yet
+            if (!document.getElementById('urgent-modal')) return;
+
             const dismissed = JSON.parse(localStorage.getItem('cc_dismissed_alerts') || '[]');
             // Filter for type 'alert' and not in dismissed list
             const alerts = state.notices
@@ -590,18 +567,6 @@
                 lucide.createIcons();
             }
             els.weatherWidget.select.value = state.locationKey;
-        };
-
-        window.editCell = (key, id) => {
-            const newText = prompt("Enter name:");
-            if(newText !== null) {
-                const cell = trailerState[key].rows.flat().find(c => c.id === id);
-                if(cell) {
-                    cell.t = newText.trim() === "" ? null : newText;
-                    renderTrailer();
-                    saveTrailer();
-                }
-            }
         };
 
         // --- Filter Update Logic ---
@@ -1023,7 +988,7 @@
             els.modal.start.textContent = formatDisplayTime(delayed);
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
-            els.modal.boat.textContent = ev.boat || 'Not specified';
+            els.modal.boat.textContent = ev.boat || 'Not specified'; // This is the boat name from Col 15
             els.modal.coach.textContent = ev.coach || 'Not specified';
             // Populate Progression
             els.modal.progression.textContent = ev.progression || 'None/Final';
