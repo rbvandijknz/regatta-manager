@@ -886,8 +886,6 @@
                                 <div class="col-span-3 hidden md:block pointer-events-none">
                                     <div class="font-bold text-slate-800 text-base leading-tight">
                                         ${ev.crew} <span class="text-sm font-medium text-slate-500">${ev.crewCode ? `(${ev.crewCode})` : ''}</span>
-                                        <span class="text-xs font-medium text-slate-500">${ev.entity ? `[${ev.entity}]` : ''}</span>
-                                        <div class="text-xs text-slate-500 font-normal mt-0.5">(${ev.boat})</div>
                                     </div>
                                 </div>
                                 <div class="col-span-1 md:col-span-2 flex flex-col md:items-center pointer-events-none">
@@ -1306,7 +1304,7 @@
                             cox: cols[12] || '',     
                             rowers: cols[11] || '',
                             coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
-                            boat: cols[24] || '', // Explicitly column 24 per instruction
+                            boat: cols[15] || '', // Explicitly column 15 per updated instruction
                             crewCode: cols[9] || '', 
                             entity: cols[10] || '' 
                         };
@@ -1386,7 +1384,8 @@
                             crewCode: cols[9],
                             entity: cols[10], // 2ndEntity
                             rowers: cols[11],
-                            cox: cols[12] || ''
+                            cox: cols[12] || '',
+                            boat: cols[15] || '' // Changed to index 15
                         };
                          // Use a composite ID or let Firestore generate one
                         const docId = `${d.eventNum}_${d.crewCode}_${d.entity || 'x'}`.replace(/[^a-zA-Z0-9]/g, '_');
