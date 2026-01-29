@@ -449,27 +449,27 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times)
+        // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times) - Updated with full dataset
         const PROGNOSTIC_STANDARDS = {
             "m1x": { "elite": "06:31", "ltwt elite": "06:40", "u23": "06:42", "ltwt u23": "06:46", "u22": "06:55", "junior": "06:45", "senior": "07:00", "int": "07:23", "club": "07:18", "novice": "07:30", "u18": "07:09", "u17": "07:15", "u16": "07:20", "u15": "07:45" },
             "m2x": { "elite": "06:00", "ltwt elite": "06:05", "u23": "06:08", "ltwt u23": "06:14", "u22": "06:28", "junior": "06:18", "senior": "06:28", "int": "06:59", "club": "06:34", "novice": "06:57", "u18": "06:38", "u17": "06:44", "u16": "06:44", "u15": "07:08" },
-            "m4x": { "elite": "05:32", "ltwt elite": "05:43", "u23": "05:40", "ltwt u23": "05:45", "u22": "05:57", "junior": "05:46", "senior": "06:00", "club": "06:05", "novice": "06:32", "u18": "06:10", "u17": "06:13", "u16": "06:16" },
+            "m4x": { "elite": "05:32", "ltwt elite": "05:43", "u23": "05:40", "ltwt u23": "05:45", "u22": "05:57", "junior": "05:46", "senior": "06:00", "club": "06:05", "novice": "06:32", "u18": "06:10", "u17": "06:13", "u16": "06:16", "u15": "06:29" },
             "m4x+": { "u22": "06:46", "junior": "06:41", "novice": "06:20", "u18": "06:23", "u17": "06:24", "u16": "06:37" },
             "m8x+": { "u22": "06:23", "u18": "06:27", "u16": "06:07" },
-            "m2-": { "elite": "06:09", "ltwt elite": "06:23", "u23": "06:20", "ltwt u23": "06:26", "u22": "06:29", "junior": "06:28", "senior": "06:38", "club": "06:53", "u18": "06:41" },
+            "m2-": { "elite": "06:09", "ltwt elite": "06:23", "u23": "06:20", "ltwt u23": "06:26", "u22": "06:29", "junior": "06:28", "senior": "06:38", "club": "06:53", "novice": "06:41", "u18": "06:41" },
             "m2+": { "elite": "06:33", "senior": "07:10" },
             "m4-": { "elite": "05:38", "ltwt elite": "05:43", "u23": "05:44", "ltwt u23": "05:54", "u22": "06:10", "junior": "05:52", "senior": "06:20", "club": "06:31", "u18": "06:06" },
             "m4+": { "elite": "05:59", "u23": "05:58", "u22": "06:30", "junior": "06:09", "senior": "06:40", "club": "06:45", "novice": "06:42", "u18": "06:30", "u17": "06:50", "u16": "06:50", "u15": "07:05" },
-            "m8+": { "elite": "05:19", "ltwt elite": "05:30", "u23": "05:19", "ltwt u23": "05:30", "u22": "05:19", "junior": "05:19", "senior": "05:19", "int": "05:19", "club": "05:19", "novice": "05:19", "u18": "05:19", "u17": "05:19", "u16": "05:19", "u15": "05:19" },
-            "w1x": { "elite": "07:08", "ltwt elite": "07:23", "u23": "07:08", "ltwt u23": "07:23", "u22": "07:08", "junior": "07:08", "senior": "07:08", "int": "07:08", "club": "07:08", "novice": "07:08", "u18": "07:08", "u17": "07:08", "u16": "07:08", "u15": "07:08" },
-            "w2x": { "elite": "06:37", "ltwt elite": "06:40", "u23": "06:37", "ltwt u23": "06:40", "u22": "06:37", "junior": "06:37", "senior": "06:37", "int": "06:37", "club": "06:37", "novice": "06:37", "u18": "06:37", "u17": "06:37", "u16": "06:37", "u15": "06:37" },
-            "w4x": { "elite": "06:06", "ltwt elite": "06:19", "u23": "06:06", "ltwt u23": "06:19", "u22": "06:06", "junior": "06:06", "senior": "06:06", "club": "06:06", "novice": "06:06", "u18": "06:06", "u17": "06:06", "u16": "06:06", "u15": "06:06" },
+            "m8+": { "elite": "05:19", "ltwt elite": "05:30", "u23": "05:19", "ltwt u23": "05:30", "u22": "05:19", "junior": "05:19", "senior": "05:19", "int": "05:19", "club": "05:42", "novice": "06:00", "u18": "05:45", "u17": "05:53", "u16": "05:53", "u15": "06:14" },
+            "w1x": { "elite": "07:08", "ltwt elite": "07:23", "u23": "07:08", "ltwt u23": "07:23", "u22": "07:08", "junior": "07:08", "senior": "07:08", "int": "07:08", "club": "08:12", "novice": "08:30", "u18": "07:54", "u17": "08:00", "u16": "08:08", "u15": "08:32" },
+            "w2x": { "elite": "06:37", "ltwt elite": "06:40", "u23": "06:37", "ltwt u23": "06:40", "u22": "06:37", "junior": "06:37", "senior": "06:37", "int": "06:37", "club": "07:25", "novice": "07:45", "u18": "07:18", "u17": "07:25", "u16": "07:25", "u15": "07:47" },
+            "w4x": { "elite": "06:06", "ltwt elite": "06:19", "u23": "06:06", "ltwt u23": "06:19", "u22": "06:06", "junior": "06:06", "senior": "06:06", "club": "06:45", "novice": "07:05", "u18": "06:35", "u17": "06:45", "u16": "06:45", "u15": "07:09" },
             "w4x+": { "u22": "06:06", "junior": "06:06", "novice": "06:06", "u18": "06:06", "u17": "06:06", "u16": "06:06" },
             "w8x+": { "u22": "06:06", "u18": "06:06", "u16": "06:06" },
             "w2-": { "elite": "06:49", "ltwt elite": "07:18", "u23": "06:49", "ltwt u23": "07:18", "u22": "06:49", "junior": "06:49", "senior": "06:49", "club": "06:49", "u18": "06:49" },
             "w4-": { "elite": "06:14", "u23": "06:14", "u22": "06:14", "junior": "06:14", "senior": "06:14", "club": "06:14", "u18": "06:14" },
-            "w4+": { "elite": "06:14", "u23": "06:14", "u22": "06:14", "junior": "06:14", "senior": "06:14", "club": "06:14", "novice": "06:14", "u18": "06:14", "u17": "06:14", "u16": "06:14", "u15": "06:14" },
-            "w8+": { "elite": "05:54", "u23": "05:54", "u22": "05:54", "junior": "05:54", "senior": "05:54", "club": "05:54", "novice": "05:54", "u18": "05:54", "u17": "05:54", "u16": "05:54", "u15": "05:54" }
+            "w4+": { "elite": "06:14", "u23": "06:14", "u22": "06:14", "junior": "06:14", "senior": "06:14", "club": "07:15", "novice": "07:45", "u18": "06:58", "u17": "07:10", "u16": "07:15", "u15": "07:35" },
+            "w8+": { "elite": "05:54", "u23": "05:54", "u22": "05:54", "junior": "05:54", "senior": "05:54", "club": "06:30", "novice": "06:50", "u18": "06:23", "u17": "06:31", "u16": "06:31", "u15": "06:54" }
         };
 
         const LOCATIONS = {
@@ -479,6 +479,7 @@
         };
 
         let state = { user: null, events: [], crews: [], notices: [], prognostics: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
+        let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || null;
         let previousDelay = null;
 
         const els = {
@@ -497,6 +498,7 @@
             filterAthlete: document.getElementById('filter-athlete'),
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
+            // Added progression to modal elements
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
@@ -566,15 +568,17 @@
 
         // NEW: Check for Urgent Notices Popup
         function checkUrgentNotices() {
+            // Guard clause to prevent error if element doesn't exist yet
             if (!document.getElementById('urgent-modal')) return;
 
             const dismissed = JSON.parse(localStorage.getItem('cc_dismissed_alerts') || '[]');
+            // Filter for type 'alert' and not in dismissed list
             const alerts = state.notices
                 .filter(n => n.type === 'alert' && !dismissed.includes(n.id))
-                .sort((a,b) => b.timestamp - a.timestamp); 
+                .sort((a,b) => b.timestamp - a.timestamp); // Newest first
 
             if (alerts.length > 0) {
-                const alert = alerts[0];
+                const alert = alerts[0]; // Show newest
                 document.getElementById('urgent-title').textContent = alert.title;
                 document.getElementById('urgent-message').textContent = alert.message;
                 document.getElementById('urgent-time').textContent = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -582,6 +586,7 @@
                     dismissed.push(alert.id);
                     localStorage.setItem('cc_dismissed_alerts', JSON.stringify(dismissed));
                     document.getElementById('urgent-modal').classList.add('hidden');
+                    // Check again in case there are more
                     checkUrgentNotices();
                 };
                 document.getElementById('urgent-modal').classList.remove('hidden');
@@ -593,6 +598,7 @@
 
         const btnNotifications = document.getElementById('btn-enable-notifications');
         
+        // Function to update button state based on permission
         function updateNotificationButton() {
             if (!('Notification' in window)) {
                 btnNotifications.classList.add('hidden');
@@ -604,6 +610,7 @@
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
                 btnNotifications.classList.add('bg-green-50', 'border-green-100');
                 
+                // Update click handler to send test alert
                 btnNotifications.onclick = () => {
                     new Notification("RegattaManager Test", { 
                         body: "System notifications are working!", 
@@ -617,6 +624,7 @@
                 btnNotifications.classList.add('bg-red-50', 'border-red-100');
                 btnNotifications.onclick = () => alert("Notifications are blocked in your browser settings. Please enable them manually.");
             } else {
+                // Default state (ask for permission)
                 btnNotifications.innerHTML = '<i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>';
                 btnNotifications.onclick = async () => {
                     try {
@@ -632,6 +640,7 @@
             lucide.createIcons();
         }
 
+        // Initialize button state on load
         updateNotificationButton();
 
         // --- Weather ---
@@ -948,7 +957,7 @@
             
             // Percentage: (Target Time / Actual Time) * 100
             // Faster than target = > 100%
-            const percentage = ((targetSeconds / actualSeconds) * 100).toFixed(1);
+            const percentage = ((targetSeconds / actualSeconds) * 100).toFixed(2);
             
             // Split
             const splitSeconds = actualSeconds / (dist / 500);
@@ -1290,14 +1299,8 @@
                         }
                         
                         // Dynamically find Boat column (first instance)
-                        // This logic prioritizes the FIRST "Boat" column it encounters in the header.
-                        // In the new file, index 15 is "Boat" (names) and index 24/25 is "Boat" (class/bool).
-                        // indexOf will return 15.
-                        const headerLine = lines[headerIndex];
-                        // Robust split for CSV headers handling quotes
-                        const headers = headerLine.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
-                        const boatIndex = headers.indexOf('boat'); 
-                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Default to 15 (new format) if not found
+                        const boatIndex = lines[headerIndex].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).findIndex(c => c.trim().replace(/^"|"$/g, '').toLowerCase() === 'boat');
+                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Fallback
 
                         let d = {
                             eventNum: cols[3],
@@ -1308,7 +1311,7 @@
                             cox: cols[12] || '',     
                             rowers: cols[11] || '',
                             coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
-                            boat: cols[safeBoatIndex] || '', // Use found index
+                            boat: cols[safeBoatIndex] || '', // Use dynamic index
                             crewCode: cols[9] || '', 
                             entity: cols[10] || '' 
                         };
@@ -1374,14 +1377,12 @@
                 }
 
                 if (isRegattaFormat) {
-                    // Full Regatta Format for Crew List (Race,Day,Time... with 2ndEntity at index 10)
-                    
-                     // Dynamically find Boat column (first instance)
                     const headerRow = lines[headerIndex];
                     const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
                     const boatIndex = headers.indexOf('boat'); // Will find the FIRST instance of "boat"
                     const safeBoatIndex = boatIndex > -1 ? boatIndex : 15;
-                    
+
+                    // Full Regatta Format for Crew List (Race,Day,Time... with 2ndEntity at index 10)
                     for (let i = headerIndex + 1; i < lines.length; i++) {
                         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                          // Mapping based on your full file structure
