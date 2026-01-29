@@ -474,7 +474,6 @@
         };
 
         let state = { user: null, events: [], crews: [], notices: [], prognostics: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
-        let trailerState = JSON.parse(localStorage.getItem('regatta_trailer_layout')) || null;
         let previousDelay = null;
 
         const els = {
@@ -497,6 +496,7 @@
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
+            // Prognostic Els
             progBoat: document.getElementById('prog-boat'),
             progResults: document.getElementById('prog-results')
         };
