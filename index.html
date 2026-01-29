@@ -336,13 +336,8 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Grade</label>
                             <select id="prog-grade" class="w-full p-2 border border-slate-300 rounded text-sm font-medium bg-slate-50">
                                 <option value="elite">Elite</option>
-                                <option value="ltwt elite">Ltwt Elite</option>
-                                <option value="u23">U23</option>
-                                <option value="ltwt u23">Ltwt U23</option>
-                                <option value="u22">U22</option>
-                                <option value="junior">Junior</option>
                                 <option value="senior">Senior</option>
-                                <option value="int">Int</option>
+                                <option value="int">Intermediate</option>
                                 <option value="club">Club</option>
                                 <option value="novice">Novice</option>
                                 <option value="u18">U18</option>
@@ -451,25 +446,25 @@
 
         // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times) - Updated with full dataset
         const PROGNOSTIC_STANDARDS = {
-            "m1x": { "elite": "06:31", "ltwt elite": "06:40", "u23": "06:42", "ltwt u23": "06:46", "u22": "06:55", "junior": "06:45", "senior": "07:00", "int": "07:23", "club": "07:18", "novice": "07:30", "u18": "07:09", "u17": "07:15", "u16": "07:20", "u15": "07:45" },
-            "m2x": { "elite": "06:00", "ltwt elite": "06:05", "u23": "06:08", "ltwt u23": "06:14", "u22": "06:28", "junior": "06:18", "senior": "06:28", "int": "06:59", "club": "06:34", "novice": "06:57", "u18": "06:38", "u17": "06:44", "u16": "06:44", "u15": "07:08" },
-            "m4x": { "elite": "05:32", "ltwt elite": "05:43", "u23": "05:40", "ltwt u23": "05:45", "u22": "05:57", "junior": "05:46", "senior": "06:00", "club": "06:05", "novice": "06:32", "u18": "06:10", "u17": "06:13", "u16": "06:16", "u15": "06:29" },
-            "m4x+": { "u22": "06:46", "junior": "06:41", "novice": "06:20", "u18": "06:23", "u17": "06:24", "u16": "06:37" },
-            "m8x+": { "u22": "06:23", "u18": "06:27", "u16": "06:07" },
-            "m2-": { "elite": "06:09", "ltwt elite": "06:23", "u23": "06:20", "ltwt u23": "06:26", "u22": "06:29", "junior": "06:28", "senior": "06:38", "club": "06:53", "novice": "06:41", "u18": "06:41" },
-            "m2+": { "elite": "06:33", "senior": "07:10" },
-            "m4-": { "elite": "05:38", "ltwt elite": "05:43", "u23": "05:44", "ltwt u23": "05:54", "u22": "06:10", "junior": "05:52", "senior": "06:20", "club": "06:31", "u18": "06:06" },
-            "m4+": { "elite": "05:59", "u23": "05:58", "u22": "06:30", "junior": "06:09", "senior": "06:40", "club": "06:45", "novice": "06:42", "u18": "06:30", "u17": "06:50", "u16": "06:50", "u15": "07:05" },
-            "m8+": { "elite": "05:19", "ltwt elite": "05:30", "u23": "05:19", "ltwt u23": "05:30", "u22": "05:19", "junior": "05:19", "senior": "05:19", "int": "05:19", "club": "05:42", "novice": "06:00", "u18": "05:45", "u17": "05:53", "u16": "05:53", "u15": "06:14" },
-            "w1x": { "elite": "07:08", "ltwt elite": "07:23", "u23": "07:08", "ltwt u23": "07:23", "u22": "07:08", "junior": "07:08", "senior": "07:08", "int": "07:08", "club": "08:12", "novice": "08:30", "u18": "07:54", "u17": "08:00", "u16": "08:08", "u15": "08:32" },
-            "w2x": { "elite": "06:37", "ltwt elite": "06:40", "u23": "06:37", "ltwt u23": "06:40", "u22": "06:37", "junior": "06:37", "senior": "06:37", "int": "06:37", "club": "07:25", "novice": "07:45", "u18": "07:18", "u17": "07:25", "u16": "07:25", "u15": "07:47" },
-            "w4x": { "elite": "06:06", "ltwt elite": "06:19", "u23": "06:06", "ltwt u23": "06:19", "u22": "06:06", "junior": "06:06", "senior": "06:06", "club": "06:45", "novice": "07:05", "u18": "06:35", "u17": "06:45", "u16": "06:45", "u15": "07:09" },
-            "w4x+": { "u22": "06:06", "junior": "06:06", "novice": "06:06", "u18": "06:06", "u17": "06:06", "u16": "06:06" },
-            "w8x+": { "u22": "06:06", "u18": "06:06", "u16": "06:06" },
-            "w2-": { "elite": "06:49", "ltwt elite": "07:18", "u23": "06:49", "ltwt u23": "07:18", "u22": "06:49", "junior": "06:49", "senior": "06:49", "club": "06:49", "u18": "06:49" },
-            "w4-": { "elite": "06:14", "u23": "06:14", "u22": "06:14", "junior": "06:14", "senior": "06:14", "club": "06:14", "u18": "06:14" },
-            "w4+": { "elite": "06:14", "u23": "06:14", "u22": "06:14", "junior": "06:14", "senior": "06:14", "club": "07:15", "novice": "07:45", "u18": "06:58", "u17": "07:10", "u16": "07:15", "u15": "07:35" },
-            "w8+": { "elite": "05:54", "u23": "05:54", "u22": "05:54", "junior": "05:54", "senior": "05:54", "club": "06:30", "novice": "06:50", "u18": "06:23", "u17": "06:31", "u16": "06:31", "u15": "06:54" }
+            "m1x": { "elite": "06:31", "senior": "07:00", "int": "07:23", "club": "07:18", "novice": "nil", "u18": "07:09", "u17": "07:15", "u16": "07:20", "u15": "nil" },
+            "m2x": { "elite": "06:00", "senior": "06:28", "int": "06:59", "club": "06:34", "novice": "06:57", "u18": "06:38", "u17": "06:44", "u16": "06:44", "u15": "06:52" },
+            "m4x": { "elite": "05:32", "senior": "06:00", "int": "nil", "club": "06:05", "novice": "06:32", "u18": "06:10", "u17": "06:13", "u16": "06:16", "u15": "nil" },
+            "m4x+": { "elite": "nil", "senior": "nil", "int": "06:46", "club": "nil", "novice": "06:41", "u18": "06:20", "u17": "06:23", "u16": "06:24", "u15": "06:37" },
+            "m8x+": { "elite": "nil", "senior": "nil", "int": "06:23", "club": "nil", "novice": "nil", "u18": "nil", "u17": "06:27", "u16": "nil", "u15": "06:07" },
+            "m2-": { "elite": "06:09", "senior": "06:38", "int": "nil", "club": "06:53", "novice": "nil", "u18": "06:41", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "m2+": { "elite": "06:33", "senior": "07:10", "int": "nil", "club": "nil", "novice": "nil", "u18": "nil", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "m4-": { "elite": "05:38", "senior": "06:20", "int": "nil", "club": "06:31", "novice": "nil", "u18": "06:06", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "m4+": { "elite": "05:59", "senior": "06:40", "int": "nil", "club": "06:45", "novice": "06:42", "u18": "06:30", "u17": "06:50", "u16": "06:50", "u15": "07:05" },
+            "m8+": { "elite": "05:19", "senior": "05:45", "int": "nil", "club": "05:42", "novice": "06:00", "u18": "05:45", "u17": "05:53", "u16": "05:53", "u15": "06:14" },
+            "w1x": { "elite": "07:08", "senior": "07:44", "int": "08:14", "club": "08:12", "novice": "08:30", "u18": "07:54", "u17": "08:00", "u16": "08:08", "u15": "08:32" },
+            "w2x": { "elite": "06:37", "senior": "07:10", "int": "07:44", "club": "07:25", "novice": "07:45", "u18": "07:18", "u17": "07:25", "u16": "07:25", "u15": "07:47" },
+            "w4x": { "elite": "06:06", "senior": "06:35", "int": "nil", "club": "06:45", "novice": "07:05", "u18": "06:35", "u17": "06:45", "u16": "06:45", "u15": "07:09" },
+            "w4x+": { "elite": "nil", "senior": "nil", "int": "07:18", "club": "nil", "novice": "07:25", "u18": "07:00", "u17": "07:15", "u16": "07:15", "u15": "07:35" },
+            "w8x+": { "elite": "nil", "senior": "nil", "int": "06:40", "club": "nil", "novice": "nil", "u18": "nil", "u17": "06:55", "u16": "nil", "u15": "06:45" },
+            "w2-": { "elite": "06:49", "senior": "07:26", "int": "nil", "club": "07:49", "novice": "nil", "u18": "07:30", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "w4-": { "elite": "06:14", "senior": "06:50", "int": "nil", "club": "07:08", "novice": "nil", "u18": "06:58", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "w4+": { "elite": "06:26", "senior": "07:15", "int": "nil", "club": "07:15", "novice": "07:45", "u18": "06:58", "u17": "07:10", "u16": "07:15", "u15": "07:35" },
+            "w8+": { "elite": "05:54", "senior": "06:23", "int": "nil", "club": "06:30", "novice": "06:50", "u18": "06:23", "u17": "06:31", "u16": "06:31", "u15": "06:54" }
         };
 
         const LOCATIONS = {
@@ -523,7 +518,7 @@
 
         // Parse mm:ss or hh:mm:ss to seconds
         const parseDuration = (str) => {
-            if(!str) return 0;
+            if(!str || str === 'nil') return 0;
             const p = str.split(':').map(Number);
             if(p.length === 2) return p[0]*60 + p[1];
             if(p.length === 3) return p[0]*3600 + p[1]*60 + p[2];
@@ -889,6 +884,59 @@
             }
         }
 
+        function renderCrews() {
+            let displayCrews = state.crews;
+            if (state.filterCrewAthlete) {
+                displayCrews = displayCrews.filter(c => {
+                    const term = state.filterCrewAthlete;
+                    // Check rowers
+                    if(c.rowers && c.rowers.split(',').some(r => r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term)) return true;
+                    // Check cox
+                    if(c.cox && c.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term) return true;
+                    return false;
+                });
+            }
+
+            // Sort by Event Num
+            displayCrews.sort((a,b) => {
+                const nA = parseInt(a.eventNum) || 0;
+                const nB = parseInt(b.eventNum) || 0;
+                return nA - nB;
+            });
+
+            if (displayCrews.length === 0) {
+                els.crewsContainer.innerHTML = `
+                    <div class="text-center py-20 text-slate-400">
+                        <i data-lucide="users" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                        <p>${state.crews.length > 0 ? "No crews found for this athlete." : "No crew data loaded."}</p>
+                    </div>`;
+            } else {
+                els.crewsContainer.innerHTML = displayCrews.map(c => `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-start mb-2 border-b border-slate-100 pb-2">
+                            <div>
+                                <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
+                                <span class="font-bold text-slate-800">${c.eventCode} (${c.crewCode})</span>
+                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.entity ? c.entity : ''}</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span class="text-slate-700 leading-relaxed">${c.rowers || 'No rowers listed'}</span>
+                            </div>
+                            ${c.cox ? `
+                            <div class="flex gap-2">
+                                <i data-lucide="megaphone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span class="text-slate-700 font-medium">${c.cox} (Cox)</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
         // Prognostics Render Function
         function renderPrognostics() {
             const tbody = document.getElementById('prog-results');
@@ -943,7 +991,9 @@
 
             // Look up standard
             const standardStr = PROGNOSTIC_STANDARDS[boat]?.[grade];
-            if(!standardStr) return alert(`No gold standard found for ${boat} ${grade}`);
+            
+            // Check for missing data
+            if(!standardStr || standardStr === "nil") return alert(`No gold standard found for ${boat} ${grade} (Time: ${standardStr || 'Missing'})`);
 
             const standardSeconds = parseDuration(standardStr);
             const actualSeconds = parseDuration(timeStr);
@@ -1299,8 +1349,10 @@
                         }
                         
                         // Dynamically find Boat column (first instance)
-                        const boatIndex = lines[headerIndex].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).findIndex(c => c.trim().replace(/^"|"$/g, '').toLowerCase() === 'boat');
-                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Fallback
+                        const headerRow = lines[headerIndex];
+                        const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
+                        const boatIndex = headers.indexOf('boat'); 
+                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Default to 15 (new format) if not found
 
                         let d = {
                             eventNum: cols[3],
@@ -1311,7 +1363,7 @@
                             cox: cols[12] || '',     
                             rowers: cols[11] || '',
                             coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
-                            boat: cols[safeBoatIndex] || '', // Use dynamic index
+                            boat: cols[safeBoatIndex] || '', // Use found index
                             crewCode: cols[9] || '', 
                             entity: cols[10] || '' 
                         };
