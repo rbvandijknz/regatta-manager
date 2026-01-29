@@ -411,28 +411,6 @@
         </div>
     </div>
 
-    <!-- Urgent Alert Modal -->
-    <div id="urgent-modal" class="fixed inset-0 z-[110] bg-red-900/90 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-in fade-in duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-red-500 relative">
-            <div class="bg-red-500 p-4 text-white flex items-center justify-center gap-3">
-                <i data-lucide="siren" class="w-8 h-8 animate-pulse"></i>
-                <h2 class="text-2xl font-black uppercase tracking-widest">Urgent Notice</h2>
-            </div>
-            <div class="p-6 text-center space-y-4">
-                <div>
-                    <h3 id="urgent-title" class="text-xl font-bold text-slate-900 leading-tight"></h3>
-                    <div id="urgent-time" class="text-xs font-mono text-slate-400 mt-1 uppercase tracking-wide"></div>
-                </div>
-                <p id="urgent-message" class="text-lg text-slate-700 font-medium leading-relaxed"></p>
-                <div class="pt-4">
-                    <button id="btn-dismiss-alert" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2">
-                        <i data-lucide="check-circle" class="w-5 h-5"></i> Acknowledge & Dismiss
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
@@ -493,7 +471,7 @@
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
             // Added progression to modal elements
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
             // Prognostic Els
@@ -1349,10 +1327,8 @@
                         }
                         
                         // Dynamically find Boat column (first instance)
-                        const headerRow = lines[headerIndex];
-                        const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
-                        const boatIndex = headers.indexOf('boat'); 
-                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Default to 15 (new format) if not found
+                        const boatIndex = lines[headerIndex].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).findIndex(c => c.trim().replace(/^"|"$/g, '').toLowerCase() === 'boat');
+                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Fallback
 
                         let d = {
                             eventNum: cols[3],
