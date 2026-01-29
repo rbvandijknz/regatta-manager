@@ -336,7 +336,13 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Grade</label>
                             <select id="prog-grade" class="w-full p-2 border border-slate-300 rounded text-sm font-medium bg-slate-50">
                                 <option value="elite">Elite</option>
+                                <option value="ltwt elite">Ltwt Elite</option>
                                 <option value="u23">U23</option>
+                                <option value="ltwt u23">Ltwt U23</option>
+                                <option value="u22">U22</option>
+                                <option value="junior">Junior</option>
+                                <option value="senior">Senior</option>
+                                <option value="int">Int</option>
                                 <option value="club">Club</option>
                                 <option value="novice">Novice</option>
                                 <option value="u18">U18</option>
@@ -445,15 +451,25 @@
 
         // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times)
         const PROGNOSTIC_STANDARDS = {
-            "m1x": { elite: "06:31", u23: "06:42", club: "07:18", novice: "07:30", u18: "07:09", u17: "07:15", u16: "07:20", u15: "07:45" },
-            "m2x": { elite: "06:00", u23: "06:08", club: "06:34", novice: "06:57", u18: "06:38", u17: "06:44", u16: "06:44", u15: "07:08" },
-            "m4x": { elite: "05:32", u23: "05:40", club: "06:00", novice: "06:20", u18: "05:58", u17: "06:07", u16: "06:07", u15: "06:29" },
-            "m8+": { elite: "05:19", u23: "05:22", club: "05:42", novice: "06:00", u18: "05:45", u17: "05:53", u16: "05:53", u15: "06:14" },
-            "w1x": { elite: "07:08", u23: "07:23", club: "08:12", novice: "08:30", u18: "07:54", u17: "08:00", u16: "08:08", u15: "08:32" },
-            "w2x": { elite: "06:37", u23: "06:49", club: "07:25", novice: "07:45", u18: "07:18", u17: "07:25", u16: "07:25", u15: "07:47" },
-            "w4x": { elite: "06:06", u23: "06:19", club: "06:45", novice: "07:05", u18: "06:35", u17: "06:45", u16: "06:45", u15: "07:09" },
-            "w8+": { elite: "05:54", u23: "06:03", club: "06:30", novice: "06:50", u18: "06:23", u17: "06:31", u16: "06:31", u15: "06:54" },
-            // Add other boat classes as needed, defaulting to generic if missing
+            "m1x": { "elite": "06:31", "ltwt elite": "06:40", "u23": "06:42", "ltwt u23": "06:46", "u22": "06:55", "junior": "06:45", "senior": "07:00", "int": "07:23", "club": "07:18", "novice": "07:30", "u18": "07:09", "u17": "07:15", "u16": "07:20", "u15": "07:45" },
+            "m2x": { "elite": "06:00", "ltwt elite": "06:05", "u23": "06:08", "ltwt u23": "06:14", "u22": "06:28", "junior": "06:18", "senior": "06:28", "int": "06:59", "club": "06:34", "novice": "06:57", "u18": "06:38", "u17": "06:44", "u16": "06:44", "u15": "07:08" },
+            "m4x": { "elite": "05:32", "ltwt elite": "05:43", "u23": "05:40", "ltwt u23": "05:45", "u22": "05:57", "junior": "05:46", "senior": "06:00", "club": "06:05", "novice": "06:32", "u18": "06:10", "u17": "06:13", "u16": "06:16" },
+            "m4x+": { "u22": "06:46", "junior": "06:41", "novice": "06:20", "u18": "06:23", "u17": "06:24", "u16": "06:37" },
+            "m8x+": { "u22": "06:23", "u18": "06:27", "u16": "06:07" },
+            "m2-": { "elite": "06:09", "ltwt elite": "06:23", "u23": "06:20", "ltwt u23": "06:26", "u22": "06:29", "junior": "06:28", "senior": "06:38", "club": "06:53", "u18": "06:41" },
+            "m2+": { "elite": "06:33", "senior": "07:10" },
+            "m4-": { "elite": "05:38", "ltwt elite": "05:43", "u23": "05:44", "ltwt u23": "05:54", "u22": "06:10", "junior": "05:52", "senior": "06:20", "club": "06:31", "u18": "06:06" },
+            "m4+": { "elite": "05:59", "u23": "05:58", "u22": "06:30", "junior": "06:09", "senior": "06:40", "club": "06:45", "novice": "06:42", "u18": "06:30", "u17": "06:50", "u16": "06:50", "u15": "07:05" },
+            "m8+": { "elite": "05:19", "ltwt elite": "05:30", "u23": "05:19", "ltwt u23": "05:30", "u22": "05:19", "junior": "05:19", "senior": "05:19", "int": "05:19", "club": "05:19", "novice": "05:19", "u18": "05:19", "u17": "05:19", "u16": "05:19", "u15": "05:19" },
+            "w1x": { "elite": "07:08", "ltwt elite": "07:23", "u23": "07:08", "ltwt u23": "07:23", "u22": "07:08", "junior": "07:08", "senior": "07:08", "int": "07:08", "club": "07:08", "novice": "07:08", "u18": "07:08", "u17": "07:08", "u16": "07:08", "u15": "07:08" },
+            "w2x": { "elite": "06:37", "ltwt elite": "06:40", "u23": "06:37", "ltwt u23": "06:40", "u22": "06:37", "junior": "06:37", "senior": "06:37", "int": "06:37", "club": "06:37", "novice": "06:37", "u18": "06:37", "u17": "06:37", "u16": "06:37", "u15": "06:37" },
+            "w4x": { "elite": "06:06", "ltwt elite": "06:19", "u23": "06:06", "ltwt u23": "06:19", "u22": "06:06", "junior": "06:06", "senior": "06:06", "club": "06:06", "novice": "06:06", "u18": "06:06", "u17": "06:06", "u16": "06:06", "u15": "06:06" },
+            "w4x+": { "u22": "06:06", "junior": "06:06", "novice": "06:06", "u18": "06:06", "u17": "06:06", "u16": "06:06" },
+            "w8x+": { "u22": "06:06", "u18": "06:06", "u16": "06:06" },
+            "w2-": { "elite": "06:49", "ltwt elite": "07:18", "u23": "06:49", "ltwt u23": "07:18", "u22": "06:49", "junior": "06:49", "senior": "06:49", "club": "06:49", "u18": "06:49" },
+            "w4-": { "elite": "06:14", "u23": "06:14", "u22": "06:14", "junior": "06:14", "senior": "06:14", "club": "06:14", "u18": "06:14" },
+            "w4+": { "elite": "06:14", "u23": "06:14", "u22": "06:14", "junior": "06:14", "senior": "06:14", "club": "06:14", "novice": "06:14", "u18": "06:14", "u17": "06:14", "u16": "06:14", "u15": "06:14" },
+            "w8+": { "elite": "05:54", "u23": "05:54", "u22": "05:54", "junior": "05:54", "senior": "05:54", "club": "05:54", "novice": "05:54", "u18": "05:54", "u17": "05:54", "u16": "05:54", "u15": "05:54" }
         };
 
         const LOCATIONS = {
@@ -484,7 +500,6 @@
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
-            // Prognostic Els
             progBoat: document.getElementById('prog-boat'),
             progResults: document.getElementById('prog-results')
         };
@@ -551,17 +566,15 @@
 
         // NEW: Check for Urgent Notices Popup
         function checkUrgentNotices() {
-            // Guard clause to prevent error if element doesn't exist yet
             if (!document.getElementById('urgent-modal')) return;
 
             const dismissed = JSON.parse(localStorage.getItem('cc_dismissed_alerts') || '[]');
-            // Filter for type 'alert' and not in dismissed list
             const alerts = state.notices
                 .filter(n => n.type === 'alert' && !dismissed.includes(n.id))
-                .sort((a,b) => b.timestamp - a.timestamp); // Newest first
+                .sort((a,b) => b.timestamp - a.timestamp); 
 
             if (alerts.length > 0) {
-                const alert = alerts[0]; // Show newest
+                const alert = alerts[0];
                 document.getElementById('urgent-title').textContent = alert.title;
                 document.getElementById('urgent-message').textContent = alert.message;
                 document.getElementById('urgent-time').textContent = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -569,7 +582,6 @@
                     dismissed.push(alert.id);
                     localStorage.setItem('cc_dismissed_alerts', JSON.stringify(dismissed));
                     document.getElementById('urgent-modal').classList.add('hidden');
-                    // Check again in case there are more
                     checkUrgentNotices();
                 };
                 document.getElementById('urgent-modal').classList.remove('hidden');
@@ -581,7 +593,6 @@
 
         const btnNotifications = document.getElementById('btn-enable-notifications');
         
-        // Function to update button state based on permission
         function updateNotificationButton() {
             if (!('Notification' in window)) {
                 btnNotifications.classList.add('hidden');
@@ -593,7 +604,6 @@
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
                 btnNotifications.classList.add('bg-green-50', 'border-green-100');
                 
-                // Update click handler to send test alert
                 btnNotifications.onclick = () => {
                     new Notification("RegattaManager Test", { 
                         body: "System notifications are working!", 
@@ -607,7 +617,6 @@
                 btnNotifications.classList.add('bg-red-50', 'border-red-100');
                 btnNotifications.onclick = () => alert("Notifications are blocked in your browser settings. Please enable them manually.");
             } else {
-                // Default state (ask for permission)
                 btnNotifications.innerHTML = '<i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>';
                 btnNotifications.onclick = async () => {
                     try {
@@ -623,7 +632,6 @@
             lucide.createIcons();
         }
 
-        // Initialize button state on load
         updateNotificationButton();
 
         // --- Weather ---
@@ -672,6 +680,13 @@
                 lucide.createIcons();
             }
             els.weatherWidget.select.value = state.locationKey;
+        };
+
+        window.editCell = (key, id) => {
+            const newText = prompt("Enter name:");
+            if(newText !== null) {
+                // Feature removed
+            }
         };
 
         // --- Filter Update Logic ---
@@ -865,59 +880,6 @@
             }
         }
 
-        function renderCrews() {
-            let displayCrews = state.crews;
-            if (state.filterCrewAthlete) {
-                displayCrews = displayCrews.filter(c => {
-                    const term = state.filterCrewAthlete;
-                    // Check rowers
-                    if(c.rowers && c.rowers.split(',').some(r => r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term)) return true;
-                    // Check cox
-                    if(c.cox && c.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term) return true;
-                    return false;
-                });
-            }
-
-            // Sort by Event Num
-            displayCrews.sort((a,b) => {
-                const nA = parseInt(a.eventNum) || 0;
-                const nB = parseInt(b.eventNum) || 0;
-                return nA - nB;
-            });
-
-            if (displayCrews.length === 0) {
-                els.crewsContainer.innerHTML = `
-                    <div class="text-center py-20 text-slate-400">
-                        <i data-lucide="users" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                        <p>${state.crews.length > 0 ? "No crews found for this athlete." : "No crew data loaded."}</p>
-                    </div>`;
-            } else {
-                els.crewsContainer.innerHTML = displayCrews.map(c => `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <div class="flex justify-between items-start mb-2 border-b border-slate-100 pb-2">
-                            <div>
-                                <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
-                                <span class="font-bold text-slate-800">${c.eventCode} (${c.crewCode})</span>
-                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.entity ? c.entity : ''}</span>
-                            </div>
-                        </div>
-                        <div class="space-y-1 text-sm">
-                            <div class="flex gap-2">
-                                <i data-lucide="users" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
-                                <span class="text-slate-700 leading-relaxed">${c.rowers || 'No rowers listed'}</span>
-                            </div>
-                            ${c.cox ? `
-                            <div class="flex gap-2">
-                                <i data-lucide="megaphone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
-                                <span class="text-slate-700 font-medium">${c.cox} (Cox)</span>
-                            </div>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
-            lucide.createIcons();
-        }
-
         // Prognostics Render Function
         function renderPrognostics() {
             const tbody = document.getElementById('prog-results');
@@ -1006,10 +968,6 @@
         };
 
         window.deletePrognostic = async (idx) => {
-             // In a real app with IDs this would deleteDoc, here we just filter local state for UI demo
-             // To properly delete we need the doc ID. 
-             // For simplicity in this demo, let's just re-render without it locally, 
-             // but correct way is deleteDoc(doc(getProgsRef(), state.prognostics[idx].id))
              if(state.prognostics[idx].id) {
                  await deleteDoc(doc(getProgsRef(), state.prognostics[idx].id));
              }
