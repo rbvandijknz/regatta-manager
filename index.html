@@ -217,6 +217,14 @@
                             </div>
                         </div>
                         
+                        <!-- Prognostics Tool Button -->
+                        <div class="p-3 bg-emerald-50 rounded border border-emerald-100 mt-2">
+                            <div class="text-xs font-bold text-emerald-700 uppercase mb-2">Performance Tools</div>
+                            <button onclick="window.switchView('prognostics')" class="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded text-sm font-bold uppercase hover:bg-emerald-700 transition">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i> Open Prognostics Tool
+                            </button>
+                        </div>
+
                         <!-- NOTICE BOARD ADMIN -->
                         <div class="p-3 bg-indigo-50 rounded border border-indigo-100">
                             <div class="text-xs font-bold text-indigo-700 uppercase mb-2">Notice Board Admin</div>
@@ -309,6 +317,67 @@
                 </div>
             </div>
         </div>
+
+        <!-- VIEW 5: PROGNOSTICS -->
+        <div id="view-prognostics" class="hidden max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="trending-up" class="w-6 h-6 text-slate-600"></i> Prognostic Calculator</h2>
+            </div>
+            
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <form id="prog-form" class="space-y-4">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Boat Class</label>
+                            <select id="prog-boat" class="w-full p-2 border border-slate-300 rounded text-sm font-mono font-bold bg-slate-50"></select>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Grade</label>
+                            <select id="prog-grade" class="w-full p-2 border border-slate-300 rounded text-sm font-medium bg-slate-50">
+                                <option value="elite">Elite</option>
+                                <option value="u23">U23</option>
+                                <option value="club">Club</option>
+                                <option value="novice">Novice</option>
+                                <option value="u18">U18</option>
+                                <option value="u17">U17</option>
+                                <option value="u16">U16</option>
+                                <option value="u15">U15</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1 md:col-span-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dist (m)</label>
+                            <input type="number" id="prog-dist" value="2000" class="w-full p-2 border border-slate-300 rounded text-sm text-center">
+                        </div>
+                        <div class="col-span-1 md:col-span-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Time (mm:ss)</label>
+                            <input type="text" id="prog-time" placeholder="e.g. 7:30.5" class="w-full p-2 border border-slate-300 rounded text-sm text-center font-mono">
+                        </div>
+                        <div class="col-span-2 md:col-span-1 flex items-end">
+                            <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-2 rounded hover:bg-emerald-700 transition shadow-sm">Calculate</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-bold text-slate-500 uppercase text-xs">Details</th>
+                            <th class="px-4 py-3 text-center font-bold text-slate-500 uppercase text-xs">Target (2k)</th>
+                            <th class="px-4 py-3 text-center font-bold text-slate-500 uppercase text-xs">Pace/2k</th>
+                            <th class="px-4 py-3 text-right font-bold text-slate-500 uppercase text-xs">% GMT</th>
+                            <th class="px-2 py-3 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="prog-results" class="divide-y divide-slate-100">
+                        <!-- Dynamic Results -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Crew Details Modal -->
@@ -333,7 +402,7 @@
                     
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
-                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="anchor" class="w-3 h-3"></i> Boat</div><div id="modal-boat" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
+                    <!-- Boat removed -->
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="user" class="w-3 h-3"></i> Coach</div><div id="modal-coach" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                 </div>
             </div>
@@ -374,13 +443,26 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times)
+        const PROGNOSTIC_STANDARDS = {
+            "m1x": { elite: "06:31", u23: "06:42", club: "07:18", novice: "07:30", u18: "07:09", u17: "07:15", u16: "07:20", u15: "07:45" },
+            "m2x": { elite: "06:00", u23: "06:08", club: "06:34", novice: "06:57", u18: "06:38", u17: "06:44", u16: "06:44", u15: "07:08" },
+            "m4x": { elite: "05:32", u23: "05:40", club: "06:00", novice: "06:20", u18: "05:58", u17: "06:07", u16: "06:07", u15: "06:29" },
+            "m8+": { elite: "05:19", u23: "05:22", club: "05:42", novice: "06:00", u18: "05:45", u17: "05:53", u16: "05:53", u15: "06:14" },
+            "w1x": { elite: "07:08", u23: "07:23", club: "08:12", novice: "08:30", u18: "07:54", u17: "08:00", u16: "08:08", u15: "08:32" },
+            "w2x": { elite: "06:37", u23: "06:49", club: "07:25", novice: "07:45", u18: "07:18", u17: "07:25", u16: "07:25", u15: "07:47" },
+            "w4x": { elite: "06:06", u23: "06:19", club: "06:45", novice: "07:05", u18: "06:35", u17: "06:45", u16: "06:45", u15: "07:09" },
+            "w8+": { elite: "05:54", u23: "06:03", club: "06:30", novice: "06:50", u18: "06:23", u17: "06:31", u16: "06:31", u15: "06:54" },
+            // Add other boat classes as needed, defaulting to generic if missing
+        };
+
         const LOCATIONS = {
             karapiro: { name: 'Karapiro', lat: -37.9265, lon: 175.5435, bearing: 315 },
             bluelake: { name: 'Blue Lake', lat: -38.196, lon: 176.327, bearing: 0 },
             ruataniwha: { name: 'Ruataniwha', lat: -44.218, lon: 170.086, bearing: 0 }
         };
 
-        let state = { user: null, events: [], crews: [], notices: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
+        let state = { user: null, events: [], crews: [], notices: [], prognostics: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
         let previousDelay = null;
 
         const els = {
@@ -399,21 +481,44 @@
             filterAthlete: document.getElementById('filter-athlete'),
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
-            // Added progression to modal elements
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
-            toastContainer: document.getElementById('toast-container')
+            toastContainer: document.getElementById('toast-container'),
+            // Prognostic Els
+            progBoat: document.getElementById('prog-boat'),
+            progResults: document.getElementById('prog-results')
         };
 
         const getEventsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_events`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_events');
         const getCrewsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_crew_list`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_crew_list');
         const getNoticesRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_notices`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_notices');
+        const getProgsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_prognostics`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_prognostics');
         const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
+
+        // Init Prognostic Boat Options
+        const boatTypes = Object.keys(PROGNOSTIC_STANDARDS).sort();
+        els.progBoat.innerHTML = boatTypes.map(b => `<option value="${b}">${b.toUpperCase()}</option>`).join('');
 
         // --- Helper Functions ---
         const timeToMinutes = (str) => { if(!str) return 0; const [h,m]=str.split(':').map(Number); return h*60+m; };
         const minutesToTime = (t) => { let m=t%60; let h=Math.floor(t/60)%24; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
         const formatDisplayTime = (m) => { let h=Math.floor(m/60)%24; let am=h>=12?'PM':'AM'; if(h>12)h-=12; if(h===0)h=12; return `${h}:${String(m%60).padStart(2,'0')} ${am}`; };
+
+        // Parse mm:ss or hh:mm:ss to seconds
+        const parseDuration = (str) => {
+            if(!str) return 0;
+            const p = str.split(':').map(Number);
+            if(p.length === 2) return p[0]*60 + p[1];
+            if(p.length === 3) return p[0]*3600 + p[1]*60 + p[2];
+            return 0;
+        };
+
+        const formatDuration = (secs) => {
+            const m = Math.floor(secs/60);
+            const s = Math.floor(secs%60);
+            const ms = Math.round((secs - Math.floor(secs))*10);
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${ms}`;
+        };
 
         // --- Notifications ---
         const showToast = (msg, type='info') => {
@@ -813,6 +918,104 @@
             lucide.createIcons();
         }
 
+        // Prognostics Render Function
+        function renderPrognostics() {
+            const tbody = document.getElementById('prog-results');
+            tbody.innerHTML = '';
+            
+            if (state.prognostics.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 italic">No calculations yet.</td></tr>`;
+                return;
+            }
+
+            state.prognostics.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                
+                // Color code percentage
+                let badgeClass = "bg-slate-100 text-slate-600";
+                if (p.percentage >= 95) badgeClass = "bg-emerald-100 text-emerald-700";
+                else if (p.percentage >= 90) badgeClass = "bg-blue-100 text-blue-700";
+                else if (p.percentage >= 85) badgeClass = "bg-yellow-100 text-yellow-700";
+                else badgeClass = "bg-orange-100 text-orange-700";
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="font-bold text-slate-700">${p.boat.toUpperCase()} ${p.grade}</div>
+                        <div class="text-xs text-slate-400">${formatDisplayTime(p.actualSeconds)} (${p.dist}m)</div>
+                    </td>
+                    <td class="px-4 py-3 text-center text-xs font-mono text-slate-600">${p.targetTime}</td>
+                    <td class="px-4 py-3 text-center text-xs font-mono text-slate-500">${p.split}/500m</td>
+                    <td class="px-4 py-3 text-right">
+                        <span class="px-2 py-1 rounded text-xs font-bold ${badgeClass}">${p.percentage}%</span>
+                    </td>
+                    <td class="px-2 py-3 text-center">
+                        <button onclick="deletePrognostic(${idx})" class="text-slate-300 hover:text-red-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        // Handle Prognostic Calculation
+        document.getElementById('prog-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if(!state.user) return;
+
+            const boat = document.getElementById('prog-boat').value;
+            const grade = document.getElementById('prog-grade').value;
+            const dist = Number(document.getElementById('prog-dist').value);
+            const timeStr = document.getElementById('prog-time').value;
+
+            if(!boat || !grade || !dist || !timeStr) return alert("Please fill all fields");
+
+            // Look up standard
+            const standardStr = PROGNOSTIC_STANDARDS[boat]?.[grade];
+            if(!standardStr) return alert(`No gold standard found for ${boat} ${grade}`);
+
+            const standardSeconds = parseDuration(standardStr);
+            const actualSeconds = parseDuration(timeStr);
+            
+            if(standardSeconds === 0 || actualSeconds === 0) return alert("Invalid time format");
+
+            // Calculate
+            // Convert standard to seconds per meter, then to target distance
+            // Standard is for 2000m
+            const targetSeconds = standardSeconds * (dist / 2000);
+            
+            // Percentage: (Target Time / Actual Time) * 100
+            // Faster than target = > 100%
+            const percentage = ((targetSeconds / actualSeconds) * 100).toFixed(1);
+            
+            // Split
+            const splitSeconds = actualSeconds / (dist / 500);
+            const split = formatDuration(splitSeconds);
+
+            const newEntry = {
+                boat, grade, dist, actualSeconds, 
+                targetTime: formatDuration(targetSeconds),
+                split, percentage, timestamp: Date.now()
+            };
+
+            const updatedProgs = [newEntry, ...state.prognostics].slice(0, 50); // Keep last 50
+            
+            await addDoc(getProgsRef(), newEntry); // Save to Firestore
+            // Reset form
+            document.getElementById('prog-time').value = '';
+        };
+
+        window.deletePrognostic = async (idx) => {
+             // In a real app with IDs this would deleteDoc, here we just filter local state for UI demo
+             // To properly delete we need the doc ID. 
+             // For simplicity in this demo, let's just re-render without it locally, 
+             // but correct way is deleteDoc(doc(getProgsRef(), state.prognostics[idx].id))
+             if(state.prognostics[idx].id) {
+                 await deleteDoc(doc(getProgsRef(), state.prognostics[idx].id));
+             }
+        };
+
+
         function renderNotices() {
             const container = document.getElementById('notices-container');
             if (state.notices.length === 0) {
@@ -863,7 +1066,7 @@
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
         initAuth();
 
-        let unsubscribeEvents, unsubscribeConfig, unsubscribeCrews, unsubscribeNotices;
+        let unsubscribeEvents, unsubscribeConfig, unsubscribeCrews, unsubscribeNotices, unsubscribeProgs;
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
@@ -887,10 +1090,12 @@
             if(unsubscribeConfig) unsubscribeConfig();
             if(unsubscribeCrews) unsubscribeCrews();
             if(unsubscribeNotices) unsubscribeNotices();
+            if(unsubscribeProgs) unsubscribeProgs();
 
             state.events = [];
             state.crews = [];
             state.notices = [];
+            state.prognostics = [];
             previousDelay = null;
             // First render to clear/show loading
             render();
@@ -911,6 +1116,13 @@
                 state.notices = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 checkUrgentNotices(); // Check for popups
                 if(!document.getElementById('view-notices').classList.contains('hidden')) renderNotices();
+            });
+            
+            unsubscribeProgs = onSnapshot(getProgsRef(), (snap) => {
+                state.prognostics = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                // Sort by timestamp desc
+                state.prognostics.sort((a,b) => b.timestamp - a.timestamp);
+                if(!document.getElementById('view-prognostics').classList.contains('hidden')) renderPrognostics();
             });
 
             unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
@@ -988,7 +1200,7 @@
             els.modal.start.textContent = formatDisplayTime(delayed);
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
-            els.modal.boat.textContent = ev.boat || 'Not specified';
+            // Boat field removed from modal logic
             els.modal.coach.textContent = ev.coach || 'Not specified';
             // Populate Progression
             els.modal.progression.textContent = ev.progression || 'None/Final';
@@ -1105,12 +1317,6 @@
                     }
                 }
                 if (isRegattaFormat) {
-                    // Find header row first to identify correct Boat column index
-                    const headerRow = lines[headerIndex];
-                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
-                    const boatIndex = headers.indexOf('boat'); // Will find the FIRST instance of "boat"
-                    const safeBoatIndex = boatIndex > -1 ? boatIndex : 15;
-
                     for (let i = headerIndex + 1; i < lines.length; i++) {
                         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                         if (cols.length < 10) continue; 
@@ -1125,6 +1331,16 @@
                             }
                         }
                         
+                        // Dynamically find Boat column (first instance)
+                        // This logic prioritizes the FIRST "Boat" column it encounters in the header.
+                        // In the new file, index 15 is "Boat" (names) and index 24/25 is "Boat" (class/bool).
+                        // indexOf will return 15.
+                        const headerLine = lines[headerIndex];
+                        // Robust split for CSV headers handling quotes
+                        const headers = headerLine.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
+                        const boatIndex = headers.indexOf('boat'); 
+                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Default to 15 (new format) if not found
+
                         let d = {
                             eventNum: cols[3],
                             alpha: cols[8],
@@ -1134,7 +1350,7 @@
                             cox: cols[12] || '',     
                             rowers: cols[11] || '',
                             coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
-                            boat: cols[safeBoatIndex] || '', // Use dynamic index
+                            boat: cols[safeBoatIndex] || '', // Use found index
                             crewCode: cols[9] || '', 
                             entity: cols[10] || '' 
                         };
@@ -1200,12 +1416,14 @@
                 }
 
                 if (isRegattaFormat) {
+                    // Full Regatta Format for Crew List (Race,Day,Time... with 2ndEntity at index 10)
+                    
+                     // Dynamically find Boat column (first instance)
                     const headerRow = lines[headerIndex];
                     const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
                     const boatIndex = headers.indexOf('boat'); // Will find the FIRST instance of "boat"
                     const safeBoatIndex = boatIndex > -1 ? boatIndex : 15;
-
-                    // Full Regatta Format for Crew List (Race,Day,Time... with 2ndEntity at index 10)
+                    
                     for (let i = headerIndex + 1; i < lines.length; i++) {
                         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                          // Mapping based on your full file structure
@@ -1280,7 +1498,7 @@
         };
         window.switchView = (v) => {
             // Hide all views first
-            ['view-regatta', 'view-crews', 'view-notices'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['view-regatta', 'view-crews', 'view-notices', 'view-prognostics'].forEach(id => document.getElementById(id).classList.add('hidden'));
             
             // Show selected view
             if (v === 'regatta') {
@@ -1291,6 +1509,9 @@
             } else if (v === 'notices') {
                 document.getElementById('view-notices').classList.remove('hidden');
                 renderNotices();
+            } else if (v === 'prognostics') {
+                document.getElementById('view-prognostics').classList.remove('hidden');
+                renderPrognostics();
             }
         };
 
