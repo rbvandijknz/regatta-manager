@@ -411,6 +411,28 @@
         </div>
     </div>
 
+    <!-- Urgent Alert Modal -->
+    <div id="urgent-modal" class="fixed inset-0 z-[110] bg-red-900/90 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-red-500 relative">
+            <div class="bg-red-500 p-4 text-white flex items-center justify-center gap-3">
+                <i data-lucide="siren" class="w-8 h-8 animate-pulse"></i>
+                <h2 class="text-2xl font-black uppercase tracking-widest">Urgent Notice</h2>
+            </div>
+            <div class="p-6 text-center space-y-4">
+                <div>
+                    <h3 id="urgent-title" class="text-xl font-bold text-slate-900 leading-tight"></h3>
+                    <div id="urgent-time" class="text-xs font-mono text-slate-400 mt-1 uppercase tracking-wide"></div>
+                </div>
+                <p id="urgent-message" class="text-lg text-slate-700 font-medium leading-relaxed"></p>
+                <div class="pt-4">
+                    <button id="btn-dismiss-alert" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i> Acknowledge & Dismiss
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
@@ -422,27 +444,26 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times) - Updated with full dataset
+        // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times) - Updated from "prog times.csv"
         const PROGNOSTIC_STANDARDS = {
-            "m1x": { "elite": "06:31", "senior": "07:00", "int": "07:23", "club": "07:18", "novice": "nil", "u18": "07:09", "u17": "07:15", "u16": "07:20", "u15": "nil" },
-            "m2x": { "elite": "06:00", "senior": "06:28", "int": "06:59", "club": "06:34", "novice": "06:57", "u18": "06:38", "u17": "06:44", "u16": "06:44", "u15": "06:52" },
-            "m4x": { "elite": "05:32", "senior": "06:00", "int": "nil", "club": "06:05", "novice": "06:32", "u18": "06:10", "u17": "06:13", "u16": "06:16", "u15": "nil" },
-            "m4x+": { "elite": "nil", "senior": "nil", "int": "06:46", "club": "nil", "novice": "06:41", "u18": "06:20", "u17": "06:23", "u16": "06:24", "u15": "06:37" },
-            "m8x+": { "elite": "nil", "senior": "nil", "int": "06:23", "club": "nil", "novice": "nil", "u18": "nil", "u17": "06:27", "u16": "nil", "u15": "06:07" },
-            "m2-": { "elite": "06:09", "senior": "06:38", "int": "nil", "club": "06:53", "novice": "nil", "u18": "06:41", "u17": "nil", "u16": "nil", "u15": "nil" },
-            "m2+": { "elite": "06:33", "senior": "07:10", "int": "nil", "club": "nil", "novice": "nil", "u18": "nil", "u17": "nil", "u16": "nil", "u15": "nil" },
-            "m4-": { "elite": "05:38", "senior": "06:20", "int": "nil", "club": "06:31", "novice": "nil", "u18": "06:06", "u17": "nil", "u16": "nil", "u15": "nil" },
-            "m4+": { "elite": "05:59", "senior": "06:40", "int": "nil", "club": "06:45", "novice": "06:42", "u18": "06:30", "u17": "06:50", "u16": "06:50", "u15": "07:05" },
-            "m8+": { "elite": "05:19", "senior": "05:45", "int": "nil", "club": "05:42", "novice": "06:00", "u18": "05:45", "u17": "05:53", "u16": "05:53", "u15": "06:14" },
-            "w1x": { "elite": "07:08", "senior": "07:44", "int": "08:14", "club": "08:12", "novice": "08:30", "u18": "07:54", "u17": "08:00", "u16": "08:08", "u15": "08:32" },
-            "w2x": { "elite": "06:37", "senior": "07:10", "int": "07:44", "club": "07:25", "novice": "07:45", "u18": "07:18", "u17": "07:25", "u16": "07:25", "u15": "07:47" },
-            "w4x": { "elite": "06:06", "senior": "06:35", "int": "nil", "club": "06:45", "novice": "07:05", "u18": "06:35", "u17": "06:45", "u16": "06:45", "u15": "07:09" },
-            "w4x+": { "elite": "nil", "senior": "nil", "int": "07:18", "club": "nil", "novice": "07:25", "u18": "07:00", "u17": "07:15", "u16": "07:15", "u15": "07:35" },
-            "w8x+": { "elite": "nil", "senior": "nil", "int": "06:40", "club": "nil", "novice": "nil", "u18": "nil", "u17": "06:55", "u16": "nil", "u15": "06:45" },
-            "w2-": { "elite": "06:49", "senior": "07:26", "int": "nil", "club": "07:49", "novice": "nil", "u18": "07:30", "u17": "nil", "u16": "nil", "u15": "nil" },
-            "w4-": { "elite": "06:14", "senior": "06:50", "int": "nil", "club": "07:08", "novice": "nil", "u18": "06:58", "u17": "nil", "u16": "nil", "u15": "nil" },
-            "w4+": { "elite": "06:26", "senior": "07:15", "int": "nil", "club": "07:15", "novice": "07:45", "u18": "06:58", "u17": "07:10", "u16": "07:15", "u15": "07:35" },
-            "w8+": { "elite": "05:54", "senior": "06:23", "int": "nil", "club": "06:30", "novice": "06:50", "u18": "06:23", "u17": "06:31", "u16": "06:31", "u15": "06:54" }
+            "m1x": { "elite": "06:30.74", "senior": "07:00.41", "int": "07:22.90", "club": "07:17.58", "novice": "nil", "u18": "07:09.33", "u17": "07:15.26", "u16": "07:19.91", "u15": "nil" },
+            "m2x": { "elite": "05:59.72", "senior": "06:27.79", "int": "06:59.19", "club": "06:34.26", "novice": "06:57.22", "u18": "06:37.56", "u17": "06:44.05", "u16": "06:44.27", "u15": "06:51.91" },
+            "m4x": { "elite": "05:32.03", "senior": "06:00.40", "int": "nil", "club": "06:05.00", "novice": "06:32.00", "u18": "06:10.00", "u17": "06:13.00", "u16": "06:16.00", "u15": "nil" },
+            "m4x+": { "elite": "nil", "senior": "nil", "int": "06:46.24", "club": "nil", "novice": "06:40.82", "u18": "06:20.25", "u17": "06:23.00", "u16": "06:23.75", "u15": "06:36.78" },
+            "m8x+": { "elite": "nil", "senior": "nil", "int": "06:23.28", "club": "nil", "novice": "nil", "u18": "nil", "u17": "06:26.56", "u16": "nil", "u15": "06:07.11" },
+            "m2-": { "elite": "06:08.50", "senior": "06:38.25", "int": "nil", "club": "06:52.56", "novice": "nil", "u18": "06:40.94", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "m4-": { "elite": "05:37.86", "senior": "06:19.55", "int": "nil", "club": "06:30.82", "novice": "nil", "u18": "06:06.00", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "m4+": { "elite": "05:58.96", "senior": "06:40.00", "int": "nil", "club": "06:45.00", "novice": "06:41.87", "u18": "06:30.00", "u17": "06:50.00", "u16": "06:50.00", "u15": "07:05.00" },
+            "m8+": { "elite": "05:18.68", "senior": "05:45.00", "int": "nil", "club": "05:42.00", "novice": "06:00.00", "u18": "05:45.00", "u17": "05:53.00", "u16": "05:53.00", "u15": "06:14.00" },
+            "w1x": { "elite": "07:07.71", "senior": "07:44.20", "int": "08:14.04", "club": "08:12.33", "novice": "08:30.00", "u18": "07:54.02", "u17": "08:00.41", "u16": "08:08.23", "u15": "08:31.95" },
+            "w2x": { "elite": "06:37.31", "senior": "07:09.91", "int": "07:43.78", "club": "07:25.00", "novice": "07:44.88", "u18": "07:18.42", "u17": "07:24.78", "u16": "07:25.26", "u15": "07:47.38" },
+            "w4x": { "elite": "06:06.84", "senior": "06:35.00", "int": "nil", "club": "06:45.00", "novice": "07:05.00", "u18": "06:35.00", "u17": "06:45.00", "u16": "06:45.00", "u15": "07:09.00" },
+            "w4x+": { "elite": "nil", "senior": "nil", "int": "07:18.00", "club": "nil", "novice": "07:25.00", "u18": "07:00.00", "u17": "07:15.00", "u16": "07:15.00", "u15": "07:35.00" },
+            "w8x+": { "elite": "nil", "senior": "nil", "int": "06:40.00", "club": "nil", "novice": "nil", "u18": "nil", "u17": "06:55.00", "u16": "nil", "u15": "06:45.00" },
+            "w2-": { "elite": "06:49.08", "senior": "07:25.75", "int": "nil", "club": "07:49.25", "novice": "nil", "u18": "07:30.00", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "w4-": { "elite": "06:14.36", "senior": "06:50.00", "int": "nil", "club": "07:08.28", "novice": "nil", "u18": "06:58.00", "u17": "nil", "u16": "nil", "u15": "nil" },
+            "w4+": { "elite": "06:26.00", "senior": "07:15.00", "int": "nil", "club": "07:15.00", "novice": "07:45.00", "u18": "06:58.00", "u17": "07:10.00", "u16": "07:15.00", "u15": "07:35.00" },
+            "w8+": { "elite": "05:54.16", "senior": "06:23.00", "int": "nil", "club": "06:30.00", "novice": "06:50.00", "u18": "06:23.00", "u17": "06:31.00", "u16": "06:48.80", "u15": "06:54.00" }
         };
 
         const LOCATIONS = {
@@ -471,7 +492,7 @@
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
             // Added progression to modal elements
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), boat: document.getElementById('modal-boat'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
             // Prognostic Els
@@ -939,7 +960,7 @@
                 tr.innerHTML = `
                     <td class="px-4 py-3">
                         <div class="font-bold text-slate-700">${p.boat.toUpperCase()} ${p.grade}</div>
-                        <div class="text-xs text-slate-400">${formatDisplayTime(p.actualSeconds)} (${p.dist}m)</div>
+                        <div class="text-xs text-slate-400">${formatDuration(p.actualSeconds)} (${p.dist}m)</div>
                     </td>
                     <td class="px-4 py-3 text-center text-xs font-mono text-slate-600">${p.targetTime}</td>
                     <td class="px-4 py-3 text-center text-xs font-mono text-slate-500">${p.split}/500m</td>
@@ -967,11 +988,8 @@
 
             if(!boat || !grade || !dist || !timeStr) return alert("Please fill all fields");
 
-            // Look up standard
             const standardStr = PROGNOSTIC_STANDARDS[boat]?.[grade];
-            
-            // Check for missing data
-            if(!standardStr || standardStr === "nil") return alert(`No gold standard found for ${boat} ${grade} (Time: ${standardStr || 'Missing'})`);
+            if(!standardStr || standardStr === "nil") return alert(`No gold standard found for ${boat} ${grade}`);
 
             const standardSeconds = parseDuration(standardStr);
             const actualSeconds = parseDuration(timeStr);
@@ -1327,7 +1345,9 @@
                         }
                         
                         // Dynamically find Boat column (first instance)
-                        const boatIndex = lines[headerIndex].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).findIndex(c => c.trim().replace(/^"|"$/g, '').toLowerCase() === 'boat');
+                        const headerRow = lines[headerIndex];
+                        const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
+                        const boatIndex = headers.indexOf('boat'); 
                         const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Fallback
 
                         let d = {
