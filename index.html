@@ -213,6 +213,7 @@
                             <!-- Passcode Change Field -->
                             <div class="flex justify-between items-center mt-2 border-t border-slate-200 pt-2">
                                 <span>Admin Passcode:</span>
+                                <!-- REMOVED DEFAULT VALUE FROM HTML -->
                                 <input type="text" id="input-admin-passcode" placeholder="Default: 1992" class="w-32 p-1 border rounded text-center text-xs">
                             </div>
                         </div>
@@ -350,19 +351,23 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dist (m)</label>
                             <input type="number" id="prog-dist" value="2000" class="w-full p-2 border border-slate-300 rounded text-sm text-center">
                         </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Date/Time</label>
+                            <input type="datetime-local" id="prog-date" class="w-full p-2 border border-slate-300 rounded text-sm font-medium">
+                        </div>
                         <div class="col-span-1 md:col-span-1">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Time (mm:ss)</label>
                             <input type="text" id="prog-time" placeholder="e.g. 7:30.5" class="w-full p-2 border border-slate-300 rounded text-sm text-center font-mono">
                         </div>
-                        <div class="col-span-2 md:col-span-1 flex items-end">
-                            <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-2 rounded hover:bg-emerald-700 transition shadow-sm">Calculate</button>
+                        <div class="col-span-2 md:col-span-5 flex justify-end">
+                            <button type="submit" class="bg-emerald-600 text-white font-bold py-2 px-6 rounded hover:bg-emerald-700 transition shadow-sm uppercase text-sm">Calculate</button>
                         </div>
                     </div>
                 </form>
             </div>
 
             <!-- Results Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
@@ -491,7 +496,6 @@
             filterAthlete: document.getElementById('filter-athlete'),
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
-            // Added progression to modal elements
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
@@ -509,6 +513,11 @@
         // Init Prognostic Boat Options
         const boatTypes = Object.keys(PROGNOSTIC_STANDARDS).sort();
         els.progBoat.innerHTML = boatTypes.map(b => `<option value="${b}">${b.toUpperCase()}</option>`).join('');
+
+        // Set default date/time for prognostics
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('prog-date').value = now.toISOString().slice(0, 16);
 
         // --- Helper Functions ---
         const timeToMinutes = (str) => { if(!str) return 0; const [h,m]=str.split(':').map(Number); return h*60+m; };
@@ -528,8 +537,16 @@
             const m = Math.floor(secs/60);
             const s = Math.floor(secs%60);
             const ms = Math.round((secs - Math.floor(secs))*10);
-            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${ms}`;
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(1,'0')}`; // Ensure single digit ms or adjust based on pref
         };
+        // Correction for 2 decimal display if needed:
+        const formatDuration2 = (secs) => {
+             const m = Math.floor(secs/60);
+             const s = Math.floor(secs%60);
+             const ms = Math.round((secs % 1) * 100);
+             return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(2,'0')}`;
+        };
+
 
         // --- Notifications ---
         const showToast = (msg, type='info') => {
@@ -883,59 +900,6 @@
             }
         }
 
-        function renderCrews() {
-            let displayCrews = state.crews;
-            if (state.filterCrewAthlete) {
-                displayCrews = displayCrews.filter(c => {
-                    const term = state.filterCrewAthlete;
-                    // Check rowers
-                    if(c.rowers && c.rowers.split(',').some(r => r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term)) return true;
-                    // Check cox
-                    if(c.cox && c.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term) return true;
-                    return false;
-                });
-            }
-
-            // Sort by Event Num
-            displayCrews.sort((a,b) => {
-                const nA = parseInt(a.eventNum) || 0;
-                const nB = parseInt(b.eventNum) || 0;
-                return nA - nB;
-            });
-
-            if (displayCrews.length === 0) {
-                els.crewsContainer.innerHTML = `
-                    <div class="text-center py-20 text-slate-400">
-                        <i data-lucide="users" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                        <p>${state.crews.length > 0 ? "No crews found for this athlete." : "No crew data loaded."}</p>
-                    </div>`;
-            } else {
-                els.crewsContainer.innerHTML = displayCrews.map(c => `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <div class="flex justify-between items-start mb-2 border-b border-slate-100 pb-2">
-                            <div>
-                                <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
-                                <span class="font-bold text-slate-800">${c.eventCode} (${c.crewCode})</span>
-                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.entity ? c.entity : ''}</span>
-                            </div>
-                        </div>
-                        <div class="space-y-1 text-sm">
-                            <div class="flex gap-2">
-                                <i data-lucide="users" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
-                                <span class="text-slate-700 leading-relaxed">${c.rowers || 'No rowers listed'}</span>
-                            </div>
-                            ${c.cox ? `
-                            <div class="flex gap-2">
-                                <i data-lucide="megaphone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
-                                <span class="text-slate-700 font-medium">${c.cox} (Cox)</span>
-                            </div>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
-            lucide.createIcons();
-        }
-
         // Prognostics Render Function
         function renderPrognostics() {
             const tbody = document.getElementById('prog-results');
@@ -956,11 +920,14 @@
                 else if (p.percentage >= 90) badgeClass = "bg-blue-100 text-blue-700";
                 else if (p.percentage >= 85) badgeClass = "bg-yellow-100 text-yellow-700";
                 else badgeClass = "bg-orange-100 text-orange-700";
+                
+                // Format date for display
+                const dateStr = p.datetime ? new Date(p.datetime).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'Just now';
 
                 tr.innerHTML = `
                     <td class="px-4 py-3">
                         <div class="font-bold text-slate-700">${p.boat.toUpperCase()} ${p.grade}</div>
-                        <div class="text-xs text-slate-400">${formatDuration(p.actualSeconds)} (${p.dist}m)</div>
+                        <div class="text-xs text-slate-400">${formatDuration2(p.actualSeconds)} (${p.dist}m) <br><span class="text-[10px] text-slate-300 uppercase font-mono">${dateStr}</span></div>
                     </td>
                     <td class="px-4 py-3 text-center text-xs font-mono text-slate-600">${p.targetTime}</td>
                     <td class="px-4 py-3 text-center text-xs font-mono text-slate-500">${p.split}/500m</td>
@@ -985,10 +952,13 @@
             const grade = document.getElementById('prog-grade').value;
             const dist = Number(document.getElementById('prog-dist').value);
             const timeStr = document.getElementById('prog-time').value;
+            const dateTime = document.getElementById('prog-date').value;
 
             if(!boat || !grade || !dist || !timeStr) return alert("Please fill all fields");
 
             const standardStr = PROGNOSTIC_STANDARDS[boat]?.[grade];
+            
+            // Check for missing data
             if(!standardStr || standardStr === "nil") return alert(`No gold standard found for ${boat} ${grade}`);
 
             const standardSeconds = parseDuration(standardStr);
@@ -1007,18 +977,17 @@
             
             // Split
             const splitSeconds = actualSeconds / (dist / 500);
-            const split = formatDuration(splitSeconds);
+            const split = formatDuration2(splitSeconds);
 
             const newEntry = {
                 boat, grade, dist, actualSeconds, 
-                targetTime: formatDuration(targetSeconds),
-                split, percentage, timestamp: Date.now()
+                targetTime: formatDuration2(targetSeconds),
+                split, percentage, timestamp: Date.now(),
+                datetime: dateTime || new Date().toISOString()
             };
 
-            const updatedProgs = [newEntry, ...state.prognostics].slice(0, 50); // Keep last 50
-            
             await addDoc(getProgsRef(), newEntry); // Save to Firestore
-            // Reset form
+            // Reset form time but keep date
             document.getElementById('prog-time').value = '';
         };
 
@@ -1348,7 +1317,7 @@
                         const headerRow = lines[headerIndex];
                         const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
                         const boatIndex = headers.indexOf('boat'); 
-                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Fallback
+                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 24; // Fallback
 
                         let d = {
                             eventNum: cols[3],
