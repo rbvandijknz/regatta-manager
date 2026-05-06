@@ -191,12 +191,12 @@
                             <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
                             <div class="flex justify-between items-center mt-2 border-t border-slate-200 pt-2">
                                 <span>Admin Passcode:</span>
-                                <input type="text" id="input-admin-passcode" placeholder="Default: 1992" class="w-32 p-1 border rounded text-center text-xs">
+                                <!-- REMOVED DEFAULT VALUE FROM HTML -->
+                                <input type="text" id="input-admin-passcode" placeholder="Set passcode" class="w-32 p-1 border rounded text-center text-xs">
                             </div>
                         </div>
                         
-                        <div class="p-3 bg-emerald-50 rounded border border-emerald-100 mt-2 flex flex-col gap-2">
-                            <div class="text-xs font-bold text-emerald-700 uppercase mb-1">Performance Tools</div>
+                        <!-- Prognostics Tool Button -->
                             <div class="flex gap-2">
                                 <button onclick="window.switchView('prognostics')" class="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded text-sm font-bold uppercase hover:bg-emerald-700 transition">
                                     <i data-lucide="trending-up" class="w-4 h-4"></i> Prognostics
@@ -1375,13 +1375,15 @@
         document.getElementById('btn-toggle-config').onclick = () => {
             const panel = document.getElementById('config-panel');
             if (panel.classList.contains('hidden')) {
-                // Try to open - Check against stored passcode (or default 1992)
-                const storedPass = state.configPasscode || "1992";
-                const code = prompt("Enter Admin Passcode:");
-                if (code === storedPass) {
+                if (!state.configPasscode) {
                     panel.classList.remove('hidden');
-                } else if (code !== null) {
-                    alert("Incorrect passcode.");
+                } else {
+                    const code = prompt("Enter Admin Passcode:");
+                    if (code === state.configPasscode) {
+                        panel.classList.remove('hidden');
+                    } else if (code !== null) {
+                        alert("Incorrect passcode.");
+                    }
                 }
             } else {
                 // Just close
