@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RegattaManager</title>
     
+    <!-- App Icon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eab308' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='white'/><path d='M3 21v-8h6v-3h6v5h6v6H3z' fill='none' stroke='%23eab308' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Prevent Pull-to-Refresh on mobile to feel more like an app */
@@ -51,19 +54,24 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans pb-10">
 
+    <!-- Notification Toast Container -->
     <div id="toast-container" class="fixed top-4 left-0 right-0 z-[100] flex justify-center pointer-events-none"></div>
 
+    <!-- APP CONTENT -->
     <div id="app-content">
         
+        <!-- Sticky Header -->
         <div class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-700">
             <div class="max-w-7xl mx-auto px-4 py-3">
                 <div class="flex flex-col xl:flex-row items-center justify-between gap-4 relative">
                     
+                    <!-- Brand (Left) -->
                     <div class="flex items-center justify-between w-full xl:w-auto z-10">
                         <div class="flex items-center gap-2 sm:gap-3">
                             <svg class="text-yellow-500 w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>
                             <h1 class="text-lg sm:text-2xl font-bold tracking-tight flex items-center h-full pt-1">RegattaManager</h1>
                             
+                            <!-- Connection & Badge -->
                             <div class="flex items-center ml-1 sm:ml-2 pt-1 border-r border-slate-700 pr-2 sm:pr-4 mr-1 sm:mr-2">
                                 <span id="group-badge" class="hidden text-[10px] sm:text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono border border-blue-400 mr-2 uppercase"></span>
                                 <button id="connection-btn" class="p-1 rounded hover:bg-slate-800 transition-colors" title="Connection Status">
@@ -71,6 +79,7 @@
                                 </button>
                             </div>
 
+                            <!-- NEW CLOCK POSITION (Beside Connected Icon) -->
                             <div class="flex flex-col items-start justify-center mr-auto sm:mr-0">
                                 <div class="font-mono text-xl sm:text-2xl font-bold text-blue-400 tracking-widest leading-none clock-display drop-shadow-md">00:00</div>
                                 <div class="text-[8px] sm:text-[9px] text-slate-400 uppercase tracking-wider font-bold leading-none mt-0.5">Official Time</div>
@@ -78,8 +87,10 @@
                         </div>
                     </div>
 
+                    <!-- Widgets (Right) -->
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto z-10 mt-2 sm:mt-0">
                         
+                        <!-- Updated Weather Widget with Wind Direction -->
                         <div id="weather-widget" class="h-10 sm:h-12 flex items-center gap-3 bg-slate-800/80 px-4 rounded-lg border border-slate-700 text-slate-300 text-sm w-full sm:w-auto min-w-[280px] justify-between shadow-sm">
                             <div class="flex items-center gap-1 relative group cursor-pointer">
                                 <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i>
@@ -95,6 +106,7 @@
                                 <span id="weather-temp" class="font-mono font-bold text-white text-lg">--°</span>
                             </div>
                             <div class="h-6 w-px bg-slate-700"></div>
+                            <!-- NEW: Wind Direction Tag -->
                             <div class="flex items-center gap-2 min-w-[80px] justify-end">
                                 <div class="flex flex-col items-end leading-none">
                                     <span id="weather-condition-tag" class="text-[10px] font-bold uppercase text-slate-500 tracking-wider">--</span>
@@ -119,13 +131,16 @@
             </div>
         </div>
 
+        <!-- VIEW 1: REGATTA PROGRAMME -->
         <div id="view-regatta" class="max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
                 <div class="flex items-center gap-3">
                     <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
                 </div>
                 
+                <!-- Filters Container -->
                 <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <!-- Coach Filter -->
                     <div class="relative flex-grow sm:flex-grow-0">
                         <select id="filter-coach" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
                             <option value="">Coach: All</option>
@@ -135,6 +150,7 @@
                         </div>
                     </div>
 
+                    <!-- Athlete Filter -->
                     <div class="relative flex-grow sm:flex-grow-0">
                         <select id="filter-athlete" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
                             <option value="">Athlete: All</option>
@@ -160,6 +176,7 @@
                 <p class="text-lg font-medium">No events scheduled</p>
             </div>
 
+            <!-- Admin Controls -->
             <div class="pt-8 border-t border-slate-200">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                     <div class="flex justify-between items-start mb-2">
@@ -167,8 +184,10 @@
                         <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline font-medium">Config</button>
                     </div>
                     
+                    <!-- VISIBLE TOOLS (No Code Required) -->
                     <div class="mb-4 space-y-2">
-                         <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                         <!-- Group Code -->
+                        <div class="bg-blue-50 p-3 rounded border border-blue-100">
                             <div class="text-xs font-bold text-blue-700 uppercase mb-1">Shared Regatta Code</div>
                             <div class="flex gap-2">
                                 <input type="text" id="input-group-code" placeholder="e.g. baycoast" class="flex-1 p-1 text-sm border rounded">
@@ -177,6 +196,7 @@
                             <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                         </div>
                         
+                        <!-- Notification Button (Smart Toggle) -->
                         <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
                             <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full transition-all">
                                 <i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>
@@ -184,19 +204,22 @@
                         </div>
                     </div>
 
+                    <!-- HIDDEN CONFIG PANEL (Requires Code) -->
                     <div id="config-panel" class="hidden mb-4 space-y-4 border-t border-slate-100 pt-4">
                         <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
                             <div class="font-bold text-slate-600 uppercase text-xs mb-2">Settings</div>
                             <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
                             <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
+                            <!-- Passcode Change Field -->
                             <div class="flex justify-between items-center mt-2 border-t border-slate-200 pt-2">
                                 <span>Admin Passcode:</span>
-                                <!-- REMOVED DEFAULT VALUE FROM HTML -->
                                 <input type="text" id="input-admin-passcode" placeholder="Set passcode" class="w-32 p-1 border rounded text-center text-xs">
                             </div>
                         </div>
                         
-                        <!-- Prognostics Tool Button -->
+                        <!-- Performance Tools Buttons -->
+                        <div class="p-3 bg-emerald-50 rounded border border-emerald-100 mt-2 flex flex-col gap-2">
+                            <div class="text-xs font-bold text-emerald-700 uppercase mb-1">Performance Tools</div>
                             <div class="flex gap-2">
                                 <button onclick="window.switchView('prognostics')" class="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded text-sm font-bold uppercase hover:bg-emerald-700 transition">
                                     <i data-lucide="trending-up" class="w-4 h-4"></i> Prognostics
@@ -210,6 +233,7 @@
                             </button>
                         </div>
 
+                        <!-- NOTICE BOARD ADMIN -->
                         <div class="p-3 bg-indigo-50 rounded border border-indigo-100">
                             <div class="text-xs font-bold text-indigo-700 uppercase mb-2">Notice Board Admin</div>
                             <form id="form-post-notice" class="flex flex-col gap-2">
@@ -227,6 +251,7 @@
                             <button id="btn-clear-notices" class="w-full mt-2 text-xs text-red-500 hover:underline text-center">Clear All Notices</button>
                         </div>
 
+                        <!-- RACE PROGRAMME DATA TOOLS -->
                         <div class="p-3 bg-slate-50 rounded border border-slate-100">
                             <div class="text-xs font-bold text-slate-500 uppercase mb-2">Race Programme Management</div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -237,6 +262,7 @@
                             </div>
                         </div>
 
+                        <!-- CREW LIST DATA TOOLS -->
                         <div class="p-3 bg-teal-50 rounded border border-teal-100">
                             <div class="text-xs font-bold text-teal-700 uppercase mb-2">Crew List Management</div>
                             <div class="grid grid-cols-2 gap-2">
@@ -246,6 +272,7 @@
                         </div>
                     </div>
                     
+                    <!-- Visible Buttons -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                         <button onclick="window.switchView('crews')" class="flex items-center justify-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 py-2 rounded text-sm font-medium transition border border-teal-200"><i data-lucide="users" class="w-4 h-4"></i> Crew List</button>
                         <button onclick="window.switchView('notices')" class="flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded text-sm font-medium transition border border-amber-200"><i data-lucide="bell" class="w-4 h-4"></i> Notices</button>
@@ -254,6 +281,7 @@
             </div>
         </div>
 
+        <!-- VIEW 3: CREW LIST -->
         <div id="view-crews" class="hidden max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
@@ -261,6 +289,7 @@
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" class="w-6 h-6 text-slate-600"></i> Crew List</h2>
                 </div>
                 
+                <!-- Crew Filters -->
                 <div class="flex items-center gap-2">
                     <div class="relative flex-grow">
                         <select id="filter-crew-athlete" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm font-medium">
@@ -282,12 +311,14 @@
             </div>
         </div>
 
+        <!-- VIEW 4: NOTICES -->
         <div id="view-notices" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
             <div class="flex justify-between items-center mb-4">
                 <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>
                 <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bell-ring" class="w-6 h-6 text-slate-600"></i> Notice Board</h2>
             </div>
             <div id="notices-container" class="space-y-4">
+                <!-- Dynamic Content -->
                 <div class="text-center py-20 text-slate-400">
                     <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
                     <p>No notices posted.</p>
@@ -295,6 +326,7 @@
             </div>
         </div>
 
+        <!-- VIEW 5: PROGNOSTICS -->
         <div id="view-prognostics" class="hidden max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
             <div class="flex justify-between items-center mb-4">
                 <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
@@ -346,6 +378,7 @@
                 </form>
             </div>
 
+            <!-- Results Table -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-200">
@@ -358,11 +391,13 @@
                         </tr>
                     </thead>
                     <tbody id="prog-results" class="divide-y divide-slate-100">
-                        </tbody>
+                        <!-- Dynamic Results -->
+                    </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- VIEW 6: RIGGING CALCULATOR -->
         <div id="view-rigging" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
             <div class="flex justify-between items-center mb-4">
                 <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
@@ -393,9 +428,17 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Inseam / Leg Length (cm)</label>
                             <input type="number" id="rig-inseam" value="84" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium" required>
                         </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arm Span (cm) <span class="lowercase font-normal text-slate-400">- Optional, defaults to height</span></label>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arm Span (cm) <span class="lowercase font-normal text-slate-400">- Optional</span></label>
                             <input type="number" id="rig-armspan" placeholder="e.g. 182" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Experience</label>
+                            <select id="rig-exp" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium">
+                                <option value="beginner">Beginner (More stable/lighter)</option>
+                                <option value="intermediate" selected>Intermediate (Standard)</option>
+                                <option value="advanced">Advanced (Aggressive/heavier)</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -405,6 +448,7 @@
                 </form>
             </div>
 
+            <!-- Rigging Results -->
             <div id="rigging-results" class="hidden bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm mb-4 border-b pb-2">Suggested Starting Rig</h3>
                 
@@ -434,6 +478,7 @@
 
     </div>
 
+    <!-- Crew Details Modal -->
     <div id="crew-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100">
             <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start">
@@ -450,10 +495,12 @@
                     <div><div class="text-[10px] uppercase text-slate-400 font-bold">Start</div><div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div></div>
                 </div>
                 <div class="space-y-3">
+                    <!-- Added Progression Field -->
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="git-merge" class="w-3 h-3"></i> Progression</div><div id="modal-progression" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200 italic">-</div></div>
                     
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
+                    <!-- Boat removed -->
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="user" class="w-3 h-3"></i> Coach</div><div id="modal-coach" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                 </div>
             </div>
@@ -461,6 +508,7 @@
         </div>
     </div>
 
+    <!-- Urgent Alert Modal -->
     <div id="urgent-modal" class="fixed inset-0 z-[110] bg-red-900/90 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-in fade-in duration-300">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-red-500 relative">
             <div class="bg-red-500 p-4 text-white flex items-center justify-center gap-3">
@@ -1128,6 +1176,7 @@
             const type = document.querySelector('input[name="rig-type"]:checked').value;
             const height = Number(document.getElementById('rig-height').value);
             const inseam = Number(document.getElementById('rig-inseam').value);
+            const exp = document.getElementById('rig-exp').value;
             
             // Use arm span if provided, else assume equal to height
             const armSpanRaw = document.getElementById('rig-armspan').value;
@@ -1135,26 +1184,38 @@
             
             let spread, oar, inboard;
             
+            // Adjustments based on experience
+            let expSpreadMod = 0;
+            let expInboardMod = 0;
+            
+            if (exp === 'beginner') {
+                expSpreadMod = type === 'scull' ? 1.5 : 0.5; // Wider for stability
+                expInboardMod = 1.0; // More inboard for lighter gearing
+            } else if (exp === 'advanced') {
+                expSpreadMod = type === 'scull' ? -1.0 : -0.5; // Narrower for more catch angle
+                expInboardMod = -0.5; // Less inboard for slightly heavier gearing
+            }
+            
             if (type === 'scull') {
                 document.getElementById('rig-res-span-label').textContent = 'Spread';
                 // Basic Scull Math Approximations
-                spread = 159 + ((height - 180) * 0.1);
-                spread = Math.min(Math.max(spread, 156), 163); // Cap between 156 - 163
+                spread = 159 + ((height - 180) * 0.1) + expSpreadMod;
+                spread = Math.min(Math.max(spread, 155), 164); // Cap
                 
                 oar = 287 + ((height - 180) * 0.2);
                 oar = Math.min(Math.max(oar, 280), 292); // Cap 280 - 292
                 
-                inboard = (spread / 2) + 7.5; // Basic overlap
+                inboard = (spread / 2) + 7.5 + expInboardMod; // Basic overlap
             } else {
                 document.getElementById('rig-res-span-label').textContent = 'Span';
                 // Basic Sweep Math Approximations
-                spread = 83.5 + ((height - 180) * 0.05);
-                spread = Math.min(Math.max(spread, 81), 86); // Cap between 81 - 86
+                spread = 83.5 + ((height - 180) * 0.05) + expSpreadMod;
+                spread = Math.min(Math.max(spread, 81), 86.5); // Cap
                 
                 oar = 373 + ((height - 180) * 0.2);
                 oar = Math.min(Math.max(oar, 368), 378); // Cap 368 - 378
                 
-                inboard = spread + 31; // Basic overlap rule
+                inboard = spread + 31 + expInboardMod; // Basic overlap rule
             }
 
             // Stretcher estimation (approx distance pin to heel)
