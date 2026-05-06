@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RegattaManager</title>
     
-    <!-- App Icon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eab308' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='white'/><path d='M3 21v-8h6v-3h6v5h6v6H3z' fill='none' stroke='%23eab308' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Prevent Pull-to-Refresh on mobile to feel more like an app */
@@ -54,24 +51,19 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans pb-10">
 
-    <!-- Notification Toast Container -->
     <div id="toast-container" class="fixed top-4 left-0 right-0 z-[100] flex justify-center pointer-events-none"></div>
 
-    <!-- APP CONTENT -->
     <div id="app-content">
         
-        <!-- Sticky Header -->
         <div class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-700">
             <div class="max-w-7xl mx-auto px-4 py-3">
                 <div class="flex flex-col xl:flex-row items-center justify-between gap-4 relative">
                     
-                    <!-- Brand (Left) -->
                     <div class="flex items-center justify-between w-full xl:w-auto z-10">
                         <div class="flex items-center gap-2 sm:gap-3">
                             <svg class="text-yellow-500 w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 21v-8h6v-3h6v5h6v6H3z' /></svg>
                             <h1 class="text-lg sm:text-2xl font-bold tracking-tight flex items-center h-full pt-1">RegattaManager</h1>
                             
-                            <!-- Connection & Badge -->
                             <div class="flex items-center ml-1 sm:ml-2 pt-1 border-r border-slate-700 pr-2 sm:pr-4 mr-1 sm:mr-2">
                                 <span id="group-badge" class="hidden text-[10px] sm:text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-mono border border-blue-400 mr-2 uppercase"></span>
                                 <button id="connection-btn" class="p-1 rounded hover:bg-slate-800 transition-colors" title="Connection Status">
@@ -79,7 +71,6 @@
                                 </button>
                             </div>
 
-                            <!-- NEW CLOCK POSITION (Beside Connected Icon) -->
                             <div class="flex flex-col items-start justify-center mr-auto sm:mr-0">
                                 <div class="font-mono text-xl sm:text-2xl font-bold text-blue-400 tracking-widest leading-none clock-display drop-shadow-md">00:00</div>
                                 <div class="text-[8px] sm:text-[9px] text-slate-400 uppercase tracking-wider font-bold leading-none mt-0.5">Official Time</div>
@@ -87,10 +78,8 @@
                         </div>
                     </div>
 
-                    <!-- Widgets (Right) -->
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto z-10 mt-2 sm:mt-0">
                         
-                        <!-- Updated Weather Widget with Wind Direction -->
                         <div id="weather-widget" class="h-10 sm:h-12 flex items-center gap-3 bg-slate-800/80 px-4 rounded-lg border border-slate-700 text-slate-300 text-sm w-full sm:w-auto min-w-[280px] justify-between shadow-sm">
                             <div class="flex items-center gap-1 relative group cursor-pointer">
                                 <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i>
@@ -106,7 +95,6 @@
                                 <span id="weather-temp" class="font-mono font-bold text-white text-lg">--°</span>
                             </div>
                             <div class="h-6 w-px bg-slate-700"></div>
-                            <!-- NEW: Wind Direction Tag -->
                             <div class="flex items-center gap-2 min-w-[80px] justify-end">
                                 <div class="flex flex-col items-end leading-none">
                                     <span id="weather-condition-tag" class="text-[10px] font-bold uppercase text-slate-500 tracking-wider">--</span>
@@ -131,16 +119,13 @@
             </div>
         </div>
 
-        <!-- VIEW 1: REGATTA PROGRAMME -->
         <div id="view-regatta" class="max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
                 <div class="flex items-center gap-3">
                     <h2 class="text-xl font-bold text-slate-800">Race Programme</h2>
                 </div>
                 
-                <!-- Filters Container -->
                 <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <!-- Coach Filter -->
                     <div class="relative flex-grow sm:flex-grow-0">
                         <select id="filter-coach" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
                             <option value="">Coach: All</option>
@@ -150,7 +135,6 @@
                         </div>
                     </div>
 
-                    <!-- Athlete Filter -->
                     <div class="relative flex-grow sm:flex-grow-0">
                         <select id="filter-athlete" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-1.5 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium">
                             <option value="">Athlete: All</option>
@@ -176,7 +160,6 @@
                 <p class="text-lg font-medium">No events scheduled</p>
             </div>
 
-            <!-- Admin Controls -->
             <div class="pt-8 border-t border-slate-200">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                     <div class="flex justify-between items-start mb-2">
@@ -184,10 +167,8 @@
                         <button type="button" id="btn-toggle-config" class="text-sm text-blue-600 hover:underline font-medium">Config</button>
                     </div>
                     
-                    <!-- VISIBLE TOOLS (No Code Required) -->
                     <div class="mb-4 space-y-2">
-                         <!-- Group Code -->
-                        <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                         <div class="bg-blue-50 p-3 rounded border border-blue-100">
                             <div class="text-xs font-bold text-blue-700 uppercase mb-1">Shared Regatta Code</div>
                             <div class="flex gap-2">
                                 <input type="text" id="input-group-code" placeholder="e.g. baycoast" class="flex-1 p-1 text-sm border rounded">
@@ -196,7 +177,6 @@
                             <p class="text-[10px] text-blue-500 mt-1">Enter a code to share this schedule with others.</p>
                         </div>
                         
-                        <!-- Notification Button (Smart Toggle) -->
                         <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
                             <button id="btn-enable-notifications" class="text-sm text-yellow-700 font-bold flex items-center justify-center gap-2 w-full transition-all">
                                 <i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>
@@ -204,29 +184,32 @@
                         </div>
                     </div>
 
-                    <!-- HIDDEN CONFIG PANEL (Requires Code) -->
                     <div id="config-panel" class="hidden mb-4 space-y-4 border-t border-slate-100 pt-4">
                         <div class="p-3 bg-slate-50 rounded text-sm space-y-2 border border-slate-100">
                             <div class="font-bold text-slate-600 uppercase text-xs mb-2">Settings</div>
                             <div class="flex justify-between items-center"><span>On Water Minutes Before:</span><input type="number" id="input-offset" value="35" class="w-16 p-1 border rounded text-center"></div>
                             <div class="flex justify-between items-center"><span>Warm Up Duration (mins):</span><input type="number" id="input-warmup" value="40" class="w-16 p-1 border rounded text-center"></div>
-                            <!-- Passcode Change Field -->
                             <div class="flex justify-between items-center mt-2 border-t border-slate-200 pt-2">
                                 <span>Admin Passcode:</span>
-                                <!-- REMOVED DEFAULT VALUE FROM HTML -->
                                 <input type="text" id="input-admin-passcode" placeholder="Default: 1992" class="w-32 p-1 border rounded text-center text-xs">
                             </div>
                         </div>
                         
-                        <!-- Prognostics Tool Button -->
-                        <div class="p-3 bg-emerald-50 rounded border border-emerald-100 mt-2">
-                            <div class="text-xs font-bold text-emerald-700 uppercase mb-2">Performance Tools</div>
-                            <button onclick="window.switchView('prognostics')" class="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded text-sm font-bold uppercase hover:bg-emerald-700 transition">
-                                <i data-lucide="trending-up" class="w-4 h-4"></i> Open Prognostics Tool
+                        <div class="p-3 bg-emerald-50 rounded border border-emerald-100 mt-2 flex flex-col gap-2">
+                            <div class="text-xs font-bold text-emerald-700 uppercase mb-1">Performance Tools</div>
+                            <div class="flex gap-2">
+                                <button onclick="window.switchView('prognostics')" class="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded text-sm font-bold uppercase hover:bg-emerald-700 transition">
+                                    <i data-lucide="trending-up" class="w-4 h-4"></i> Prognostics
+                                </button>
+                                <button onclick="window.downloadPrognostics()" class="bg-emerald-100 text-emerald-800 py-2 px-3 rounded hover:bg-emerald-200 transition font-bold" title="Download CSV">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <button onclick="window.switchView('rigging')" class="w-full flex items-center justify-center gap-2 bg-slate-700 text-white py-2 rounded text-sm font-bold uppercase hover:bg-slate-800 transition shadow-sm">
+                                <i data-lucide="wrench" class="w-4 h-4"></i> Rigging Setup Calculator
                             </button>
                         </div>
 
-                        <!-- NOTICE BOARD ADMIN -->
                         <div class="p-3 bg-indigo-50 rounded border border-indigo-100">
                             <div class="text-xs font-bold text-indigo-700 uppercase mb-2">Notice Board Admin</div>
                             <form id="form-post-notice" class="flex flex-col gap-2">
@@ -244,7 +227,6 @@
                             <button id="btn-clear-notices" class="w-full mt-2 text-xs text-red-500 hover:underline text-center">Clear All Notices</button>
                         </div>
 
-                        <!-- RACE PROGRAMME DATA TOOLS -->
                         <div class="p-3 bg-slate-50 rounded border border-slate-100">
                             <div class="text-xs font-bold text-slate-500 uppercase mb-2">Race Programme Management</div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -255,7 +237,6 @@
                             </div>
                         </div>
 
-                        <!-- CREW LIST DATA TOOLS -->
                         <div class="p-3 bg-teal-50 rounded border border-teal-100">
                             <div class="text-xs font-bold text-teal-700 uppercase mb-2">Crew List Management</div>
                             <div class="grid grid-cols-2 gap-2">
@@ -265,7 +246,6 @@
                         </div>
                     </div>
                     
-                    <!-- Visible Buttons -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                         <button onclick="window.switchView('crews')" class="flex items-center justify-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 py-2 rounded text-sm font-medium transition border border-teal-200"><i data-lucide="users" class="w-4 h-4"></i> Crew List</button>
                         <button onclick="window.switchView('notices')" class="flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded text-sm font-medium transition border border-amber-200"><i data-lucide="bell" class="w-4 h-4"></i> Notices</button>
@@ -274,7 +254,6 @@
             </div>
         </div>
 
-        <!-- VIEW 3: CREW LIST -->
         <div id="view-crews" class="hidden max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
@@ -282,7 +261,6 @@
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" class="w-6 h-6 text-slate-600"></i> Crew List</h2>
                 </div>
                 
-                <!-- Crew Filters -->
                 <div class="flex items-center gap-2">
                     <div class="relative flex-grow">
                         <select id="filter-crew-athlete" class="w-full appearance-none bg-white border border-slate-300 text-slate-700 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm font-medium">
@@ -304,14 +282,12 @@
             </div>
         </div>
 
-        <!-- VIEW 4: NOTICES -->
         <div id="view-notices" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
             <div class="flex justify-between items-center mb-4">
                 <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>
                 <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bell-ring" class="w-6 h-6 text-slate-600"></i> Notice Board</h2>
             </div>
             <div id="notices-container" class="space-y-4">
-                <!-- Dynamic Content -->
                 <div class="text-center py-20 text-slate-400">
                     <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
                     <p>No notices posted.</p>
@@ -319,11 +295,15 @@
             </div>
         </div>
 
-        <!-- VIEW 5: PROGNOSTICS -->
         <div id="view-prognostics" class="hidden max-w-4xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
             <div class="flex justify-between items-center mb-4">
                 <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
-                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="trending-up" class="w-6 h-6 text-slate-600"></i> Prognostic Calculator</h2>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="trending-up" class="w-6 h-6 text-slate-600"></i> Prognostics</h2>
+                    <button onclick="window.downloadPrognostics()" class="bg-white text-slate-600 p-2 rounded-full hover:bg-slate-100 transition shadow-sm border border-slate-200" title="Export to CSV">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
@@ -366,7 +346,6 @@
                 </form>
             </div>
 
-            <!-- Results Table -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-200">
@@ -379,14 +358,82 @@
                         </tr>
                     </thead>
                     <tbody id="prog-results" class="divide-y divide-slate-100">
-                        <!-- Dynamic Results -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
+
+        <div id="view-rigging" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="wrench" class="w-6 h-6 text-slate-600"></i> Setup Calculator</h2>
+            </div>
+            
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-sm text-slate-500 mb-4">Enter the rower's physical measurements to calculate a suggested baseline rigging setup. <span class="font-bold text-slate-700">These are starting points only and should be adjusted for comfort and technique.</span></p>
+
+                <form id="rigging-form" class="space-y-5">
+                    <div class="flex gap-4 mb-2">
+                        <label class="flex-1 border p-3 rounded-lg cursor-pointer hover:bg-slate-50 transition flex items-center gap-2">
+                            <input type="radio" name="rig-type" value="scull" checked class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            <span class="font-bold text-slate-700">Scull (2 Oars)</span>
+                        </label>
+                        <label class="flex-1 border p-3 rounded-lg cursor-pointer hover:bg-slate-50 transition flex items-center gap-2">
+                            <input type="radio" name="rig-type" value="sweep" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            <span class="font-bold text-slate-700">Sweep (1 Oar)</span>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Height (cm)</label>
+                            <input type="number" id="rig-height" value="180" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Inseam / Leg Length (cm)</label>
+                            <input type="number" id="rig-inseam" value="84" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium" required>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arm Span (cm) <span class="lowercase font-normal text-slate-400">- Optional, defaults to height</span></label>
+                            <input type="number" id="rig-armspan" placeholder="e.g. 182" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-slate-800 text-white font-bold py-3 rounded-lg hover:bg-slate-900 transition shadow-sm uppercase tracking-wide flex justify-center items-center gap-2">
+                        <i data-lucide="calculator" class="w-5 h-5"></i> Calculate Setup
+                    </button>
+                </form>
+            </div>
+
+            <div id="rigging-results" class="hidden bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm mb-4 border-b pb-2">Suggested Starting Rig</h3>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-100 text-center">
+                        <div id="rig-res-span-label" class="text-xs font-bold text-blue-700 uppercase mb-1">Spread</div>
+                        <div id="rig-res-span" class="font-mono text-2xl font-bold text-slate-800">160<span class="text-sm">cm</span></div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-100 text-center">
+                        <div class="text-xs font-bold text-blue-700 uppercase mb-1">Oar Length</div>
+                        <div id="rig-res-oar" class="font-mono text-2xl font-bold text-slate-800">288<span class="text-sm">cm</span></div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-100 text-center">
+                        <div class="text-xs font-bold text-blue-700 uppercase mb-1">Inboard</div>
+                        <div id="rig-res-inboard" class="font-mono text-2xl font-bold text-slate-800">88<span class="text-sm">cm</span></div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 text-center">
+                        <div class="text-xs font-bold text-slate-600 uppercase mb-1">Stretcher (Pin to Heel)</div>
+                        <div id="rig-res-stretcher" class="font-mono text-xl font-bold text-slate-800 mt-1">15<span class="text-sm">cm</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Crew Details Modal -->
     <div id="crew-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100">
             <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start">
@@ -403,12 +450,10 @@
                     <div><div class="text-[10px] uppercase text-slate-400 font-bold">Start</div><div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div></div>
                 </div>
                 <div class="space-y-3">
-                    <!-- Added Progression Field -->
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="git-merge" class="w-3 h-3"></i> Progression</div><div id="modal-progression" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200 italic">-</div></div>
                     
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
-                    <!-- Boat removed -->
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="user" class="w-3 h-3"></i> Coach</div><div id="modal-coach" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                 </div>
             </div>
@@ -416,7 +461,6 @@
         </div>
     </div>
 
-    <!-- Urgent Alert Modal -->
     <div id="urgent-modal" class="fixed inset-0 z-[110] bg-red-900/90 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-in fade-in duration-300">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-red-500 relative">
             <div class="bg-red-500 p-4 text-white flex items-center justify-center gap-3">
@@ -496,6 +540,7 @@
             filterAthlete: document.getElementById('filter-athlete'),
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
+            // Added progression to modal elements
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
@@ -900,6 +945,59 @@
             }
         }
 
+        function renderCrews() {
+            let displayCrews = state.crews;
+            if (state.filterCrewAthlete) {
+                displayCrews = displayCrews.filter(c => {
+                    const term = state.filterCrewAthlete;
+                    // Check rowers
+                    if(c.rowers && c.rowers.split(',').some(r => r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term)) return true;
+                    // Check cox
+                    if(c.cox && c.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '') === term) return true;
+                    return false;
+                });
+            }
+
+            // Sort by Event Num
+            displayCrews.sort((a,b) => {
+                const nA = parseInt(a.eventNum) || 0;
+                const nB = parseInt(b.eventNum) || 0;
+                return nA - nB;
+            });
+
+            if (displayCrews.length === 0) {
+                els.crewsContainer.innerHTML = `
+                    <div class="text-center py-20 text-slate-400">
+                        <i data-lucide="users" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                        <p>${state.crews.length > 0 ? "No crews found for this athlete." : "No crew data loaded."}</p>
+                    </div>`;
+            } else {
+                els.crewsContainer.innerHTML = displayCrews.map(c => `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-start mb-2 border-b border-slate-100 pb-2">
+                            <div>
+                                <span class="bg-teal-50 text-teal-700 font-bold px-2 py-1 rounded text-xs mr-2">#${c.eventNum}</span>
+                                <span class="font-bold text-slate-800">${c.eventCode} (${c.crewCode})</span>
+                                <span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded ml-2">${c.entity ? c.entity : ''}</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span class="text-slate-700 leading-relaxed">${c.rowers || 'No rowers listed'}</span>
+                            </div>
+                            ${c.cox ? `
+                            <div class="flex gap-2">
+                                <i data-lucide="megaphone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span class="text-slate-700 font-medium">${c.cox} (Cox)</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
         // Prognostics Render Function
         function renderPrognostics() {
             const tbody = document.getElementById('prog-results');
@@ -942,6 +1040,39 @@
             });
             lucide.createIcons();
         }
+
+        // Export Prognostics to CSV
+        window.downloadPrognostics = () => {
+            if (state.prognostics.length === 0) return alert("No data to export.");
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Date,Time,Boat,Grade,Distance,Actual Time,Target Time,Split,Percentage\n";
+            
+            state.prognostics.forEach(p => {
+                const date = p.datetime ? new Date(p.datetime).toLocaleDateString() : '';
+                const time = p.datetime ? new Date(p.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                const row = [
+                    date,
+                    time,
+                    p.boat.toUpperCase(),
+                    p.grade,
+                    p.dist,
+                    formatDuration2(p.actualSeconds),
+                    p.targetTime,
+                    p.split,
+                    p.percentage + "%"
+                ].join(",");
+                csvContent += row + "\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "prognostics_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
 
         // Handle Prognostic Calculation
         document.getElementById('prog-form').onsubmit = async (e) => {
@@ -989,6 +1120,54 @@
             await addDoc(getProgsRef(), newEntry); // Save to Firestore
             // Reset form time but keep date
             document.getElementById('prog-time').value = '';
+        };
+
+        // Handle Rigging Form Calculation
+        document.getElementById('rigging-form').onsubmit = (e) => {
+            e.preventDefault();
+            const type = document.querySelector('input[name="rig-type"]:checked').value;
+            const height = Number(document.getElementById('rig-height').value);
+            const inseam = Number(document.getElementById('rig-inseam').value);
+            
+            // Use arm span if provided, else assume equal to height
+            const armSpanRaw = document.getElementById('rig-armspan').value;
+            const armSpan = armSpanRaw ? Number(armSpanRaw) : height;
+            
+            let spread, oar, inboard;
+            
+            if (type === 'scull') {
+                document.getElementById('rig-res-span-label').textContent = 'Spread';
+                // Basic Scull Math Approximations
+                spread = 159 + ((height - 180) * 0.1);
+                spread = Math.min(Math.max(spread, 156), 163); // Cap between 156 - 163
+                
+                oar = 287 + ((height - 180) * 0.2);
+                oar = Math.min(Math.max(oar, 280), 292); // Cap 280 - 292
+                
+                inboard = (spread / 2) + 7.5; // Basic overlap
+            } else {
+                document.getElementById('rig-res-span-label').textContent = 'Span';
+                // Basic Sweep Math Approximations
+                spread = 83.5 + ((height - 180) * 0.05);
+                spread = Math.min(Math.max(spread, 81), 86); // Cap between 81 - 86
+                
+                oar = 373 + ((height - 180) * 0.2);
+                oar = Math.min(Math.max(oar, 368), 378); // Cap 368 - 378
+                
+                inboard = spread + 31; // Basic overlap rule
+            }
+
+            // Stretcher estimation (approx distance pin to heel)
+            // Very rough estimate: Inseam * ~0.18. 
+            // e.g. 84cm inseam -> ~15cm pin to heel.
+            let stretcher = Math.round(inseam * 0.18);
+
+            document.getElementById('rig-res-span').innerHTML = `${spread.toFixed(1)}<span class="text-sm">cm</span>`;
+            document.getElementById('rig-res-oar').innerHTML = `${Math.round(oar)}<span class="text-sm">cm</span>`;
+            document.getElementById('rig-res-inboard').innerHTML = `${inboard.toFixed(1)}<span class="text-sm">cm</span>`;
+            document.getElementById('rig-res-stretcher').innerHTML = `${stretcher}<span class="text-sm">cm</span>`;
+            
+            document.getElementById('rigging-results').classList.remove('hidden');
         };
 
         window.deletePrognostic = async (idx) => {
@@ -1112,7 +1291,9 @@
                     const d = snap.data();
                     // Load Passcode
                     state.configPasscode = d.passcode;
-                    document.getElementById('input-admin-passcode').value = d.passcode || '';
+                    // REMOVED DEFAULT PASSCODE FROM INPUT VALUE
+                    // if (d.passcode) document.getElementById('input-admin-passcode').value = d.passcode; 
+                    // Keeping input empty by default for security, will prompt only
 
                     if(d.delay !== undefined) {
                         triggerNotification(d.delay, previousDelay);
@@ -1317,7 +1498,7 @@
                         const headerRow = lines[headerIndex];
                         const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
                         const boatIndex = headers.indexOf('boat'); 
-                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 24; // Fallback
+                        const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; // Fallback
 
                         let d = {
                             eventNum: cols[3],
@@ -1474,7 +1655,7 @@
         };
         window.switchView = (v) => {
             // Hide all views first
-            ['view-regatta', 'view-crews', 'view-notices', 'view-prognostics'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['view-regatta', 'view-crews', 'view-notices', 'view-prognostics', 'view-rigging'].forEach(id => document.getElementById(id).classList.add('hidden'));
             
             // Show selected view
             if (v === 'regatta') {
@@ -1488,6 +1669,8 @@
             } else if (v === 'prognostics') {
                 document.getElementById('view-prognostics').classList.remove('hidden');
                 renderPrognostics();
+            } else if (v === 'rigging') {
+                document.getElementById('view-rigging').classList.remove('hidden');
             }
         };
 
