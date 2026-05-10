@@ -473,6 +473,23 @@
                         <div id="rig-res-stretcher" class="font-mono text-xl font-bold text-slate-800 mt-1">15<span class="text-sm">cm</span></div>
                     </div>
                 </div>
+
+                <!-- Target Angles Section -->
+                <h4 class="font-bold text-slate-700 uppercase tracking-wider text-xs mt-6 mb-3 border-b border-slate-100 pb-1">Target Angles</h4>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100 text-center">
+                        <div class="text-xs font-bold text-indigo-700 uppercase mb-1">Catch</div>
+                        <div id="rig-res-catch" class="font-mono text-xl font-bold text-slate-800">--<span class="text-sm">&deg;</span></div>
+                    </div>
+                    <div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100 text-center">
+                        <div class="text-xs font-bold text-indigo-700 uppercase mb-1">Finish</div>
+                        <div id="rig-res-finish" class="font-mono text-xl font-bold text-slate-800">--<span class="text-sm">&deg;</span></div>
+                    </div>
+                    <div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100 text-center">
+                        <div class="text-xs font-bold text-indigo-700 uppercase mb-1">Total Arc</div>
+                        <div id="rig-res-arc" class="font-mono text-xl font-bold text-slate-800">--<span class="text-sm">&deg;</span></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1223,10 +1240,26 @@
             // e.g. 84cm inseam -> ~15cm pin to heel.
             let stretcher = Math.round(inseam * 0.18);
 
+            // Calculate Target Angles based on discipline and experience
+            let catchAngle, finishAngle, arc;
+            if (type === 'scull') {
+                catchAngle = exp === 'beginner' ? '55-60' : (exp === 'advanced' ? '65-70' : '60-65');
+                finishAngle = exp === 'beginner' ? '35-40' : (exp === 'advanced' ? '40-45' : '40');
+                arc = exp === 'beginner' ? '90-100' : (exp === 'advanced' ? '105-115' : '100-105');
+            } else {
+                catchAngle = exp === 'beginner' ? '45-50' : (exp === 'advanced' ? '55-60' : '50-55');
+                finishAngle = exp === 'beginner' ? '25-30' : (exp === 'advanced' ? '30-35' : '30-33');
+                arc = exp === 'beginner' ? '70-80' : (exp === 'advanced' ? '85-95' : '80-88');
+            }
+
             document.getElementById('rig-res-span').innerHTML = `${spread.toFixed(1)}<span class="text-sm">cm</span>`;
             document.getElementById('rig-res-oar').innerHTML = `${Math.round(oar)}<span class="text-sm">cm</span>`;
             document.getElementById('rig-res-inboard').innerHTML = `${inboard.toFixed(1)}<span class="text-sm">cm</span>`;
             document.getElementById('rig-res-stretcher').innerHTML = `${stretcher}<span class="text-sm">cm</span>`;
+            
+            document.getElementById('rig-res-catch').innerHTML = `${catchAngle}<span class="text-sm">&deg;</span>`;
+            document.getElementById('rig-res-finish').innerHTML = `${finishAngle}<span class="text-sm">&deg;</span>`;
+            document.getElementById('rig-res-arc').innerHTML = `${arc}<span class="text-sm">&deg;</span>`;
             
             document.getElementById('rigging-results').classList.remove('hidden');
         };
