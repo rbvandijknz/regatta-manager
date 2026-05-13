@@ -419,7 +419,7 @@
                         </label>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Height (cm)</label>
                             <input type="number" id="rig-height" value="180" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium" required>
@@ -438,6 +438,22 @@
                                 <option value="beginner">Beginner (More stable/lighter)</option>
                                 <option value="intermediate" selected>Intermediate (Standard)</option>
                                 <option value="advanced">Advanced (Aggressive/heavier)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Boat Size</label>
+                            <select id="rig-boat-size" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium">
+                                <option value="small">Small (1x, 2x, 2-, 2+)</option>
+                                <option value="mid">Mid (4x, 4-, 4+)</option>
+                                <option value="large" selected>Large (8x, 8+)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Blade Profile</label>
+                            <select id="rig-blade" class="w-full p-2 border border-slate-300 rounded text-sm text-slate-800 font-medium">
+                                <option value="std" selected>Standard / Smoothie</option>
+                                <option value="comp">Concept2 Comp</option>
+                                <option value="fat2">Concept2 Fat2</option>
                             </select>
                         </div>
                     </div>
@@ -1194,6 +1210,8 @@
             const height = Number(document.getElementById('rig-height').value);
             const inseam = Number(document.getElementById('rig-inseam').value);
             const exp = document.getElementById('rig-exp').value;
+            const boatSize = document.getElementById('rig-boat-size').value;
+            const blade = document.getElementById('rig-blade').value;
             
             // Use arm span if provided, else assume equal to height
             const armSpanRaw = document.getElementById('rig-armspan').value;
@@ -1212,27 +1230,49 @@
                 expSpreadMod = type === 'scull' ? -1.0 : -0.5; // Narrower for more catch angle
                 expInboardMod = -0.5; // Less inboard for slightly heavier gearing
             }
+
+            // Adjustments based on Boat Size (larger boats = narrower spread, shorter oars)
+            let sizeSpreadMod = 0;
+            let sizeOarMod = 0;
+            if (type === 'scull') {
+                if (boatSize === 'mid') { sizeSpreadMod = -1.0; sizeOarMod = -1; }
+                else if (boatSize === 'large') { sizeSpreadMod = -2.0; sizeOarMod = -2; }
+            } else {
+                if (boatSize === 'small') { sizeSpreadMod = 1.5; sizeOarMod = 2; }
+                else if (boatSize === 'mid') { sizeSpreadMod = 1.0; sizeOarMod = 1; }
+            }
+
+            // Adjustments based on Blade Profile
+            let bladeOarMod = 0;
+            let bladeInboardMod = 0;
+            if (blade === 'fat2') {
+                bladeOarMod = type === 'scull' ? -2.5 : -3;
+                bladeInboardMod = type === 'scull' ? -1 : -1.5;
+            } else if (blade === 'comp') {
+                bladeOarMod = type === 'scull' ? -1 : -1.5;
+                bladeInboardMod = type === 'scull' ? -0.5 : -0.5;
+            }
             
             if (type === 'scull') {
                 document.getElementById('rig-res-span-label').textContent = 'Spread';
                 // Basic Scull Math Approximations
-                spread = 159 + ((height - 180) * 0.1) + expSpreadMod;
-                spread = Math.min(Math.max(spread, 155), 164); // Cap
+                spread = 159.5 + ((height - 180) * 0.1) + expSpreadMod + sizeSpreadMod;
+                spread = Math.min(Math.max(spread, 155), 165); // Cap
                 
-                oar = 287 + ((height - 180) * 0.2);
-                oar = Math.min(Math.max(oar, 280), 292); // Cap 280 - 292
+                oar = 288 + ((height - 180) * 0.2) + sizeOarMod + bladeOarMod;
+                oar = Math.min(Math.max(oar, 275), 295); // Cap
                 
-                inboard = (spread / 2) + 7.5 + expInboardMod; // Basic overlap
+                inboard = (spread / 2) + 8.0 + expInboardMod + bladeInboardMod; // Basic overlap
             } else {
                 document.getElementById('rig-res-span-label').textContent = 'Span';
                 // Basic Sweep Math Approximations
-                spread = 83.5 + ((height - 180) * 0.05) + expSpreadMod;
-                spread = Math.min(Math.max(spread, 81), 86.5); // Cap
+                spread = 83.5 + ((height - 180) * 0.05) + expSpreadMod + sizeSpreadMod;
+                spread = Math.min(Math.max(spread, 80), 87.5); // Cap
                 
-                oar = 373 + ((height - 180) * 0.2);
-                oar = Math.min(Math.max(oar, 368), 378); // Cap 368 - 378
+                oar = 373 + ((height - 180) * 0.2) + sizeOarMod + bladeOarMod;
+                oar = Math.min(Math.max(oar, 365), 380); // Cap
                 
-                inboard = spread + 31 + expInboardMod; // Basic overlap rule
+                inboard = spread + 31 + expInboardMod + bladeInboardMod; // Basic overlap rule
             }
 
             // Stretcher estimation (approx distance pin to heel)
