@@ -79,7 +79,7 @@
                                 </button>
                             </div>
 
-                            <!-- NEW CLOCK POSITION (Beside Connected Icon) -->
+                            <!-- Clock -->
                             <div class="flex flex-col items-start justify-center mr-auto sm:mr-0">
                                 <div class="font-mono text-xl sm:text-2xl font-bold text-blue-400 tracking-widest leading-none clock-display drop-shadow-md">00:00</div>
                                 <div class="text-[8px] sm:text-[9px] text-slate-400 uppercase tracking-wider font-bold leading-none mt-0.5">Official Time</div>
@@ -90,7 +90,7 @@
                     <!-- Widgets (Right) -->
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto z-10 mt-2 sm:mt-0">
                         
-                        <!-- Updated Weather Widget with Wind Direction -->
+                        <!-- Weather Widget -->
                         <div id="weather-widget" class="h-10 sm:h-12 flex items-center gap-3 bg-slate-800/80 px-4 rounded-lg border border-slate-700 text-slate-300 text-sm w-full sm:w-auto min-w-[280px] justify-between shadow-sm">
                             <div class="flex items-center gap-1 relative group cursor-pointer">
                                 <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i>
@@ -106,7 +106,7 @@
                                 <span id="weather-temp" class="font-mono font-bold text-white text-lg">--°</span>
                             </div>
                             <div class="h-6 w-px bg-slate-700"></div>
-                            <!-- NEW: Wind Direction Tag -->
+                            <!-- Wind Direction Tag -->
                             <div class="flex items-center gap-2 min-w-[80px] justify-end">
                                 <div class="flex flex-col items-end leading-none">
                                     <span id="weather-condition-tag" class="text-[10px] font-bold uppercase text-slate-500 tracking-wider">--</span>
@@ -118,6 +118,7 @@
                             </div>
                         </div>
 
+                        <!-- Delay Widget -->
                         <div class="h-10 sm:h-12 flex items-center justify-between gap-4 bg-slate-800 px-4 rounded-lg border border-slate-700 w-full sm:w-auto min-w-[240px] shadow-sm">
                             <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Delay</div>
                             <div class="flex items-center gap-3">
@@ -528,12 +529,10 @@
                     <div><div class="text-[10px] uppercase text-slate-400 font-bold">Start</div><div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div></div>
                 </div>
                 <div class="space-y-3">
-                    <!-- Added Progression Field -->
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="git-merge" class="w-3 h-3"></i> Progression</div><div id="modal-progression" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200 italic">-</div></div>
-                    
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
-                    <!-- Boat removed -->
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="anchor" class="w-3 h-3"></i> Boat</div><div id="modal-boat" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                     <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="user" class="w-3 h-3"></i> Coach</div><div id="modal-coach" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
                 </div>
             </div>
@@ -622,7 +621,7 @@
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
             // Added progression to modal elements
-            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression') },
+            modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression'), boat: document.getElementById('modal-boat') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
             // Prognostic Els
@@ -659,14 +658,12 @@
             return 0;
         };
 
-        // Format to single decimal representation if needed
         const formatDuration = (secs) => {
             const m = Math.floor(secs/60);
             const s = Math.floor(secs%60);
             const ms = Math.round((secs - Math.floor(secs))*10);
             return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(1,'0')}`; 
         };
-        // Format for 2 decimal display:
         const formatDuration2 = (secs) => {
              const m = Math.floor(secs/60);
              const s = Math.floor(secs%60);
@@ -703,17 +700,16 @@
             }
         };
 
-        // Check for Urgent Notices Popup
         function checkUrgentNotices() {
             if (!document.getElementById('urgent-modal')) return;
 
             const dismissed = JSON.parse(localStorage.getItem('cc_dismissed_alerts') || '[]');
             const alerts = state.notices
                 .filter(n => n.type === 'alert' && !dismissed.includes(n.id))
-                .sort((a,b) => b.timestamp - a.timestamp); // Newest first
+                .sort((a,b) => b.timestamp - a.timestamp); 
 
             if (alerts.length > 0) {
-                const alert = alerts[0]; // Show newest
+                const alert = alerts[0]; 
                 document.getElementById('urgent-title').textContent = alert.title;
                 document.getElementById('urgent-message').textContent = alert.message;
                 document.getElementById('urgent-time').textContent = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -721,7 +717,6 @@
                     dismissed.push(alert.id);
                     localStorage.setItem('cc_dismissed_alerts', JSON.stringify(dismissed));
                     document.getElementById('urgent-modal').classList.add('hidden');
-                    // Check again in case there are more
                     checkUrgentNotices();
                 };
                 document.getElementById('urgent-modal').classList.remove('hidden');
@@ -733,33 +728,25 @@
 
         const btnNotifications = document.getElementById('btn-enable-notifications');
         
-        // Function to update button state based on permission
         function updateNotificationButton() {
             if (!('Notification' in window)) {
                 btnNotifications.classList.add('hidden');
                 return;
             }
-            
             if (Notification.permission === 'granted') {
                 btnNotifications.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i> <span class="text-green-700">Test Alert</span>';
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
                 btnNotifications.classList.add('bg-green-50', 'border-green-100');
-                
-                // Update click handler to send test alert
                 btnNotifications.onclick = () => {
-                    new Notification("RegattaManager Test", { 
-                        body: "System notifications are working!", 
-                        icon: "https://via.placeholder.com/128?text=RM"
-                    });
+                    new Notification("RegattaManager Test", { body: "System notifications are working!", icon: "https://via.placeholder.com/128?text=RM" });
                     showToast("Test notification sent", "success");
                 };
             } else if (Notification.permission === 'denied') {
                 btnNotifications.innerHTML = '<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span class="text-red-700">Alerts Blocked</span>';
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
                 btnNotifications.classList.add('bg-red-50', 'border-red-100');
-                btnNotifications.onclick = () => alert("Notifications are blocked in your browser settings. Please enable them manually.");
+                btnNotifications.onclick = () => alert("Notifications are blocked in your browser settings.");
             } else {
-                // Default state (ask for permission)
                 btnNotifications.innerHTML = '<i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>';
                 btnNotifications.onclick = async () => {
                     try {
@@ -827,33 +814,24 @@
 
         // --- Filter Update Logic ---
         function updateFilters() {
-            // Update Coach Dropdown
-            const allCoaches = [...new Set(state.events.flatMap(ev => 
-                ev.coach ? ev.coach.split(',').map(c => c.trim()) : []
-            ).filter(Boolean))].sort();
-            
+            const allCoaches = [...new Set(state.events.flatMap(ev => ev.coach ? ev.coach.split(',').map(c => c.trim()) : []).filter(Boolean))].sort();
             const currentCoachOptions = Array.from(els.filterCoach.options).map(o => o.value).filter(v => v);
             
             if (allCoaches.length !== currentCoachOptions.length || !allCoaches.every((c, i) => c === currentCoachOptions[i])) {
                 let optionsHTML = '<option value="">Coach: All</option>';
-                allCoaches.forEach(c => {
-                    optionsHTML += `<option value="${c}">${c}</option>`;
-                });
+                allCoaches.forEach(c => optionsHTML += `<option value="${c}">${c}</option>`);
                 els.filterCoach.innerHTML = optionsHTML;
                 els.filterCoach.value = state.filterCoach;
             }
 
-            // Update Athlete Dropdown (Extract from Rowers and Cox columns)
             const allAthletes = new Set();
             state.events.forEach(ev => {
-                // Extract rowers
                 if (ev.rowers) {
                     ev.rowers.split(',').forEach(r => {
                         let name = r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '');
                         if (name) allAthletes.add(name);
                     });
                 }
-                // Extract Coxswain
                 if (ev.cox && ev.cox.trim()) {
                     let name = ev.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '');
                     allAthletes.add(name);
@@ -865,15 +843,12 @@
 
             if (sortedAthletes.length !== currentAthleteOptions.length || !sortedAthletes.every((c, i) => c === currentAthleteOptions[i])) {
                 let optionsHTML = '<option value="">Athlete: All</option>';
-                sortedAthletes.forEach(a => {
-                    optionsHTML += `<option value="${a}">${a}</option>`;
-                });
+                sortedAthletes.forEach(a => optionsHTML += `<option value="${a}">${a}</option>`);
                 els.filterAthlete.innerHTML = optionsHTML;
                 els.filterAthlete.value = state.filterAthlete;
             }
         }
 
-        // Update Crew List Filters
         function updateCrewFilters() {
             const allAthletes = new Set();
             state.crews.forEach(crew => {
@@ -906,7 +881,6 @@
             els.delayDisplay.textContent = `+${state.delay}m`;
             els.delayDisplay.className = state.delay > 0 ? "min-w-[3.5rem] text-center font-mono text-xl font-bold text-red-400 border-b-2 border-red-500/50" : "min-w-[3.5rem] text-center font-mono text-xl font-bold text-slate-200";
             
-            // Filter Events
             let displayEvents = state.events;
             if(state.filterCoach) {
                 displayEvents = displayEvents.filter(ev => {
@@ -1056,6 +1030,11 @@
                                 <i data-lucide="megaphone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
                                 <span class="text-slate-700 font-medium">${c.cox} (Cox)</span>
                             </div>` : ''}
+                            ${c.boat ? `
+                            <div class="flex gap-2 mt-1">
+                                <i data-lucide="anchor" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span class="text-slate-700 font-medium">${c.boat}</span>
+                            </div>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -1063,7 +1042,6 @@
             lucide.createIcons();
         }
 
-        // Prognostics Render Function
         function renderPrognostics() {
             const tbody = document.getElementById('prog-results');
             tbody.innerHTML = '';
@@ -1104,44 +1082,25 @@
             lucide.createIcons();
         }
 
-        // Export Prognostics to CSV
         window.downloadPrognostics = () => {
             if (state.prognostics.length === 0) return alert("No data to export.");
-            
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Date,Time,Boat,Grade,Distance,Actual Time,Target Time,Split,Percentage\n";
-            
+            let csvContent = "data:text/csv;charset=utf-8,Date,Time,Boat,Grade,Distance,Actual Time,Target Time,Split,Percentage\n";
             state.prognostics.forEach(p => {
                 const date = p.datetime ? new Date(p.datetime).toLocaleDateString() : '';
                 const time = p.datetime ? new Date(p.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                const row = [
-                    date,
-                    time,
-                    p.boat.toUpperCase(),
-                    p.grade,
-                    p.dist,
-                    formatDuration2(p.actualSeconds),
-                    p.targetTime,
-                    p.split,
-                    p.percentage + "%"
-                ].join(",");
+                const row = [date, time, p.boat.toUpperCase(), p.grade, p.dist, formatDuration2(p.actualSeconds), p.targetTime, p.split, p.percentage + "%"].join(",");
                 csvContent += row + "\n";
             });
-            
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", "prognostics_export.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         };
 
-        // Handle Prognostic Calculation
         document.getElementById('prog-form').onsubmit = async (e) => {
             e.preventDefault();
             if(!state.user) return;
-
             const boat = document.getElementById('prog-boat').value;
             const grade = document.getElementById('prog-grade').value;
             const dist = Number(document.getElementById('prog-dist').value);
@@ -1149,14 +1108,11 @@
             const dateTime = document.getElementById('prog-date').value;
 
             if(!boat || !grade || !dist || !timeStr) return alert("Please fill all fields");
-
             const standardStr = PROGNOSTIC_STANDARDS[boat]?.[grade];
-            
             if(!standardStr || standardStr === "nil") return alert(`No gold standard found for ${boat} ${grade}`);
 
             const standardSeconds = parseDuration(standardStr);
             const actualSeconds = parseDuration(timeStr);
-            
             if(standardSeconds === 0 || actualSeconds === 0) return alert("Invalid time format");
 
             const targetSeconds = standardSeconds * (dist / 2000);
@@ -1164,18 +1120,11 @@
             const splitSeconds = actualSeconds / (dist / 500);
             const split = formatDuration2(splitSeconds);
 
-            const newEntry = {
-                boat, grade, dist, actualSeconds, 
-                targetTime: formatDuration2(targetSeconds),
-                split, percentage, timestamp: Date.now(),
-                datetime: dateTime || new Date().toISOString()
-            };
-
+            const newEntry = { boat, grade, dist, actualSeconds, targetTime: formatDuration2(targetSeconds), split, percentage, timestamp: Date.now(), datetime: dateTime || new Date().toISOString() };
             await addDoc(getProgsRef(), newEntry); 
             document.getElementById('prog-time').value = '';
         };
 
-        // Handle Rigging Form Calculation
         document.getElementById('rigging-form').onsubmit = (e) => {
             e.preventDefault();
             const type = document.querySelector('input[name="rig-type"]:checked').value;
@@ -1185,24 +1134,13 @@
             const boatSize = document.getElementById('rig-boat-size').value;
             const blade = document.getElementById('rig-blade').value;
             
-            const armSpanRaw = document.getElementById('rig-armspan').value;
-            const armSpan = armSpanRaw ? Number(armSpanRaw) : height;
-            
             let spread, oar, inboard;
+            let expSpreadMod = 0, expInboardMod = 0;
             
-            let expSpreadMod = 0;
-            let expInboardMod = 0;
-            
-            if (exp === 'beginner') {
-                expSpreadMod = type === 'scull' ? 1.5 : 0.5; 
-                expInboardMod = 1.0; 
-            } else if (exp === 'advanced') {
-                expSpreadMod = type === 'scull' ? -1.0 : -0.5; 
-                expInboardMod = -0.5; 
-            }
+            if (exp === 'beginner') { expSpreadMod = type === 'scull' ? 1.5 : 0.5; expInboardMod = 1.0; } 
+            else if (exp === 'advanced') { expSpreadMod = type === 'scull' ? -1.0 : -0.5; expInboardMod = -0.5; }
 
-            let sizeSpreadMod = 0;
-            let sizeOarMod = 0;
+            let sizeSpreadMod = 0, sizeOarMod = 0;
             if (type === 'scull') {
                 if (boatSize === 'mid') { sizeSpreadMod = -1.0; sizeOarMod = -1; }
                 else if (boatSize === 'large') { sizeSpreadMod = -2.0; sizeOarMod = -2; }
@@ -1211,38 +1149,27 @@
                 else if (boatSize === 'mid') { sizeSpreadMod = 1.0; sizeOarMod = 1; }
             }
 
-            let bladeOarMod = 0;
-            let bladeInboardMod = 0;
-            if (blade === 'fat2') {
-                bladeOarMod = type === 'scull' ? -2.5 : -3;
-                bladeInboardMod = type === 'scull' ? -1 : -1.5;
-            } else if (blade === 'comp') {
-                bladeOarMod = type === 'scull' ? -1 : -1.5;
-                bladeInboardMod = type === 'scull' ? -0.5 : -0.5;
-            }
+            let bladeOarMod = 0, bladeInboardMod = 0;
+            if (blade === 'fat2') { bladeOarMod = type === 'scull' ? -2.5 : -3; bladeInboardMod = type === 'scull' ? -1 : -1.5; } 
+            else if (blade === 'comp') { bladeOarMod = type === 'scull' ? -1 : -1.5; bladeInboardMod = type === 'scull' ? -0.5 : -0.5; }
             
             if (type === 'scull') {
                 document.getElementById('rig-res-span-label').textContent = 'Spread';
                 spread = 159.5 + ((height - 180) * 0.1) + expSpreadMod + sizeSpreadMod;
                 spread = Math.min(Math.max(spread, 155), 165); 
-                
                 oar = 288 + ((height - 180) * 0.2) + sizeOarMod + bladeOarMod;
                 oar = Math.min(Math.max(oar, 275), 295); 
-                
-                inboard = (spread / 2) + 8.0 + expInboardMod + bladeInboardMod; 
+                inboard = (spread / 2) + 8.0 + expInboardMod + bladeInboardMod;
             } else {
                 document.getElementById('rig-res-span-label').textContent = 'Span';
                 spread = 83.5 + ((height - 180) * 0.05) + expSpreadMod + sizeSpreadMod;
                 spread = Math.min(Math.max(spread, 80), 87.5); 
-                
                 oar = 373 + ((height - 180) * 0.2) + sizeOarMod + bladeOarMod;
                 oar = Math.min(Math.max(oar, 365), 380); 
-                
                 inboard = spread + 31 + expInboardMod + bladeInboardMod; 
             }
 
             let stretcher = Math.round(inseam * 0.18);
-
             let catchAngle, finishAngle, arc;
             if (type === 'scull') {
                 catchAngle = exp === 'beginner' ? '55-60' : (exp === 'advanced' ? '65-70' : '60-65');
@@ -1258,67 +1185,31 @@
             document.getElementById('rig-res-oar').innerHTML = `${Math.round(oar)}<span class="text-sm">cm</span>`;
             document.getElementById('rig-res-inboard').innerHTML = `${inboard.toFixed(1)}<span class="text-sm">cm</span>`;
             document.getElementById('rig-res-stretcher').innerHTML = `${stretcher}<span class="text-sm">cm</span>`;
-            
             document.getElementById('rig-res-catch').innerHTML = `${catchAngle}<span class="text-sm">&deg;</span>`;
             document.getElementById('rig-res-finish').innerHTML = `${finishAngle}<span class="text-sm">&deg;</span>`;
             document.getElementById('rig-res-arc').innerHTML = `${arc}<span class="text-sm">&deg;</span>`;
-            
             document.getElementById('rigging-results').classList.remove('hidden');
         };
 
-        window.deletePrognostic = async (idx) => {
-             if(state.prognostics[idx].id) {
-                 await deleteDoc(doc(getProgsRef(), state.prognostics[idx].id));
-             }
-        };
-
+        window.deletePrognostic = async (idx) => { if(state.prognostics[idx].id) await deleteDoc(doc(getProgsRef(), state.prognostics[idx].id)); };
 
         function renderNotices() {
             const container = document.getElementById('notices-container');
             if (state.notices.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-20 text-slate-400">
-                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                        <p>No notices posted.</p>
-                    </div>`;
+                container.innerHTML = `<div class="text-center py-20 text-slate-400"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i><p>No notices posted.</p></div>`;
             } else {
                 const sorted = [...state.notices].sort((a,b) => b.timestamp - a.timestamp);
-                
                 container.innerHTML = sorted.map(n => {
                     const time = new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    let colors = "bg-white border-slate-200";
-                    let icon = "info";
-                    let iconColor = "text-blue-500";
-                    
-                    if(n.type === 'warn') { 
-                        colors = "bg-orange-50 border-orange-200"; 
-                        icon = "alert-triangle"; 
-                        iconColor = "text-orange-500"; 
-                    }
-                    if(n.type === 'alert') { 
-                        colors = "bg-red-50 border-red-200"; 
-                        icon = "megaphone"; 
-                        iconColor = "text-red-500"; 
-                    }
-
-                    return `
-                        <div class="p-4 rounded-xl border shadow-sm ${colors} flex gap-4">
-                            <div class="shrink-0 mt-1"><i data-lucide="${icon}" class="w-6 h-6 ${iconColor}"></i></div>
-                            <div class="flex-grow">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="font-bold text-slate-800 text-lg">${n.title}</h3>
-                                    <span class="text-xs font-mono text-slate-500 bg-white/50 px-2 py-1 rounded">${time}</span>
-                                </div>
-                                <p class="text-slate-700 mt-1 whitespace-pre-wrap text-sm leading-relaxed">${n.message}</p>
-                            </div>
-                        </div>
-                    `;
+                    let colors = "bg-white border-slate-200", icon = "info", iconColor = "text-blue-500";
+                    if(n.type === 'warn') { colors = "bg-orange-50 border-orange-200"; icon = "alert-triangle"; iconColor = "text-orange-500"; }
+                    if(n.type === 'alert') { colors = "bg-red-50 border-red-200"; icon = "megaphone"; iconColor = "text-red-500"; }
+                    return `<div class="p-4 rounded-xl border shadow-sm ${colors} flex gap-4"><div class="shrink-0 mt-1"><i data-lucide="${icon}" class="w-6 h-6 ${iconColor}"></i></div><div class="flex-grow"><div class="flex justify-between items-start"><h3 class="font-bold text-slate-800 text-lg">${n.title}</h3><span class="text-xs font-mono text-slate-500 bg-white/50 px-2 py-1 rounded">${time}</span></div><p class="text-slate-700 mt-1 whitespace-pre-wrap text-sm leading-relaxed">${n.message}</p></div></div>`;
                 }).join('');
             }
             lucide.createIcons();
         }
 
-        // --- Listeners ---
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
         initAuth();
 
@@ -1327,80 +1218,42 @@
         onAuthStateChanged(auth, (u) => {
             state.user = u;
             if(u) {
-                els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>';
-                lucide.createIcons();
+                els.connectionBtn.innerHTML = '<i data-lucide="cloud" class="w-5 h-5 text-green-400"></i>'; lucide.createIcons();
                 if(state.groupCode) els.groupInput.value = state.groupCode;
                 setupListeners();
                 els.weatherWidget.select.value = state.locationKey;
-                fetchWeather();
-                setInterval(fetchWeather, 900000);
+                fetchWeather(); setInterval(fetchWeather, 900000);
             } else {
-                els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>';
-                lucide.createIcons();
+                els.connectionBtn.innerHTML = '<i data-lucide="cloud-off" class="w-5 h-5 text-red-400"></i>'; lucide.createIcons();
             }
         });
 
         function setupListeners() {
-            if(unsubscribeEvents) unsubscribeEvents();
-            if(unsubscribeConfig) unsubscribeConfig();
-            if(unsubscribeCrews) unsubscribeCrews();
-            if(unsubscribeNotices) unsubscribeNotices();
-            if(unsubscribeProgs) unsubscribeProgs();
-
-            state.events = [];
-            state.crews = [];
-            state.notices = [];
-            state.prognostics = [];
-            previousDelay = null;
+            if(unsubscribeEvents) unsubscribeEvents(); if(unsubscribeConfig) unsubscribeConfig(); if(unsubscribeCrews) unsubscribeCrews(); if(unsubscribeNotices) unsubscribeNotices(); if(unsubscribeProgs) unsubscribeProgs();
+            state.events = []; state.crews = []; state.notices = []; state.prognostics = []; previousDelay = null;
             render();
 
-            unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => {
-                state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                updateFilters(); 
-                render();
-            });
-
-            unsubscribeCrews = onSnapshot(getCrewsRef(), (snap) => {
-                state.crews = snap.docs.map(d => d.data());
-                updateCrewFilters();
-                if(!document.getElementById('view-crews').classList.contains('hidden')) renderCrews();
-            });
-
-            unsubscribeNotices = onSnapshot(getNoticesRef(), (snap) => {
-                state.notices = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                checkUrgentNotices(); 
-                if(!document.getElementById('view-notices').classList.contains('hidden')) renderNotices();
-            });
-            
-            unsubscribeProgs = onSnapshot(getProgsRef(), (snap) => {
-                state.prognostics = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                state.prognostics.sort((a,b) => b.timestamp - a.timestamp);
-                if(!document.getElementById('view-prognostics').classList.contains('hidden')) renderPrognostics();
-            });
+            unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => { state.events = snap.docs.map(d => ({id: d.id, ...d.data()})); updateFilters(); render(); });
+            unsubscribeCrews = onSnapshot(getCrewsRef(), (snap) => { state.crews = snap.docs.map(d => d.data()); updateCrewFilters(); if(!document.getElementById('view-crews').classList.contains('hidden')) renderCrews(); });
+            unsubscribeNotices = onSnapshot(getNoticesRef(), (snap) => { state.notices = snap.docs.map(d => ({id: d.id, ...d.data()})); checkUrgentNotices(); if(!document.getElementById('view-notices').classList.contains('hidden')) renderNotices(); });
+            unsubscribeProgs = onSnapshot(getProgsRef(), (snap) => { state.prognostics = snap.docs.map(d => ({id: d.id, ...d.data()})); state.prognostics.sort((a,b) => b.timestamp - a.timestamp); if(!document.getElementById('view-prognostics').classList.contains('hidden')) renderPrognostics(); });
 
             unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
                 if(snap.exists()) {
                     const d = snap.data();
                     state.configPasscode = d.passcode;
-
-                    if(d.delay !== undefined) {
-                        triggerNotification(d.delay, previousDelay);
-                        previousDelay = d.delay;
-                        state.delay = d.delay;
-                    }
+                    if(d.delay !== undefined) { triggerNotification(d.delay, previousDelay); previousDelay = d.delay; state.delay = d.delay; }
                     if(d.settings) state.settings = d.settings;
                     document.getElementById('input-offset').value = state.settings.onWaterOffset;
                     document.getElementById('input-warmup').value = state.settings.warmUpDuration;
                     render();
                 } else {
-                    state.delay = 0;
-                    previousDelay = 0;
-                    state.configPasscode = null;
-                    render();
+                    state.delay = 0; previousDelay = 0; state.configPasscode = null; render();
                 }
             });
         }
 
+        // Global Handlers
         els.weatherWidget.select.onchange = (e) => { state.locationKey = e.target.value; localStorage.setItem('regatta_location', e.target.value); els.weatherWidget.temp.textContent = "--"; fetchWeather(); };
         els.filterCoach.onchange = (e) => { state.filterCoach = e.target.value; if(state.filterCoach) { state.filterAthlete = ''; els.filterAthlete.value = ''; } render(); };
         els.filterAthlete.onchange = (e) => { state.filterAthlete = e.target.value; if(state.filterAthlete) { state.filterCoach = ''; els.filterCoach.value = ''; } render(); };
@@ -1408,11 +1261,7 @@
 
         document.getElementById('btn-join-group').onclick = () => { 
             const code = document.getElementById('input-group-code').value.trim().toLowerCase(); 
-            if(code !== state.groupCode) { 
-                state.groupCode = code; 
-                localStorage.setItem('regatta_group_code', code); 
-                setupListeners(); 
-            } 
+            if(code !== state.groupCode) { state.groupCode = code; localStorage.setItem('regatta_group_code', code); setupListeners(); } 
         };
 
         window.openModal = (id) => { 
@@ -1421,15 +1270,13 @@
             els.modal.eventNum.textContent = `#${ev.eventNum}`;
             els.modal.alpha.textContent = ev.alpha || '-';
             els.modal.crew.textContent = ev.crew;
-            const base = timeToMinutes(ev.originalTime);
-            const delayed = base + state.delay;
-            const onWater = delayed - state.settings.onWaterOffset;
-            const warmUp = onWater - state.settings.warmUpDuration;
+            const base = timeToMinutes(ev.originalTime); const delayed = base + state.delay; const onWater = delayed - state.settings.onWaterOffset; const warmUp = onWater - state.settings.warmUpDuration;
             els.modal.warmup.textContent = formatDisplayTime(warmUp);
             els.modal.onwater.textContent = formatDisplayTime(onWater);
             els.modal.start.textContent = formatDisplayTime(delayed);
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
+            els.modal.boat.textContent = ev.boat || 'Not specified';
             els.modal.coach.textContent = ev.coach || 'Not specified';
             els.modal.progression.textContent = ev.progression || 'None/Final';
             els.modal.el.classList.remove('hidden');
@@ -1439,19 +1286,9 @@
         document.getElementById('btn-toggle-config').onclick = () => {
             const panel = document.getElementById('config-panel');
             if (panel.classList.contains('hidden')) {
-                if (!state.configPasscode) {
-                    panel.classList.remove('hidden');
-                } else {
-                    const code = prompt("Enter Admin Passcode:");
-                    if (code === state.configPasscode) {
-                        panel.classList.remove('hidden');
-                    } else if (code !== null) {
-                        alert("Incorrect passcode.");
-                    }
-                }
-            } else {
-                panel.classList.add('hidden');
-            }
+                if (!state.configPasscode) panel.classList.remove('hidden');
+                else { const code = prompt("Enter Admin Passcode:"); if (code === state.configPasscode) panel.classList.remove('hidden'); else if (code !== null) alert("Incorrect passcode."); }
+            } else panel.classList.add('hidden');
         };
         
         window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
@@ -1464,9 +1301,7 @@
             const newPasscode = document.getElementById('input-admin-passcode').value || null;
             await setDoc(getConfigRef(), { delay: state.delay, settings: s, passcode: newPasscode }, { merge: true });
         };
-        document.getElementById('input-offset').onchange = updateSettings;
-        document.getElementById('input-warmup').onchange = updateSettings;
-        document.getElementById('input-admin-passcode').onchange = updateSettings;
+        document.getElementById('input-offset').onchange = updateSettings; document.getElementById('input-warmup').onchange = updateSettings; document.getElementById('input-admin-passcode').onchange = updateSettings;
 
         document.getElementById('btn-clear').onclick = async () => {
             if(!state.user || !confirm("Delete all EVENTS from the schedule?")) return;
@@ -1480,245 +1315,153 @@
             if(!state.user || !confirm("Delete all CREW LIST data?")) return;
             const batch = writeBatch(db);
             const snapshot = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js').then(mod => mod.getDocs(getCrewsRef()));
-            snapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-            await batch.commit();
-            alert("Crew list cleared.");
+            snapshot.forEach(doc => batch.delete(doc.ref));
+            await batch.commit(); alert("Crew list cleared.");
         };
 
         document.getElementById('form-post-notice').onsubmit = async (e) => {
-            e.preventDefault();
-            if (!state.user) return;
-            
-            const title = document.getElementById('input-notice-title').value;
-            const msg = document.getElementById('input-notice-msg').value;
-            const type = document.getElementById('input-notice-type').value;
-            
-            if(title && msg) {
-                await addDoc(getNoticesRef(), { title: title, message: msg, type: type, timestamp: Date.now() });
-                document.getElementById('input-notice-title').value = '';
-                document.getElementById('input-notice-msg').value = '';
-                alert("Notice Posted");
-            }
+            e.preventDefault(); if (!state.user) return;
+            const title = document.getElementById('input-notice-title').value; const msg = document.getElementById('input-notice-msg').value; const type = document.getElementById('input-notice-type').value;
+            if(title && msg) { await addDoc(getNoticesRef(), { title, message: msg, type, timestamp: Date.now() }); document.getElementById('input-notice-title').value = ''; document.getElementById('input-notice-msg').value = ''; alert("Notice Posted"); }
         };
 
         document.getElementById('btn-clear-notices').onclick = async () => {
             if(!state.user || !confirm("Clear ALL notices?")) return;
             const batch = writeBatch(db);
             const snapshot = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js').then(mod => mod.getDocs(getNoticesRef()));
-            snapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-            await batch.commit();
-            alert("Notices cleared.");
+            snapshot.forEach(doc => batch.delete(doc.ref));
+            await batch.commit(); alert("Notices cleared.");
         };
 
         document.getElementById('input-csv').onchange = (e) => {
-            const file = e.target.files[0];
-            if(!file || !state.user) return;
+            const file = e.target.files[0]; if(!file || !state.user) return;
             const r = new FileReader();
             r.onload = async (evt) => {
-                const text = evt.target.result;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                const batch = writeBatch(db);
-                const ref = getEventsRef();
-                let count = 0;
-                let headerIndex = -1;
-                let isRegattaFormat = false;
+                const lines = evt.target.result.split('\n').map(l => l.trim()).filter(l => l);
+                const batch = writeBatch(db); const ref = getEventsRef(); let count = 0; let headerIndex = -1; let isRegattaFormat = false;
+                
                 for(let i=0; i<Math.min(10, lines.length); i++) {
-                    if(lines[i].toLowerCase().startsWith('race,day,time')) {
-                        headerIndex = i;
-                        isRegattaFormat = true;
-                        break;
-                    }
+                    if(lines[i].toLowerCase().startsWith('race,day,time')) { headerIndex = i; isRegattaFormat = true; break; }
                 }
+                
                 if (isRegattaFormat) {
                     const headerRow = lines[headerIndex];
-                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
+                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, ''));
                     const boatIndex = headers.findIndex(h => h.includes('boat')); 
-                    const safeBoatIndex = boatIndex > -1 ? boatIndex : 15;
+                    const safeBoatIndex = boatIndex > -1 ? boatIndex : 15; 
 
                     for (let i = headerIndex + 1; i < lines.length; i++) {
                         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                         if (cols.length < 10) continue; 
-                        let rawProgression = cols[6] || '';
-                        let computedProgression = rawProgression;
-                        if (!computedProgression.trim()) {
-                            const round = cols[5] || '';
-                            const division = cols[7] || '';
-                            if(round) {
-                                const fmtRound = round.charAt(0).toUpperCase() + round.slice(1);
-                                computedProgression = division ? `${division} ${fmtRound}` : fmtRound;
-                            }
+                        let computedProgression = cols[6] || '';
+                        if (!computedProgression.trim() && cols[5]) {
+                            computedProgression = cols[7] ? `${cols[7]} ${cols[5].charAt(0).toUpperCase() + cols[5].slice(1)}` : (cols[5].charAt(0).toUpperCase() + cols[5].slice(1));
                         }
                         
                         let d = {
-                            eventNum: cols[3],
-                            alpha: cols[8],
-                            crew: cols[4],
-                            originalTime: cols[2],
-                            progression: computedProgression,
-                            cox: cols[12] || '',     
-                            rowers: cols[11] || '',
-                            coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
-                            boat: cols[safeBoatIndex] || '', 
-                            crewCode: cols[9] || '', 
-                            entity: cols[10] || '' 
+                            eventNum: cols[3], alpha: cols[8], crew: cols[4], originalTime: cols[2], progression: computedProgression,
+                            cox: cols[12] || '', rowers: cols[11] || '', coach: [cols[13], cols[14]].filter(c => c && c.trim()).join(', '),
+                            boat: cols[safeBoatIndex] || '', crewCode: cols[9] || '', entity: cols[10] || '' 
                         };
-                        if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) {
-                            batch.set(doc(ref), d);
-                            count++;
-                        }
+                        if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
                     }
                 } else {
+                    const headerRow = lines[0];
+                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, ''));
+                    const boatIndex = headers.findIndex(h => h.includes('boat')); 
+                    const safeBoatIndex = boatIndex > -1 ? boatIndex : 6;
+                    
                     lines.forEach((line, idx) => {
-                        if(!line.trim()) return;
+                        if(idx === 0) return;
                         const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                        if((cols[0].toLowerCase().includes('event') || cols[0].toLowerCase().includes('number')) && idx === 0) return;
                         let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
-                        if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; d.coach=cols[7]; }
-                        else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[6]; }
+                        if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[safeBoatIndex]||cols[6]; d.coach=cols[7]; }
+                        else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[safeBoatIndex]||cols[6]; }
                         else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
                         else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
                         else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
                         else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
-                        if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { 
-                            batch.set(doc(ref), d); 
-                            count++; 
-                        }
+                        if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
                     });
                 }
-                if(count > 0) {
-                    await batch.commit();
-                    alert(`Successfully imported ${count} events.`);
-                } else {
-                    alert("No valid rows found. Please check the CSV format.");
-                }
+                if(count > 0) { await batch.commit(); alert(`Successfully imported ${count} events.`); } else { alert("No valid rows found. Please check the CSV format."); }
             };
-            r.readAsText(file);
-            e.target.value = null;
+            r.readAsText(file); e.target.value = null;
         };
 
         document.getElementById('input-crew-csv').onchange = (e) => {
-            const file = e.target.files[0];
-            if(!file || !state.user) return;
+            const file = e.target.files[0]; if(!file || !state.user) return;
             const r = new FileReader();
             r.onload = async (evt) => {
-                const text = evt.target.result;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                const batch = writeBatch(db);
-                const ref = getCrewsRef();
-                let count = 0;
-                
-                let headerIndex = -1;
-                let isRegattaFormat = false;
+                const lines = evt.target.result.split('\n').map(l => l.trim()).filter(l => l);
+                const batch = writeBatch(db); const ref = getCrewsRef(); let count = 0; let headerIndex = -1; let isRegattaFormat = false;
 
                 for(let i=0; i<Math.min(10, lines.length); i++) {
-                    if(lines[i].toLowerCase().startsWith('race,day,time')) {
-                        headerIndex = i;
-                        isRegattaFormat = true;
-                        break;
-                    }
+                    if(lines[i].toLowerCase().startsWith('race,day,time')) { headerIndex = i; isRegattaFormat = true; break; }
                 }
 
                 if (isRegattaFormat) {
                     const headerRow = lines[headerIndex];
-                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
+                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, ''));
                     const boatIndex = headers.findIndex(h => h.includes('boat')); 
                     const safeBoatIndex = boatIndex > -1 ? boatIndex : 15;
 
                     for (let i = headerIndex + 1; i < lines.length; i++) {
                         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                         if (cols.length < 13) continue;
-
-                        const d = {
-                            eventNum: cols[3],
-                            eventCode: cols[4],
-                            crewCode: cols[9],
-                            entity: cols[10],
-                            rowers: cols[11],
-                            cox: cols[12] || '',
-                            boat: cols[safeBoatIndex] || '' 
-                        };
+                        const d = { eventNum: cols[3], eventCode: cols[4], crewCode: cols[9], entity: cols[10], rowers: cols[11], cox: cols[12] || '', boat: cols[safeBoatIndex] || '' };
                         const docId = `${d.eventNum}_${d.crewCode}_${d.entity || 'x'}`.replace(/[^a-zA-Z0-9]/g, '_');
-                        batch.set(doc(ref, docId), d);
-                        count++;
+                        batch.set(doc(ref, docId), d); count++;
                     }
-
                 } else {
+                    const headerRow = lines[0];
+                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, ''));
+                    const boatIndex = headers.findIndex(h => h.includes('boat')); 
+                    const safeBoatIndex = boatIndex > -1 ? boatIndex : 6;
+
                     lines.forEach((line, idx) => {
+                        if(idx === 0) return;
                         const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                        if(idx === 0 && (cols[0].includes('Event') || cols[0].includes('#'))) return;
-                        
                         if (cols.length >= 5) {
-                            const d = {
-                                eventNum: cols[0],
-                                eventCode: cols[1],
-                                crewCode: cols[2],
-                                entity: cols[3],
-                                rowers: cols[4],
-                                cox: cols[5] || ''
-                            };
+                            const d = { eventNum: cols[0], eventCode: cols[1], crewCode: cols[2], entity: cols[3], rowers: cols[4], cox: cols[5] || '', boat: cols[safeBoatIndex] || '' };
                             const docId = `${d.eventNum}_${d.crewCode}`.replace(/\W/g, '_');
-                            batch.set(doc(ref, docId), d);
-                            count++;
+                            batch.set(doc(ref, docId), d); count++;
                         }
                     });
                 }
-
-                if(count > 0) {
-                    await batch.commit();
-                    alert(`Imported ${count} crews successfully.`);
-                } else {
-                    alert("No valid crew rows found.");
-                }
+                if(count > 0) { await batch.commit(); alert(`Imported ${count} crews successfully.`); } else { alert("No valid crew rows found."); }
             };
-            r.readAsText(file);
-            e.target.value = null;
+            r.readAsText(file); e.target.value = null;
         };
 
         document.getElementById('btn-template').onclick = () => {
             const content = "Event Number,Alpha,Crew Name,Start Time (HH:MM),Coxswain,Rowers,Boat Name,Coach\n101,A,U19 8+,08:30,John Doe,Rower1;Rower2...,The Black Pearl,Coach Steve";
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([content], { type: 'text/csv;charset=utf-8;' }));
-            link.download = "regatta_template.csv";
+            const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([content], { type: 'text/csv;charset=utf-8;' })); link.download = "regatta_template.csv";
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
         };
+        
         document.getElementById('btn-demo').onclick = async () => {
             if(!state.user) return;
-            const batch = writeBatch(db);
-            const ref = getEventsRef();
+            const batch = writeBatch(db); const ref = getEventsRef();
             const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl', coach: 'Steve' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise', coach: 'Mike' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager', coach: 'Steve' }];
-            d.forEach(i => batch.set(doc(ref), i));
-            await batch.commit();
+            d.forEach(i => batch.set(doc(ref), i)); await batch.commit();
         };
+
         window.switchView = (v) => {
             ['view-regatta', 'view-crews', 'view-notices', 'view-prognostics', 'view-rigging'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            
             if (v === 'regatta') document.getElementById('view-regatta').classList.remove('hidden');
             else if (v === 'crews') { document.getElementById('view-crews').classList.remove('hidden'); renderCrews(); }
             else if (v === 'notices') { document.getElementById('view-notices').classList.remove('hidden'); renderNotices(); }
             else if (v === 'prognostics') { document.getElementById('view-prognostics').classList.remove('hidden'); renderPrognostics(); }
-            else if (v === 'rigging') document.getElementById('view-rigging').classList.remove('hidden');
+            else if (v === 'rigging') { document.getElementById('view-rigging').classList.remove('hidden'); }
         };
 
         document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
-                render();
-                checkUrgentNotices();
-                fetchWeather(); 
-            }
+            if (document.visibilityState === "visible") { render(); checkUrgentNotices(); fetchWeather(); }
         });
 
-        window.addEventListener('online', () => {
-            showToast('<i class="inline-block mr-2 w-4 h-4" data-lucide="wifi"></i> Back Online', 'success');
-            setupListeners(); 
-        });
-        
-        window.addEventListener('offline', () => {
-            showToast('<i class="inline-block mr-2 w-4 h-4" data-lucide="wifi-off"></i> Connection Lost', 'warn');
-        });
+        window.addEventListener('online', () => { showToast('<i class="inline-block mr-2 w-4 h-4" data-lucide="wifi"></i> Back Online', 'success'); setupListeners(); });
+        window.addEventListener('offline', () => { showToast('<i class="inline-block mr-2 w-4 h-4" data-lucide="wifi-off"></i> Connection Lost', 'warn'); });
 
         setInterval(() => { state.currentTime = new Date(); render(); }, 1000);
         lucide.createIcons();
