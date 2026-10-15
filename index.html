@@ -547,6 +547,7 @@
                     </div>
                 </div>
                 <div class="flex justify-end mt-4">
+                    <button onclick="window.clearBuilderData()" class="bg-red-50 text-red-600 font-bold py-2 px-6 rounded hover:bg-red-100 transition shadow-sm uppercase text-sm mr-2 border border-red-100">Clear Workspace</button>
                     <button onclick="window.loadBuilderData()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 transition shadow-sm uppercase text-sm">Setup Workspace</button>
                 </div>
             </div>
@@ -700,6 +701,7 @@
         const getNoticesRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_notices`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_notices');
         const getProgsRef = () => state.groupCode ? collection(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_prognostics`) : collection(db, 'artifacts', appId, 'users', state.user.uid, 'regatta_prognostics');
         const getConfigRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_config`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'config', 'main');
+        const getBuilderRef = () => state.groupCode ? doc(db, 'artifacts', appId, 'public', 'data', `${state.groupCode}_builder`, 'main') : doc(db, 'artifacts', appId, 'users', state.user.uid, 'builder', 'main');
 
         // Init Prognostic Boat Options
         const boatTypes = Object.keys(PROGNOSTIC_STANDARDS).sort();
@@ -1243,9 +1245,28 @@
             document.getElementById('rigging-results').classList.remove('hidden');
         };
 
-        window.deletePrognostic = async (idx) => { if(state.prognostics[idx].id) await deleteDoc(doc(getProgsRef(), state.prognostics[idx].id)); };
+        window.deletePrognostic = async (idx) => {
+             if(state.prognostics[idx].id) {
+                 await deleteDoc(doc(getProgsRef(), state.prognostics[idx].id));
+             }
+        };
 
-        window.loadBuilderData = () => {
+        // NEW: Save builder state to Firebase
+        window.saveBuilderState = async () => {
+            if(!state.user) return;
+            await setDoc(getBuilderRef(), builderState);
+        };
+
+        window.clearBuilderData = async () => {
+            if(confirm("Clear the entire Crew Builder workspace?")) {
+                builderState = { athletes: [], events: [] };
+                await window.saveBuilderState();
+                document.getElementById('builder-input-athletes').value = '';
+                document.getElementById('builder-input-events').value = '';
+            }
+        };
+
+        window.loadBuilderData = async () => {
             const athletesText = document.getElementById('builder-input-athletes').value;
             const eventsText = document.getElementById('builder-input-events').value;
 
@@ -1272,7 +1293,10 @@
                         return { id: 'evt_'+Date.now()+'_'+Math.random().toString(36).substr(2,9), name: name, capacity: cap, crew: [] };
                     });
             }
-            window.renderBuilder();
+            await window.saveBuilderState();
+            // Clear inputs after loaded
+            document.getElementById('builder-input-athletes').value = '';
+            document.getElementById('builder-input-events').value = '';
         };
 
         window.renderBuilder = () => {
@@ -1338,7 +1362,7 @@
             lucide.createIcons();
         };
 
-        window.dropBuilderAthlete = (e, eventId) => {
+        window.dropBuilderAthlete = async (e, eventId) => {
             const name = e.dataTransfer.getData('text/plain');
             if(!name) return;
             const ev = builderState.events.find(ev => ev.id === eventId);
@@ -1346,18 +1370,21 @@
                 if(ev.crew.length < ev.capacity) {
                     if(!ev.crew.includes(name)) {
                         ev.crew.push(name);
-                        window.renderBuilder();
+                        await window.saveBuilderState();
                     } else showToast("Athlete already in this boat", "warn");
                 } else showToast("Boat is full", "warn");
             }
         };
 
-        window.removeBuilderAthlete = (eventId, index) => {
+        window.removeBuilderAthlete = async (eventId, index) => {
             const ev = builderState.events.find(ev => ev.id === eventId);
-            if(ev) { ev.crew.splice(index, 1); window.renderBuilder(); }
+            if(ev) { 
+                ev.crew.splice(index, 1); 
+                await window.saveBuilderState(); 
+            }
         };
 
-        window.duplicateBuilderEvent = (eventId) => {
+        window.duplicateBuilderEvent = async (eventId) => {
             const ev = builderState.events.find(e => e.id === eventId);
             if(ev) {
                 const newEv = {
@@ -1368,17 +1395,15 @@
                 };
                 const idx = builderState.events.findIndex(e => e.id === eventId);
                 builderState.events.splice(idx + 1, 0, newEv);
-                document.getElementById('builder-input-events').value = builderState.events.map(e => e.name).join('\n');
-                window.renderBuilder();
+                await window.saveBuilderState();
             }
         };
 
-        window.removeBuilderEvent = (eventId) => {
+        window.removeBuilderEvent = async (eventId) => {
             const idx = builderState.events.findIndex(e => e.id === eventId);
             if(idx > -1) {
                 builderState.events.splice(idx, 1);
-                document.getElementById('builder-input-events').value = builderState.events.map(e => e.name).join('\n');
-                window.renderBuilder();
+                await window.saveBuilderState();
             }
         };
 
@@ -1472,11 +1497,11 @@
             }
             lucide.createIcons();
         }
-
+        // --- Listeners ---
         const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
         initAuth();
 
-        let unsubscribeEvents, unsubscribeConfig, unsubscribeCrews, unsubscribeNotices, unsubscribeProgs;
+        let unsubscribeEvents, unsubscribeConfig, unsubscribeCrews, unsubscribeNotices, unsubscribeProgs, unsubscribeBuilder;
 
         onAuthStateChanged(auth, (u) => {
             state.user = u;
@@ -1492,14 +1517,31 @@
         });
 
         function setupListeners() {
-            if(unsubscribeEvents) unsubscribeEvents(); if(unsubscribeConfig) unsubscribeConfig(); if(unsubscribeCrews) unsubscribeCrews(); if(unsubscribeNotices) unsubscribeNotices(); if(unsubscribeProgs) unsubscribeProgs();
-            state.events = []; state.crews = []; state.notices = []; state.prognostics = []; previousDelay = null;
-            render();
+            if(unsubscribeEvents) unsubscribeEvents();
+            if(unsubscribeConfig) unsubscribeConfig();
+            if(unsubscribeCrews) unsubscribeCrews();
+            if(unsubscribeNotices) unsubscribeNotices();
+            if(unsubscribeProgs) unsubscribeProgs();
+            if(unsubscribeBuilder) unsubscribeBuilder();
 
-            unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => { state.events = snap.docs.map(d => ({id: d.id, ...d.data()})); updateFilters(); render(); });
-            unsubscribeCrews = onSnapshot(getCrewsRef(), (snap) => { state.crews = snap.docs.map(d => d.data()); updateCrewFilters(); if(!document.getElementById('view-crews').classList.contains('hidden')) renderCrews(); });
-            unsubscribeNotices = onSnapshot(getNoticesRef(), (snap) => { state.notices = snap.docs.map(d => ({id: d.id, ...d.data()})); checkUrgentNotices(); if(!document.getElementById('view-notices').classList.contains('hidden')) renderNotices(); });
-            unsubscribeProgs = onSnapshot(getProgsRef(), (snap) => { state.prognostics = snap.docs.map(d => ({id: d.id, ...d.data()})); state.prognostics.sort((a,b) => b.timestamp - a.timestamp); if(!document.getElementById('view-prognostics').classList.contains('hidden')) renderPrognostics(); });
+            state.events = [];
+            state.crews = [];
+            unsubscribeProgs = onSnapshot(getProgsRef(), (snap) => {
+                state.prognostics = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                // Sort by timestamp desc
+                state.prognostics.sort((a,b) => b.timestamp - a.timestamp);
+                if(!document.getElementById('view-prognostics').classList.contains('hidden')) renderPrognostics();
+            });
+
+            unsubscribeBuilder = onSnapshot(getBuilderRef(), (snap) => {
+                if(snap.exists()) {
+                    builderState = snap.data();
+                    if(!document.getElementById('view-crew-builder').classList.contains('hidden')) window.renderBuilder();
+                } else {
+                    builderState = { athletes: [], events: [] };
+                    if(!document.getElementById('view-crew-builder').classList.contains('hidden')) window.renderBuilder();
+                }
+            });
 
             unsubscribeConfig = onSnapshot(getConfigRef(), (snap) => {
                 if(snap.exists()) {
