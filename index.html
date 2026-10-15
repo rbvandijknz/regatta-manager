@@ -673,6 +673,27 @@
             </div>
         </div>
 
+    <!-- Admin Passcode Modal -->
+    <div id="passcode-modal" class="fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all scale-100">
+            <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5 text-slate-600"></i> Admin Access</h3>
+                <button onclick="document.getElementById('passcode-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-sm text-slate-600">Enter the admin passcode to unlock the configuration and setup tools.</p>
+                <div>
+                    <input type="password" id="input-modal-passcode" placeholder="Enter passcode" class="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition shadow-sm" onkeypress="if(event.key === 'Enter') window.submitPasscode()">
+                    <p id="passcode-error" class="text-xs text-red-500 mt-2 hidden font-medium flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> Incorrect passcode.</p>
+                </div>
+            </div>
+            <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end gap-2">
+                <button onclick="document.getElementById('passcode-modal').classList.add('hidden')" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 transition">Cancel</button>
+                <button onclick="window.submitPasscode()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">Unlock Tools</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
@@ -1867,25 +1888,56 @@
             els.modal.eventNum.textContent = `#${ev.eventNum}`;
             els.modal.alpha.textContent = ev.alpha || '-';
             els.modal.crew.textContent = ev.crew;
-            const base = timeToMinutes(ev.originalTime); const delayed = base + state.delay; const onWater = delayed - state.settings.onWaterOffset; const warmUp = onWater - state.settings.warmUpDuration;
+            const base = timeToMinutes(ev.originalTime);
+            const delayed = base + state.delay;
+            const onWater = delayed - state.settings.onWaterOffset;
+            const warmUp = onWater - state.settings.warmUpDuration;
             els.modal.warmup.textContent = formatDisplayTime(warmUp);
             els.modal.onwater.textContent = formatDisplayTime(onWater);
             els.modal.start.textContent = formatDisplayTime(delayed);
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
-            if (els.modal.boat) els.modal.boat.textContent = ev.boat || 'Not specified';
+            // Boat field removed from modal logic
             els.modal.coach.textContent = ev.coach || 'Not specified';
+            // Populate Progression
             els.modal.progression.textContent = ev.progression || 'None/Final';
             els.modal.el.classList.remove('hidden');
         };
         window.closeModal = () => els.modal.el.classList.add('hidden');
         
+        // PASSCODE PROTECTION for Config
         document.getElementById('btn-toggle-config').onclick = () => {
             const panel = document.getElementById('config-panel');
             if (panel.classList.contains('hidden')) {
-                if (!state.configPasscode) panel.classList.remove('hidden');
-                else { const code = prompt("Enter Admin Passcode:"); if (code === state.configPasscode) panel.classList.remove('hidden'); else if (code !== null) alert("Incorrect passcode."); }
-            } else panel.classList.add('hidden');
+                if (!state.configPasscode) {
+                    panel.classList.remove('hidden');
+                } else {
+                    // Reset and show custom login modal
+                    document.getElementById('input-modal-passcode').value = '';
+                    document.getElementById('passcode-error').classList.add('hidden');
+                    document.getElementById('passcode-modal').classList.remove('hidden');
+                    // Auto-focus the input box for faster typing
+                    setTimeout(() => document.getElementById('input-modal-passcode').focus(), 100);
+                }
+            } else {
+                // Just close
+                panel.classList.add('hidden');
+            }
+        };
+
+        window.submitPasscode = () => {
+            const code = document.getElementById('input-modal-passcode').value;
+            if (code === state.configPasscode) {
+                // Success
+                document.getElementById('passcode-modal').classList.add('hidden');
+                document.getElementById('config-panel').classList.remove('hidden');
+                showToast("Admin tools unlocked", "success");
+            } else {
+                // Fail
+                document.getElementById('passcode-error').classList.remove('hidden');
+                document.getElementById('input-modal-passcode').value = '';
+                document.getElementById('input-modal-passcode').focus();
+            }
         };
         
         window.deleteEvent = async (e, id) => { e.stopPropagation(); if(state.user && confirm("Delete?")) await deleteDoc(doc(getEventsRef(), id)); };
