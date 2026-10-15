@@ -1909,16 +1909,12 @@
         document.getElementById('btn-toggle-config').onclick = () => {
             const panel = document.getElementById('config-panel');
             if (panel.classList.contains('hidden')) {
-                if (!state.configPasscode) {
-                    panel.classList.remove('hidden');
-                } else {
-                    // Reset and show custom login modal
-                    document.getElementById('input-modal-passcode').value = '';
-                    document.getElementById('passcode-error').classList.add('hidden');
-                    document.getElementById('passcode-modal').classList.remove('hidden');
-                    // Auto-focus the input box for faster typing
-                    setTimeout(() => document.getElementById('input-modal-passcode').focus(), 100);
-                }
+                // Always require passcode, even if using the internal default
+                document.getElementById('input-modal-passcode').value = '';
+                document.getElementById('passcode-error').classList.add('hidden');
+                document.getElementById('passcode-modal').classList.remove('hidden');
+                // Auto-focus the input box for faster typing
+                setTimeout(() => document.getElementById('input-modal-passcode').focus(), 100);
             } else {
                 // Just close
                 panel.classList.add('hidden');
@@ -1927,7 +1923,9 @@
 
         window.submitPasscode = () => {
             const code = document.getElementById('input-modal-passcode').value;
-            if (code === state.configPasscode) {
+            const requiredCode = state.configPasscode || "1992"; // Hidden default if none is set
+            
+            if (code === requiredCode) {
                 // Success
                 document.getElementById('passcode-modal').classList.add('hidden');
                 document.getElementById('config-panel').classList.remove('hidden');
