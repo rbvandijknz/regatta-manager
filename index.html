@@ -554,8 +554,13 @@
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 print-hide mb-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. Paste Athlete Roster</label>
-                        <textarea id="builder-input-athletes" class="w-full h-32 p-3 border border-slate-300 rounded text-sm font-medium" placeholder="John Doe&#10;Jane Smith&#10;..."></textarea>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">1. Paste Athlete Roster</label>
+                            <label class="cursor-pointer text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded">
+                                <i data-lucide="upload" class="w-3 h-3"></i> Load CSV <input type="file" id="builder-athlete-csv" accept=".csv" class="hidden">
+                            </label>
+                        </div>
+                        <textarea id="builder-input-athletes" class="w-full h-32 p-3 border border-slate-300 rounded text-sm font-medium whitespace-nowrap" placeholder="Name, Gender, Side, Cox&#10;John Doe, M, Stroke, N&#10;Jane Smith, W, Bow, Y&#10;..."></textarea>
                     </div>
                     <div>
                         <div class="flex justify-between items-end mb-2">
@@ -1313,8 +1318,29 @@
             if (athletesText.trim()) {
                 builderState.athletes = athletesText.split('\n')
                     .map(a => a.trim())
-                    .filter(a => a)
-                    .map(name => ({ id: 'ath_'+Date.now()+'_'+Math.random().toString(36).substr(2,9), name: name }));
+                    .filter(a => a && !a.toLowerCase().startsWith('name,gender') && !a.toLowerCase().startsWith('name, gender'))
+                    .map(line => {
+                        // Support CSV formatting: Name, Gender, Side, Cox
+                        const cols = line.split(',').map(c => c.trim());
+                        const name = cols[0];
+                        const gender = cols[1] ? cols[1].toUpperCase().charAt(0) : '';
+                        
+                        const sideRaw = cols[2] ? cols[2].toUpperCase() : '';
+                        let side = '';
+                        if (sideRaw.includes('STROKE') || sideRaw === 'S') side = 'S';
+                        else if (sideRaw.includes('BOW') || sideRaw === 'B') side = 'B';
+                        else if (sideRaw.includes('BOTH') || sideRaw.includes('ANY') || sideRaw === 'S/B') side = 'S/B';
+
+                        const isCox = cols[3] ? (cols[3].toUpperCase() === 'Y' || cols[3].toUpperCase() === 'YES' || cols[3].toUpperCase() === 'TRUE') : false;
+
+                        return { 
+                            id: 'ath_'+Date.now()+'_'+Math.random().toString(36).substr(2,9), 
+                            name: name,
+                            gender: gender,
+                            side: side,
+                            isCox: isCox
+                        };
+                    });
             }
 
             if (eventsText.trim()) {
@@ -1411,12 +1437,47 @@
             if (builderState.athletes.length === 0) {
                 rosterEl.innerHTML = `<p class="text-sm text-slate-400 italic text-center py-4">No athletes loaded.</p>`;
             } else {
-                rosterEl.innerHTML = builderState.athletes.map(a => {
+                let displayAthletes = builderState.athletes;
+                
+                // Advanced Roster Filtering based on explicit CSV data & Inference
+                if (activeBuilderTab === 'M') {
+                    displayAthletes = builderState.athletes.filter(a => {
+                        if (a.gender === 'M' || a.isCox) return true;
+                        if (a.gender === 'W') return false;
+                        const inferredW = builderState.events.some(ev => /\b(W|G|Womens?|Girls?)\b/i.test(ev.name) && ev.crew.includes(a.name));
+                        return !inferredW; 
+                    });
+                } else if (activeBuilderTab === 'W') {
+                    displayAthletes = builderState.athletes.filter(a => {
+                        if (a.gender === 'W' || a.isCox) return true;
+                        if (a.gender === 'M') return false;
+                        const inferredM = builderState.events.some(ev => /\b(M|B|Mens?|Boys?)\b/i.test(ev.name) && ev.crew.includes(a.name));
+                        return !inferredM;
+                    });
+                }
+
+                // Sort Roster Alphabetically
+                displayAthletes.sort((a, b) => a.name.localeCompare(b.name));
+
+                rosterEl.innerHTML = displayAthletes.map(a => {
                     const count = counts[a.name] || 0;
                     const badgeClass = count > 0 ? (count >= 4 ? 'bg-red-100 text-red-700 ring-1 ring-red-400' : 'bg-green-100 text-green-700') : 'bg-slate-100 text-slate-500';
+                    
+                    // Generate Detail Badges
+                    let traits = '';
+                    if(a.isCox) traits += '<span class="text-[9px] bg-purple-100 text-purple-700 px-1 py-0.5 rounded font-bold ml-1 leading-none" title="Coxswain">C</span>';
+                    if(a.side === 'S') traits += '<span class="text-[9px] bg-rose-100 text-rose-700 px-1 py-0.5 rounded font-bold ml-1 leading-none" title="Stroke Side">S</span>';
+                    if(a.side === 'B') traits += '<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1 py-0.5 rounded font-bold ml-1 leading-none" title="Bow Side">B</span>';
+                    if(a.side === 'S/B') traits += '<span class="text-[9px] bg-blue-100 text-blue-700 px-1 py-0.5 rounded font-bold ml-1 leading-none" title="Both Sides">S/B</span>';
+                    if(a.gender === 'M') traits += '<span class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-1 py-0.5 rounded font-bold ml-1 leading-none">M</span>';
+                    if(a.gender === 'W') traits += '<span class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-1 py-0.5 rounded font-bold ml-1 leading-none">W</span>';
+
                     return `<div draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${a.name}'); event.dataTransfer.setData('sourceEvent', '');" class="p-2 mb-2 bg-white border border-slate-200 rounded shadow-sm cursor-grab active:cursor-grabbing flex justify-between items-center hover:border-blue-400 transition">
-                        <span class="font-medium text-sm text-slate-700 truncate mr-2" title="${a.name}">${a.name}</span>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${badgeClass}">${count} Races</span>
+                        <div class="flex items-center min-w-0 mr-2">
+                            <span class="font-medium text-sm text-slate-700 truncate" title="${a.name}">${a.name}</span>
+                            <div class="flex flex-shrink-0">${traits}</div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 ${badgeClass}">${count} Races</span>
                     </div>`;
                 }).join('');
             }
@@ -1873,7 +1934,8 @@
         };
 
         document.getElementById('input-crew-csv').onchange = (e) => {
-            const file = e.target.files[0]; if(!file || !state.user) return;
+            const file = e.target.files[0];
+            if(!file || !state.user) return;
             const r = new FileReader();
             r.onload = async (evt) => {
                 const lines = evt.target.result.split('\n').map(l => l.trim()).filter(l => l);
@@ -1912,9 +1974,26 @@
                         }
                     });
                 }
-                if(count > 0) { await batch.commit(); alert(`Imported ${count} crews successfully.`); } else { alert("No valid crew rows found."); }
             };
-            r.readAsText(file); e.target.value = null;
+            r.readAsText(file);
+            e.target.value = null;
+        };
+
+        // NEW: BUILDER ATHLETE CSV UPLOAD
+        document.getElementById('builder-athlete-csv').onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const r = new FileReader();
+            r.onload = (evt) => {
+                const text = evt.target.result;
+                const textarea = document.getElementById('builder-input-athletes');
+                const currentText = textarea.value.trim();
+                textarea.value = currentText ? currentText + '\n' + text.trim() : text.trim();
+                window.loadBuilderData();
+                showToast('Roster loaded from CSV', 'success');
+            };
+            r.readAsText(file);
+            e.target.value = null;
         };
 
         document.getElementById('btn-template').onclick = () => {
