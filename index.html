@@ -50,6 +50,9 @@
         
         /* Hide elements in read-only mode */
         body.read-only .admin-only { display: none !important; }
+        
+        /* Drag and Drop styles */
+        .droppable-over { background-color: #eff6ff !important; border-color: #60a5fa !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans pb-10">
@@ -118,7 +121,6 @@
                             </div>
                         </div>
 
-                        <!-- Delay Widget -->
                         <div class="h-10 sm:h-12 flex items-center justify-between gap-4 bg-slate-800 px-4 rounded-lg border border-slate-700 w-full sm:w-auto min-w-[240px] shadow-sm">
                             <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Delay</div>
                             <div class="flex items-center gap-3">
@@ -220,7 +222,7 @@
                         
                         <!-- Performance Tools Buttons -->
                         <div class="p-3 bg-emerald-50 rounded border border-emerald-100 mt-2 flex flex-col gap-2">
-                            <div class="text-xs font-bold text-emerald-700 uppercase mb-1">Performance Tools</div>
+                            <div class="text-xs font-bold text-emerald-700 uppercase mb-1">Performance & Prep Tools</div>
                             <div class="flex gap-2">
                                 <button onclick="window.switchView('prognostics')" class="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded text-sm font-bold uppercase hover:bg-emerald-700 transition">
                                     <i data-lucide="trending-up" class="w-4 h-4"></i> Prognostics
@@ -229,9 +231,14 @@
                                     <i data-lucide="download" class="w-4 h-4"></i>
                                 </button>
                             </div>
-                            <button onclick="window.switchView('rigging')" class="w-full flex items-center justify-center gap-2 bg-slate-700 text-white py-2 rounded text-sm font-bold uppercase hover:bg-slate-800 transition shadow-sm">
-                                <i data-lucide="wrench" class="w-4 h-4"></i> Rigging Setup Calculator
-                            </button>
+                            <div class="flex gap-2">
+                                <button onclick="window.switchView('rigging')" class="flex-1 flex items-center justify-center gap-2 bg-slate-700 text-white py-2 rounded text-sm font-bold uppercase hover:bg-slate-800 transition shadow-sm">
+                                    <i data-lucide="wrench" class="w-4 h-4"></i> Rigging Setup
+                                </button>
+                                <button onclick="window.switchView('crew-builder')" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded text-sm font-bold uppercase hover:bg-blue-700 transition shadow-sm">
+                                    <i data-lucide="users" class="w-4 h-4"></i> Crew Builder
+                                </button>
+                            </div>
                         </div>
 
                         <!-- NOTICE BOARD ADMIN -->
@@ -510,6 +517,59 @@
             </div>
         </div>
 
+        <!-- VIEW 7: CREW BUILDER -->
+        <div id="view-crew-builder" class="hidden max-w-7xl mx-auto px-4 py-6 space-y-6 fade-in pb-20">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="window.switchView('regatta')" class="flex items-center gap-1 text-blue-600 hover:underline font-medium"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Programme</button>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" class="w-6 h-6 text-slate-600"></i> Crew Builder</h2>
+                    <button onclick="window.exportBuilderCrews()" class="bg-white text-slate-600 p-2 rounded-full hover:bg-slate-100 transition shadow-sm border border-slate-200" title="Export Crews to CSV">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Setup Inputs -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Athletes (Paste list, one per line)</label>
+                        <textarea id="builder-input-athletes" class="w-full h-32 p-3 border border-slate-300 rounded text-sm font-medium" placeholder="John Doe&#10;Jane Smith&#10;..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Events/Boats (Paste list, one per line)</label>
+                        <textarea id="builder-input-events" class="w-full h-32 p-3 border border-slate-300 rounded text-sm font-medium" placeholder="M U19 8+&#10;W Club 4x&#10;..."></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button onclick="window.loadBuilderData()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 transition shadow-sm uppercase text-sm">Setup Workspace</button>
+                </div>
+            </div>
+
+            <!-- Drag and Drop Workspace -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+                
+                <!-- Left Col: Roster -->
+                <div class="md:col-span-1 bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-inner sticky top-24 max-h-[80vh] overflow-y-auto">
+                    <h3 class="font-bold text-slate-700 uppercase tracking-wider text-xs mb-3 border-b border-slate-200 pb-2">Roster</h3>
+                    <div id="builder-roster" class="space-y-2 min-h-[100px]">
+                        <p class="text-sm text-slate-400 italic text-center py-4">No athletes loaded.</p>
+                    </div>
+                </div>
+
+                <!-- Right Col: Events Grid -->
+                <div class="md:col-span-3">
+                    <div id="builder-events-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="col-span-full text-center py-20 bg-white rounded-xl border border-slate-200 text-slate-400">
+                            <i data-lucide="anchor" class="w-12 h-12 mx-auto mb-2 opacity-30"></i>
+                            <p>Load events to start building crews.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
     <!-- Crew Details Modal -->
@@ -573,7 +633,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times) - Updated from "prog times.csv"
+        // REFERENCE DATA FOR PROGNOSTICS (2000m Gold Times)
         const PROGNOSTIC_STANDARDS = {
             "m1x": { "elite": "06:30.74", "senior": "07:00.41", "int": "07:22.90", "club": "07:17.58", "novice": "nil", "u18": "07:09.33", "u17": "07:15.26", "u16": "07:19.91", "u15": "nil" },
             "m2x": { "elite": "05:59.72", "senior": "06:27.79", "int": "06:59.19", "club": "06:34.26", "novice": "06:57.22", "u18": "06:37.56", "u17": "06:44.05", "u16": "06:44.27", "u15": "06:51.91" },
@@ -603,6 +663,9 @@
 
         let state = { user: null, events: [], crews: [], notices: [], prognostics: [], delay: 0, settings: { onWaterOffset: 35, warmUpDuration: 40 }, currentTime: new Date(), groupCode: localStorage.getItem('regatta_group_code') || '', weather: { temp: null, wind: null, dir: null, code: null, dir_deg: null }, locationKey: localStorage.getItem('regatta_location') || 'karapiro', filterCoach: '', filterAthlete: '', filterCrewAthlete: '', configPasscode: null };
         let previousDelay = null;
+        
+        // Crew Builder Local State
+        let builderState = { athletes: [], events: [] };
 
         const els = {
             eventsContainer: document.getElementById('events-container'),
@@ -620,11 +683,9 @@
             filterAthlete: document.getElementById('filter-athlete'),
             filterCrewAthlete: document.getElementById('filter-crew-athlete'),
             weatherWidget: { select: document.getElementById('weather-location'), temp: document.getElementById('weather-temp'), wind: document.getElementById('weather-wind'), icon: document.getElementById('weather-icon'), tag: document.getElementById('weather-condition-tag') },
-            // Added progression to modal elements
             modal: { el: document.getElementById('crew-modal'), eventNum: document.getElementById('modal-event-num'), alpha: document.getElementById('modal-alpha'), crew: document.getElementById('modal-crew-name'), warmup: document.getElementById('modal-time-warmup'), onwater: document.getElementById('modal-time-onwater'), start: document.getElementById('modal-time-start'), cox: document.getElementById('modal-cox'), rowers: document.getElementById('modal-rowers'), coach: document.getElementById('modal-coach'), progression: document.getElementById('modal-progression'), boat: document.getElementById('modal-boat') },
             saveStatus: document.getElementById('trailer-status'),
             toastContainer: document.getElementById('toast-container'),
-            // Prognostic Els
             progBoat: document.getElementById('prog-boat'),
             progResults: document.getElementById('prog-results')
         };
@@ -639,7 +700,6 @@
         const boatTypes = Object.keys(PROGNOSTIC_STANDARDS).sort();
         els.progBoat.innerHTML = boatTypes.map(b => `<option value="${b}">${b.toUpperCase()}</option>`).join('');
 
-        // Set default date/time for prognostics
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('prog-date').value = now.toISOString().slice(0, 16);
@@ -649,7 +709,6 @@
         const minutesToTime = (t) => { let m=t%60; let h=Math.floor(t/60)%24; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
         const formatDisplayTime = (m) => { let h=Math.floor(m/60)%24; let am=h>=12?'PM':'AM'; if(h>12)h-=12; if(h===0)h=12; return `${h}:${String(m%60).padStart(2,'0')} ${am}`; };
 
-        // Parse mm:ss or hh:mm:ss to seconds
         const parseDuration = (str) => {
             if(!str || str === 'nil') return 0;
             const p = str.split(':').map(Number);
@@ -662,7 +721,7 @@
             const m = Math.floor(secs/60);
             const s = Math.floor(secs%60);
             const ms = Math.round((secs - Math.floor(secs))*10);
-            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(1,'0')}`; 
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(1,'0')}`;
         };
         const formatDuration2 = (secs) => {
              const m = Math.floor(secs/60);
@@ -688,13 +747,10 @@
             if (oldDelay === null) return; 
             const diff = newDelay - oldDelay;
             if (diff === 0) return;
-
             const direction = diff > 0 ? "Increased" : "Decreased";
             const msg = `Delay ${direction} to +${newDelay}m`;
-
             showToast(`<i class="inline-block mr-2 w-4 h-4" data-lucide="clock"></i> ${msg}`, 'warn');
             lucide.createIcons();
-
             if ('Notification' in window && Notification.permission === 'granted') {
                 try { new Notification("RegattaManager Update", { body: msg }); } catch(e) {}
             }
@@ -702,14 +758,13 @@
 
         function checkUrgentNotices() {
             if (!document.getElementById('urgent-modal')) return;
-
             const dismissed = JSON.parse(localStorage.getItem('cc_dismissed_alerts') || '[]');
             const alerts = state.notices
                 .filter(n => n.type === 'alert' && !dismissed.includes(n.id))
-                .sort((a,b) => b.timestamp - a.timestamp); 
+                .sort((a,b) => b.timestamp - a.timestamp);
 
             if (alerts.length > 0) {
-                const alert = alerts[0]; 
+                const alert = alerts[0];
                 document.getElementById('urgent-title').textContent = alert.title;
                 document.getElementById('urgent-message').textContent = alert.message;
                 document.getElementById('urgent-time').textContent = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -727,12 +782,8 @@
         }
 
         const btnNotifications = document.getElementById('btn-enable-notifications');
-        
         function updateNotificationButton() {
-            if (!('Notification' in window)) {
-                btnNotifications.classList.add('hidden');
-                return;
-            }
+            if (!('Notification' in window)) { btnNotifications.classList.add('hidden'); return; }
             if (Notification.permission === 'granted') {
                 btnNotifications.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i> <span class="text-green-700">Test Alert</span>';
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
@@ -745,7 +796,7 @@
                 btnNotifications.innerHTML = '<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span class="text-red-700">Alerts Blocked</span>';
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
                 btnNotifications.classList.add('bg-red-50', 'border-red-100');
-                btnNotifications.onclick = () => alert("Notifications are blocked in your browser settings.");
+                btnNotifications.onclick = () => alert("Notifications are blocked in your browser settings. Please enable them manually.");
             } else {
                 btnNotifications.innerHTML = '<i data-lucide="bell" class="w-4 h-4"></i> <span>Enable Alerts</span>';
                 btnNotifications.onclick = async () => {
@@ -761,7 +812,6 @@
             }
             lucide.createIcons();
         }
-
         updateNotificationButton();
 
         // --- Weather ---
@@ -819,7 +869,7 @@
             
             if (allCoaches.length !== currentCoachOptions.length || !allCoaches.every((c, i) => c === currentCoachOptions[i])) {
                 let optionsHTML = '<option value="">Coach: All</option>';
-                allCoaches.forEach(c => optionsHTML += `<option value="${c}">${c}</option>`);
+                allCoaches.forEach(c => { optionsHTML += `<option value="${c}">${c}</option>`; });
                 els.filterCoach.innerHTML = optionsHTML;
                 els.filterCoach.value = state.filterCoach;
             }
@@ -843,7 +893,7 @@
 
             if (sortedAthletes.length !== currentAthleteOptions.length || !sortedAthletes.every((c, i) => c === currentAthleteOptions[i])) {
                 let optionsHTML = '<option value="">Athlete: All</option>';
-                sortedAthletes.forEach(a => optionsHTML += `<option value="${a}">${a}</option>`);
+                sortedAthletes.forEach(a => { optionsHTML += `<option value="${a}">${a}</option>`; });
                 els.filterAthlete.innerHTML = optionsHTML;
                 els.filterAthlete.value = state.filterAthlete;
             }
@@ -853,15 +903,9 @@
             const allAthletes = new Set();
             state.crews.forEach(crew => {
                 if (crew.rowers) {
-                    crew.rowers.split(',').forEach(r => {
-                        let name = r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '');
-                        if (name) allAthletes.add(name);
-                    });
+                    crew.rowers.split(',').forEach(r => { let name = r.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, ''); if (name) allAthletes.add(name); });
                 }
-                if (crew.cox && crew.cox.trim()) {
-                    let name = crew.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, '');
-                    if(name) allAthletes.add(name);
-                }
+                if (crew.cox && crew.cox.trim()) { let name = crew.cox.trim().replace(/\s*\([a-zA-Z0-9]+\)/g, ''); if(name) allAthletes.add(name); }
             });
             const sorted = [...allAthletes].sort();
             let html = '<option value="">Find Athlete...</option>';
@@ -1134,6 +1178,9 @@
             const boatSize = document.getElementById('rig-boat-size').value;
             const blade = document.getElementById('rig-blade').value;
             
+            const armSpanRaw = document.getElementById('rig-armspan').value;
+            const armSpan = armSpanRaw ? Number(armSpanRaw) : height;
+            
             let spread, oar, inboard;
             let expSpreadMod = 0, expInboardMod = 0;
             
@@ -1192,6 +1239,128 @@
         };
 
         window.deletePrognostic = async (idx) => { if(state.prognostics[idx].id) await deleteDoc(doc(getProgsRef(), state.prognostics[idx].id)); };
+
+        window.loadBuilderData = () => {
+            const athletesText = document.getElementById('builder-input-athletes').value;
+            const eventsText = document.getElementById('builder-input-events').value;
+
+            if (athletesText.trim()) {
+                builderState.athletes = athletesText.split('\n')
+                    .map(a => a.trim())
+                    .filter(a => a)
+                    .map(name => ({ id: 'ath_'+Date.now()+'_'+Math.random().toString(36).substr(2,9), name: name }));
+            }
+
+            if (eventsText.trim()) {
+                builderState.events = eventsText.split('\n')
+                    .map(e => e.trim())
+                    .filter(e => e)
+                    .map(name => {
+                        let cap = 99;
+                        const n = name.toLowerCase();
+                        if(n.includes('8+')) cap = 9;
+                        else if(n.includes('4+') || n.includes('4x+')) cap = 5;
+                        else if(n.includes('4-') || n.includes('4x')) cap = 4;
+                        else if(n.includes('2+') || n.includes('2x+')) cap = 3;
+                        else if(n.includes('2-') || n.includes('2x')) cap = 2;
+                        else if(n.includes('1x')) cap = 1;
+                        return { id: 'evt_'+Date.now()+'_'+Math.random().toString(36).substr(2,9), name: name, capacity: cap, crew: [] };
+                    });
+            }
+            window.renderBuilder();
+        };
+
+        window.renderBuilder = () => {
+            const rosterEl = document.getElementById('builder-roster');
+            const eventsEl = document.getElementById('builder-events-container');
+
+            const counts = {};
+            builderState.athletes.forEach(a => counts[a.name] = 0);
+            builderState.events.forEach(ev => {
+                ev.crew.forEach(name => { counts[name] = (counts[name] || 0) + 1; });
+            });
+
+            if (builderState.athletes.length === 0) {
+                rosterEl.innerHTML = `<p class="text-sm text-slate-400 italic text-center py-4">No athletes loaded.</p>`;
+            } else {
+                rosterEl.innerHTML = builderState.athletes.map(a => {
+                    const count = counts[a.name] || 0;
+                    const badgeClass = count > 0 ? (count > 3 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700') : 'bg-slate-100 text-slate-500';
+                    return `<div draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${a.name}')" class="p-2 mb-2 bg-white border border-slate-200 rounded shadow-sm cursor-grab active:cursor-grabbing flex justify-between items-center hover:border-blue-400 transition">
+                        <span class="font-medium text-sm text-slate-700 truncate mr-2" title="${a.name}">${a.name}</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${badgeClass}">${count} Races</span>
+                    </div>`;
+                }).join('');
+            }
+
+            if (builderState.events.length === 0) {
+                eventsEl.innerHTML = `
+                    <div class="col-span-full text-center py-20 bg-white rounded-xl border border-slate-200 text-slate-400">
+                        <i data-lucide="anchor" class="w-12 h-12 mx-auto mb-2 opacity-30"></i>
+                        <p>Load events to start building crews.</p>
+                    </div>`;
+            } else {
+                eventsEl.innerHTML = builderState.events.map(ev => {
+                    const isFull = ev.crew.length >= ev.capacity;
+                    const crewList = ev.crew.map((name, idx) => `
+                        <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-1 px-2 rounded text-sm mb-1 group">
+                            <span class="text-slate-700 truncate">${name}</span>
+                            <button onclick="window.removeBuilderAthlete('${ev.id}', ${idx})" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="x" class="w-3 h-3"></i></button>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col h-full transition-colors" 
+                             ondragover="event.preventDefault(); this.classList.add('droppable-over');" 
+                             ondragleave="this.classList.remove('droppable-over');"
+                             ondrop="event.preventDefault(); this.classList.remove('droppable-over'); window.dropBuilderAthlete(event, '${ev.id}')">
+                            <div class="flex justify-between items-center mb-2 border-b border-slate-100 pb-2">
+                                <h4 class="font-bold text-slate-800 text-sm truncate mr-2" title="${ev.name}">${ev.name}</h4>
+                                <span class="text-xs font-mono font-bold whitespace-nowrap ${isFull ? 'text-red-500' : 'text-slate-400'}">${ev.crew.length}/${ev.capacity === 99 ? '∞' : ev.capacity}</span>
+                            </div>
+                            <div class="flex-grow min-h-[60px] space-y-1">
+                                ${crewList}
+                                ${!isFull && ev.crew.length === 0 ? '<div class="text-xs text-slate-400 italic text-center mt-4 border-2 border-dashed border-slate-100 py-3 rounded">Drop athletes here</div>' : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            lucide.createIcons();
+        };
+
+        window.dropBuilderAthlete = (e, eventId) => {
+            const name = e.dataTransfer.getData('text/plain');
+            if(!name) return;
+            const ev = builderState.events.find(ev => ev.id === eventId);
+            if(ev) {
+                if(ev.crew.length < ev.capacity) {
+                    if(!ev.crew.includes(name)) {
+                        ev.crew.push(name);
+                        window.renderBuilder();
+                    } else showToast("Athlete already in this boat", "warn");
+                } else showToast("Boat is full", "warn");
+            }
+        };
+
+        window.removeBuilderAthlete = (eventId, index) => {
+            const ev = builderState.events.find(ev => ev.id === eventId);
+            if(ev) { ev.crew.splice(index, 1); window.renderBuilder(); }
+        };
+
+        window.exportBuilderCrews = () => {
+            if(builderState.events.length === 0) return alert("No events configured to export.");
+            let csv = "Event,Crew\n";
+            builderState.events.forEach(ev => {
+                const crewStr = ev.crew.join('; ');
+                csv += `"${ev.name}","${crewStr}"\n`;
+            });
+            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "crew_builder_export.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        };
 
         function renderNotices() {
             const container = document.getElementById('notices-container');
@@ -1276,7 +1445,7 @@
             els.modal.start.textContent = formatDisplayTime(delayed);
             els.modal.cox.textContent = ev.cox || 'Not specified';
             els.modal.rowers.textContent = ev.rowers || 'Not specified';
-            els.modal.boat.textContent = ev.boat || 'Not specified';
+            if (els.modal.boat) els.modal.boat.textContent = ev.boat || 'Not specified';
             els.modal.coach.textContent = ev.coach || 'Not specified';
             els.modal.progression.textContent = ev.progression || 'None/Final';
             els.modal.el.classList.remove('hidden');
@@ -1322,7 +1491,7 @@
         document.getElementById('form-post-notice').onsubmit = async (e) => {
             e.preventDefault(); if (!state.user) return;
             const title = document.getElementById('input-notice-title').value; const msg = document.getElementById('input-notice-msg').value; const type = document.getElementById('input-notice-type').value;
-            if(title && msg) { await addDoc(getNoticesRef(), { title, message: msg, type, timestamp: Date.now() }); document.getElementById('input-notice-title').value = ''; document.getElementById('input-notice-msg').value = ''; alert("Notice Posted"); }
+            if(title && msg) { await addDoc(getNoticesRef(), { title, message: msg, type, timestamp: Date.now() }); document.getElementById('input-notice-title').value = ''; document.getElementById('input-notice-msg').value = ''; showToast("Notice Posted", "success"); }
         };
 
         document.getElementById('btn-clear-notices').onclick = async () => {
@@ -1366,7 +1535,7 @@
                         if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
                     }
                 } else {
-                    const headerRow = lines[0];
+                    const headerRow = lines[0] || '';
                     const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, ''));
                     const boatIndex = headers.findIndex(h => h.includes('boat')); 
                     const safeBoatIndex = boatIndex > -1 ? boatIndex : 6;
@@ -1414,7 +1583,7 @@
                         batch.set(doc(ref, docId), d); count++;
                     }
                 } else {
-                    const headerRow = lines[0];
+                    const headerRow = lines[0] || '';
                     const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, ''));
                     const boatIndex = headers.findIndex(h => h.includes('boat')); 
                     const safeBoatIndex = boatIndex > -1 ? boatIndex : 6;
@@ -1448,12 +1617,13 @@
         };
 
         window.switchView = (v) => {
-            ['view-regatta', 'view-crews', 'view-notices', 'view-prognostics', 'view-rigging'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['view-regatta', 'view-crews', 'view-notices', 'view-prognostics', 'view-rigging', 'view-crew-builder'].forEach(id => document.getElementById(id).classList.add('hidden'));
             if (v === 'regatta') document.getElementById('view-regatta').classList.remove('hidden');
             else if (v === 'crews') { document.getElementById('view-crews').classList.remove('hidden'); renderCrews(); }
             else if (v === 'notices') { document.getElementById('view-notices').classList.remove('hidden'); renderNotices(); }
             else if (v === 'prognostics') { document.getElementById('view-prognostics').classList.remove('hidden'); renderPrognostics(); }
             else if (v === 'rigging') { document.getElementById('view-rigging').classList.remove('hidden'); }
+            else if (v === 'crew-builder') { document.getElementById('view-crew-builder').classList.remove('hidden'); window.renderBuilder(); }
         };
 
         document.addEventListener("visibilitychange", () => {
