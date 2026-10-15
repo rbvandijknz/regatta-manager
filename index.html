@@ -586,6 +586,9 @@
 
                 <!-- Right Col: Events Grid -->
                 <div class="md:col-span-3">
+                    <div id="builder-tabs" class="flex gap-2 mb-4 border-b border-slate-200 print-hide">
+                        <!-- Tabs dynamically rendered here -->
+                    </div>
                     <div id="builder-events-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div class="col-span-full text-center py-20 bg-white rounded-xl border border-slate-200 text-slate-400">
                             <i data-lucide="anchor" class="w-12 h-12 mx-auto mb-2 opacity-30"></i>
@@ -708,6 +711,7 @@
         
         // Crew Builder Local State
         let builderState = { athletes: [], events: [] };
+        let activeBuilderTab = 'all';
 
         const els = {
             eventsContainer: document.getElementById('events-container'),
@@ -1388,9 +1392,15 @@
 
         window.printBuilder = () => window.print();
 
+        window.setBuilderTab = (tab) => {
+            activeBuilderTab = tab;
+            window.renderBuilder();
+        };
+
         window.renderBuilder = () => {
             const rosterEl = document.getElementById('builder-roster');
             const eventsEl = document.getElementById('builder-events-container');
+            const tabsEl = document.getElementById('builder-tabs');
 
             const counts = {};
             builderState.athletes.forEach(a => counts[a.name] = 0);
@@ -1411,14 +1421,29 @@
                 }).join('');
             }
 
-            if (builderState.events.length === 0) {
+            if (tabsEl) {
+                tabsEl.innerHTML = `
+                    <button onclick="window.setBuilderTab('all')" class="px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeBuilderTab === 'all' ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600' : 'text-slate-500 hover:bg-slate-100'}">All</button>
+                    <button onclick="window.setBuilderTab('M')" class="px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeBuilderTab === 'M' ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600' : 'text-slate-500 hover:bg-slate-100'}">Men's (M/B)</button>
+                    <button onclick="window.setBuilderTab('W')" class="px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeBuilderTab === 'W' ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600' : 'text-slate-500 hover:bg-slate-100'}">Women's (W/G)</button>
+                `;
+            }
+
+            let displayEvents = builderState.events;
+            if (activeBuilderTab === 'M') {
+                displayEvents = displayEvents.filter(ev => /\b(M|B|Mens?|Boys?)(U\d+|\d+[x\+\-]?|[\s]|$)/i.test(ev.name) && !/\b(Mix|Mixed)\b/i.test(ev.name));
+            } else if (activeBuilderTab === 'W') {
+                displayEvents = displayEvents.filter(ev => /\b(W|G|Womens?|Girls?)(U\d+|\d+[x\+\-]?|[\s]|$)/i.test(ev.name) && !/\b(Mix|Mixed)\b/i.test(ev.name));
+            }
+
+            if (displayEvents.length === 0) {
                 eventsEl.innerHTML = `
                     <div class="col-span-full text-center py-20 bg-white rounded-xl border border-slate-200 text-slate-400">
                         <i data-lucide="anchor" class="w-12 h-12 mx-auto mb-2 opacity-30"></i>
-                        <p>Load events to start building crews.</p>
+                        <p>${builderState.events.length === 0 ? 'Load events to start building crews.' : 'No events found for this filter.'}</p>
                     </div>`;
             } else {
-                eventsEl.innerHTML = builderState.events.map(ev => {
+                eventsEl.innerHTML = displayEvents.map(ev => {
                     const isFull = ev.crew.length >= ev.capacity;
                     
                     // Render interactive drag-and-drop seats
