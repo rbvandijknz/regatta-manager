@@ -582,8 +582,9 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
                 
                 <!-- Left Col: Roster -->
-                <div class="md:col-span-1 bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-inner sticky top-24 max-h-[80vh] overflow-y-auto print-hide">
-                    <h3 class="font-bold text-slate-700 uppercase tracking-wider text-xs mb-3 border-b border-slate-200 pb-2">Roster</h3>
+                <div class="md:col-span-1 bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-inner md:sticky top-24 max-h-[40vh] md:max-h-[80vh] overflow-y-auto print-hide">
+                    <h3 class="font-bold text-slate-700 uppercase tracking-wider text-xs mb-1 border-b border-slate-200 pb-2">Roster</h3>
+                    <p class="text-[10px] text-slate-500 mb-3 md:hidden">Tap an athlete, then tap a boat to place.</p>
                     <div id="builder-roster" class="space-y-2 min-h-[100px]">
                         <p class="text-sm text-slate-400 italic text-center py-4">No athletes loaded.</p>
                     </div>
@@ -1472,7 +1473,13 @@
                     if(a.gender === 'M') traits += '<span class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-1 py-0.5 rounded font-bold ml-1 leading-none">M</span>';
                     if(a.gender === 'W') traits += '<span class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-1 py-0.5 rounded font-bold ml-1 leading-none">W</span>';
 
-                    return `<div draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${a.name}'); event.dataTransfer.setData('sourceEvent', '');" class="p-2 mb-2 bg-white border border-slate-200 rounded shadow-sm cursor-grab active:cursor-grabbing flex justify-between items-center hover:border-blue-400 transition">
+                    const isSelected = window.selectedBuilderAthlete && window.selectedBuilderAthlete.name === a.name && !window.selectedBuilderAthlete.sourceEvent;
+                    const selectClass = isSelected ? 'ring-2 ring-blue-500 bg-blue-50 border-blue-500' : 'bg-white border-slate-200 hover:border-blue-400';
+
+                    return `<div draggable="true" 
+                        ondragstart="event.dataTransfer.setData('text/plain', '${a.name}'); event.dataTransfer.setData('sourceEvent', '');" 
+                        onclick="window.toggleAthleteSelection('${a.name}', '', '')"
+                        class="p-2 mb-2 border rounded shadow-sm cursor-pointer md:cursor-grab active:cursor-grabbing flex justify-between items-center transition ${selectClass}">
                         <div class="flex items-center min-w-0 mr-2">
                             <span class="font-medium text-sm text-slate-700 truncate" title="${a.name}">${a.name}</span>
                             <div class="flex flex-shrink-0">${traits}</div>
@@ -1514,23 +1521,28 @@
                             seatHtml = `<span class="text-orange-500 text-xs w-4 inline-block font-bold" title="Coxswain">C</span>`;
                         }
                         
+                        const isSelected = window.selectedBuilderAthlete && window.selectedBuilderAthlete.sourceEvent === ev.id && String(window.selectedBuilderAthlete.sourceIndex) === String(idx);
+                        const selectClass = isSelected ? 'ring-2 ring-blue-500 bg-blue-100 border-blue-500' : 'bg-slate-50 border-slate-200 hover:border-blue-300';
+
                         return `
-                        <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-1 px-2 rounded text-sm mb-1 group cursor-grab active:cursor-grabbing"
+                        <div class="flex justify-between items-center border p-1 px-2 rounded text-sm mb-1 group cursor-pointer md:cursor-grab active:cursor-grabbing transition-colors ${selectClass}"
                              draggable="true"
                              ondragstart="event.dataTransfer.setData('text/plain', '${name}'); event.dataTransfer.setData('sourceEvent', '${ev.id}'); event.dataTransfer.setData('sourceIndex', '${idx}');"
                              ondragover="event.preventDefault(); this.classList.add('border-blue-400');"
                              ondragleave="this.classList.remove('border-blue-400');"
-                             ondrop="event.preventDefault(); this.classList.remove('border-blue-400'); window.dropSeatSwap(event, '${ev.id}', ${idx});">
+                             ondrop="event.preventDefault(); this.classList.remove('border-blue-400'); window.dropSeatSwap(event, '${ev.id}', ${idx});"
+                             onclick="event.stopPropagation(); window.handleSeatClick('${ev.id}', ${idx}, '${name}')">
                             <span class="text-slate-700 truncate font-medium">${seatHtml} ${name}</span>
                             <button onclick="window.removeBuilderAthlete('${ev.id}', ${idx})" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition print-hide"><i data-lucide="x" class="w-3 h-3"></i></button>
                         </div>
                     `}).join('');
 
                     return `
-                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col h-full transition-colors" 
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col h-full transition-colors cursor-pointer md:cursor-default" 
                              ondragover="event.preventDefault(); this.classList.add('droppable-over');" 
                              ondragleave="this.classList.remove('droppable-over');"
-                             ondrop="event.preventDefault(); this.classList.remove('droppable-over'); window.dropBuilderAthlete(event, '${ev.id}')">
+                             ondrop="event.preventDefault(); this.classList.remove('droppable-over'); window.dropBuilderAthlete(event, '${ev.id}')"
+                             onclick="window.handleBoatClick('${ev.id}')">
                             <div class="flex justify-between items-center mb-2 border-b border-slate-100 pb-2">
                                 <h4 class="font-bold text-slate-800 text-sm truncate mr-2" title="${ev.name}">${ev.name}</h4>
                                 <div class="flex items-center gap-2 print-hide">
@@ -1541,13 +1553,54 @@
                             </div>
                             <div class="flex-grow min-h-[60px] space-y-1">
                                 ${crewList}
-                                ${!isFull ? '<div class="text-xs text-slate-400 italic text-center mt-2 border-2 border-dashed border-slate-100 py-2 rounded print-hide pointer-events-none">Drop athletes here</div>' : ''}
+                                ${!isFull ? `<div class="text-xs text-slate-400 italic text-center mt-2 border-2 border-dashed border-slate-100 py-2 rounded print-hide pointer-events-none ${window.selectedBuilderAthlete ? 'bg-blue-50 border-blue-200 text-blue-500' : ''}">Tap or Drop here</div>` : ''}
                             </div>
                         </div>
                     `;
                 }).join('');
             }
             lucide.createIcons();
+        };
+
+        // NEW: Tap-to-Place Mobile Logic
+        window.selectedBuilderAthlete = null;
+
+        window.toggleAthleteSelection = (name, sourceEvent, sourceIndex) => {
+            if (window.selectedBuilderAthlete && window.selectedBuilderAthlete.name === name && window.selectedBuilderAthlete.sourceEvent === sourceEvent) {
+                window.selectedBuilderAthlete = null; // Deselect
+            } else {
+                window.selectedBuilderAthlete = { name, sourceEvent, sourceIndex }; // Select
+            }
+            window.renderBuilder();
+        };
+
+        window.handleSeatClick = async (eventId, seatIdx, currentAthleteName) => {
+            if (window.selectedBuilderAthlete) {
+                // Construct a mock event to reuse drop logic
+                const mockEvent = { stopPropagation: () => {}, dataTransfer: { getData: (k) => {
+                    if (k === 'text/plain') return window.selectedBuilderAthlete.name;
+                    if (k === 'sourceEvent') return window.selectedBuilderAthlete.sourceEvent;
+                    if (k === 'sourceIndex') return window.selectedBuilderAthlete.sourceIndex;
+                }}};
+                await window.dropSeatSwap(mockEvent, eventId, seatIdx);
+                window.selectedBuilderAthlete = null;
+                window.renderBuilder();
+            } else {
+                // Select the athlete currently in this seat
+                window.toggleAthleteSelection(currentAthleteName, eventId, seatIdx);
+            }
+        };
+
+        window.handleBoatClick = async (eventId) => {
+            if (window.selectedBuilderAthlete) {
+                const mockEvent = { dataTransfer: { getData: (k) => {
+                    if (k === 'text/plain') return window.selectedBuilderAthlete.name;
+                    if (k === 'sourceEvent') return window.selectedBuilderAthlete.sourceEvent;
+                }}};
+                await window.dropBuilderAthlete(mockEvent, eventId);
+                window.selectedBuilderAthlete = null;
+                window.renderBuilder();
+            }
         };
 
         window.dropBuilderAthlete = async (e, eventId) => {
