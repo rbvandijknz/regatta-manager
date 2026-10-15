@@ -537,7 +537,12 @@
                         <textarea id="builder-input-athletes" class="w-full h-32 p-3 border border-slate-300 rounded text-sm font-medium" placeholder="John Doe&#10;Jane Smith&#10;..."></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Events/Boats (Paste list, one per line)</label>
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Events/Boats (Paste list)</label>
+                            <label class="text-[10px] font-bold text-blue-600 cursor-pointer hover:underline flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                                <i data-lucide="upload" class="w-3 h-3"></i> Load CSV <input type="file" id="builder-csv-upload" accept=".csv" class="hidden">
+                            </label>
+                        </div>
                         <textarea id="builder-input-events" class="w-full h-32 p-3 border border-slate-300 rounded text-sm font-medium" placeholder="M U19 8+&#10;W Club 4x&#10;..."></textarea>
                     </div>
                 </div>
@@ -1360,6 +1365,66 @@
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", "crew_builder_export.csv");
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        };
+
+        // NEW: Load Builder Events from CSV
+        document.getElementById('builder-csv-upload').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const r = new FileReader();
+            r.onload = (evt) => {
+                const text = evt.target.result;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                let headerIndex = -1;
+                let isRegattaFormat = false;
+                
+                for(let i=0; i<Math.min(10, lines.length); i++) {
+                    if(lines[i].toLowerCase().startsWith('race,day,time')) {
+                        headerIndex = i;
+                        isRegattaFormat = true;
+                        break;
+                    }
+                }
+                
+                const uniqueBoats = new Set();
+                
+                if (isRegattaFormat) {
+                    for (let i = headerIndex + 1; i < lines.length; i++) {
+                        const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                        if (cols.length < 5) continue;
+                        
+                        // Extract Event (col 3), Crew (col 4), and Alpha (col 8)
+                        const eventName = cols[3] || '';
+                        const crewName = cols[4] || '';
+                        const alpha = cols[8] || '';
+                        
+                        const boatStr = `${eventName} ${crewName} ${alpha}`.trim().replace(/\s+/g, ' ');
+                        if (boatStr) uniqueBoats.add(boatStr);
+                    }
+                } else {
+                    // Try to guess from a simple CSV
+                    lines.forEach((line, idx) => {
+                        if(idx === 0 && line.toLowerCase().includes('event')) return; 
+                        const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                        let boatStr = '';
+                        if(cols.length >= 3) { boatStr = `${cols[0]} ${cols[2]} ${cols[1] || ''}`.trim().replace(/\s+/g, ' '); }
+                        else if(cols.length === 2) { boatStr = `${cols[0]} ${cols[1]}`.trim().replace(/\s+/g, ' '); }
+                        else if(cols.length === 1) { boatStr = cols[0].trim(); }
+                        if(boatStr) uniqueBoats.add(boatStr);
+                    });
+                }
+                
+                const textarea = document.getElementById('builder-input-events');
+                const currentText = textarea.value.trim();
+                const newText = Array.from(uniqueBoats).join('\n');
+                textarea.value = currentText ? currentText + '\n' + newText : newText;
+                
+                // Automatically setup the workspace with the new list
+                window.loadBuilderData();
+                showToast(`Loaded ${uniqueBoats.size} unique events from CSV`, 'success');
+            };
+            r.readAsText(file);
+            e.target.value = null;
         };
 
         function renderNotices() {
