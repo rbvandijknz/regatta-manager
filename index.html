@@ -53,13 +53,17 @@
         
         /* Print Styles for Crew Builder */
         @media print {
-            body * { visibility: hidden; }
-            #view-crew-builder, #view-crew-builder * { visibility: visible; }
-            #view-crew-builder { position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0; }
-            #view-crew-builder button, #builder-roster, #view-crew-builder .bg-white.p-5.rounded-xl.shadow-sm.border.border-slate-200.mb-4 { display: none !important; }
-            #builder-events-container { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; break-inside: avoid; }
-            .bg-white { box-shadow: none !important; border-color: #000 !important; }
+            body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body > *:not(#app-content) { display: none !important; }
+            #app-content > *:not(#view-crew-builder) { display: none !important; }
+            
+            #view-crew-builder { display: block !important; margin: 0 !important; padding: 0 !important; }
             .print-hide { display: none !important; }
+            
+            /* Expand grid to full width and format cards */
+            #view-crew-builder > .grid { display: block !important; }
+            #builder-events-container { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 15px !important; }
+            #builder-events-container > div { break-inside: avoid !important; page-break-inside: avoid !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; margin-bottom: 15px !important; }
         }
     </style>
 </head>
@@ -573,7 +577,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
                 
                 <!-- Left Col: Roster -->
-                <div class="md:col-span-1 bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-inner sticky top-24 max-h-[80vh] overflow-y-auto">
+                <div class="md:col-span-1 bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-inner sticky top-24 max-h-[80vh] overflow-y-auto print-hide">
                     <h3 class="font-bold text-slate-700 uppercase tracking-wider text-xs mb-3 border-b border-slate-200 pb-2">Roster</h3>
                     <div id="builder-roster" class="space-y-2 min-h-[100px]">
                         <p class="text-sm text-slate-400 italic text-center py-4">No athletes loaded.</p>
@@ -607,8 +611,23 @@
             </div>
             <div class="p-5 space-y-4">
                 <div class="grid grid-cols-3 gap-2 text-center bg-slate-50 rounded-lg p-3 border border-slate-100">
-        <!-- Urgent Alert Modal -->
-        <div id="urgent-modal" class="fixed inset-0 z-[110] bg-red-900/90 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-in fade-in duration-300">
+                    <div><div class="text-[10px] uppercase text-slate-400 font-bold">Warm Up</div><div id="modal-time-warmup" class="font-mono font-bold text-slate-600">--:--</div></div>
+                    <div><div class="text-[10px] uppercase text-blue-500 font-bold">On Water</div><div id="modal-time-onwater" class="font-mono font-bold text-blue-600 text-lg">--:--</div></div>
+                    <div><div class="text-[10px] uppercase text-slate-400 font-bold">Start</div><div id="modal-time-start" class="font-mono font-bold text-slate-800">--:--</div></div>
+                </div>
+                <div class="space-y-3">
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="git-merge" class="w-3 h-3"></i> Progression</div><div id="modal-progression" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200 italic">-</div></div>
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Coxswain</div><div id="modal-cox" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="users" class="w-3 h-3"></i> Crew</div><div id="modal-rowers" class="text-slate-700 pl-5 border-l-2 border-slate-200 leading-relaxed text-sm">-</div></div>
+                    <div><div class="flex items-center gap-2 text-sm font-semibold text-slate-400 uppercase mb-1"><i data-lucide="user" class="w-3 h-3"></i> Coach</div><div id="modal-coach" class="text-slate-800 font-medium pl-5 border-l-2 border-slate-200">-</div></div>
+                </div>
+            </div>
+            <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end"><button onclick="window.closeModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 transition">Close</button></div>
+        </div>
+    </div>
+
+    <!-- Urgent Alert Modal -->
+    <div id="urgent-modal" class="fixed inset-0 z-[110] bg-red-900/90 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-in fade-in duration-300">
             <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-red-500 relative">
                 <div class="bg-red-500 p-4 text-white flex items-center justify-center gap-3">
                     <i data-lucide="siren" class="w-8 h-8 animate-pulse"></i>
@@ -1403,17 +1422,23 @@
                     const isFull = ev.crew.length >= ev.capacity;
                     
                     // Render interactive drag-and-drop seats
-                    const crewList = ev.crew.map((name, idx) => `
+                    const crewList = ev.crew.map((name, idx) => {
+                        let seatHtml = `<span class="text-slate-400 text-xs w-4 inline-block font-mono">${idx+1}</span>`;
+                        if (idx === ev.capacity - 1 && (ev.capacity === 9 || ev.capacity === 5 || ev.capacity === 3)) {
+                            seatHtml = `<span class="text-orange-500 text-xs w-4 inline-block font-bold" title="Coxswain">C</span>`;
+                        }
+                        
+                        return `
                         <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-1 px-2 rounded text-sm mb-1 group cursor-grab active:cursor-grabbing"
                              draggable="true"
                              ondragstart="event.dataTransfer.setData('text/plain', '${name}'); event.dataTransfer.setData('sourceEvent', '${ev.id}'); event.dataTransfer.setData('sourceIndex', '${idx}');"
                              ondragover="event.preventDefault(); this.classList.add('border-blue-400');"
                              ondragleave="this.classList.remove('border-blue-400');"
                              ondrop="event.preventDefault(); this.classList.remove('border-blue-400'); window.dropSeatSwap(event, '${ev.id}', ${idx});">
-                            <span class="text-slate-700 truncate font-medium"><span class="text-slate-400 text-xs w-4 inline-block font-mono">${idx+1}</span> ${name}</span>
+                            <span class="text-slate-700 truncate font-medium">${seatHtml} ${name}</span>
                             <button onclick="window.removeBuilderAthlete('${ev.id}', ${idx})" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition print-hide"><i data-lucide="x" class="w-3 h-3"></i></button>
                         </div>
-                    `).join('');
+                    `}).join('');
 
                     return `
                         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col h-full transition-colors" 
