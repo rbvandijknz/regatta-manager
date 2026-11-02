@@ -596,11 +596,12 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
-        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
         import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, setDoc, getDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 
-        const firebaseConfig = { apiKey: "AIzaSyAbQE9pdiPYP1BdUb4T6AaEnMQwmfe2s3k", authDomain: "regatta-manager-d6101.firebaseapp.com", projectId: "regatta-manager-d6101", storageBucket: "regatta-manager-d6101.firebasestorage.app", messagingSenderId: "1023336958830", appId: "1:1023336958830:web:19f0cfc62274189d8b8f7f", measurementId: "G-0Y0FELH6KE" };
-        const appId = 'regatta-manager-d6101';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "AIzaSyAbQE9pdiPYP1BdUb4T6AaEnMQwmfe2s3k", authDomain: "regatta-manager-d6101.firebaseapp.com", projectId: "regatta-manager-d6101", storageBucket: "regatta-manager-d6101.firebasestorage.app", messagingSenderId: "1023336958830", appId: "1:1023336958830:web:19f0cfc62274189d8b8f7f", measurementId: "G-0Y0FELH6KE" };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'regatta-manager-d6101';
+        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -1595,7 +1596,15 @@
         };
 
         // --- Listeners ---
-        const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
+        const initAuth = async () => { 
+            try { 
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth); 
+                }
+            } catch(e) { console.error("Auth error:", e); } 
+        };
         initAuth();
 
         let unsubscribeEvents, unsubscribeConfig, unsubscribeProgs, unsubscribeBuilder;
@@ -1771,25 +1780,25 @@
                         if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
                     }
                 } else {
-                    const headerRow = lines[0] || '';
-                    const headers = headerRow.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, ''));
-                    const boatIndex = headers.findIndex(h => h.includes('boat')); 
-                    const safeBoatIndex = boatIndex > -1 ? boatIndex : 6;
-                    
-                    lines.forEach((line, idx) => {
-                        if(idx === 0) return;
-                        const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                        let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
-                        if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[safeBoatIndex]||cols[6]; d.coach=cols[7]; }
-                        else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[safeBoatIndex]||cols[6]; }
-                        else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
-                        else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
-                        else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
-                        else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
-                        if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
-                    });
+                        lines.forEach((line, idx) => {
+                            if(idx === 0) return;
+                            const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                            let d = { eventNum:'', alpha:'', crew:'', originalTime:'', cox:'', rowers:'', boat:'', coach:'' };
+                            if(cols.length >= 8) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[safeBoatIndex]||cols[6]; d.coach=cols[7]; }
+                            else if(cols.length >= 7) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; d.boat=cols[safeBoatIndex]||cols[6]; }
+                            else if(cols.length >= 6) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; d.cox=cols[4]; d.rowers=cols[5]; }
+                            else if(cols.length >= 4) { d.eventNum=cols[0]; d.alpha=cols[1]; d.crew=cols[2]; d.originalTime=cols[3]; }
+                            else if(cols.length === 3) { d.eventNum=cols[0]; d.crew=cols[1]; d.originalTime=cols[2]; }
+                            else if(cols.length === 2) { d.crew=cols[0]; d.originalTime=cols[1]; }
+                            if(d.originalTime && d.originalTime.match(/\d{1,2}:\d{2}/)) { batch.set(doc(ref), d); count++; }
+                        });
+                    }
+                if(count > 0) { 
+                    await batch.commit(); 
+                    showToast(`Successfully imported ${count} events.`, 'success'); 
+                } else { 
+                    showToast("No valid rows found. Please check the CSV format.", 'warn'); 
                 }
-                if(count > 0) { await batch.commit(); alert(`Successfully imported ${count} events.`); } else { alert("No valid rows found. Please check the CSV format."); }
             };
             r.readAsText(file); e.target.value = null;
         };
@@ -1819,9 +1828,16 @@
         
         document.getElementById('btn-demo').onclick = async () => {
             if(!state.user) return;
-            const batch = writeBatch(db); const ref = getEventsRef();
-            const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl', coach: 'Steve' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise', coach: 'Mike' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager', coach: 'Steve' }];
-            d.forEach(i => batch.set(doc(ref), i)); await batch.commit();
+            try {
+                const batch = writeBatch(db); const ref = getEventsRef();
+                const d = [{ eventNum: '101', alpha: 'A', crew: 'M U19 8+', originalTime: '08:00', cox: 'James', rowers: 'Tom, Mark', boat: 'The Black Pearl', coach: 'Steve' }, { eventNum: '101', alpha: 'B', crew: 'M U19 8+', originalTime: '08:05', cox: 'Sarah', rowers: 'Ben, Jerry', boat: 'Enterprise', coach: 'Mike' }, { eventNum: '102', alpha: '', crew: 'W Club 4x', originalTime: '08:15', cox: '', rowers: 'Lisa, Jenny', boat: 'Voyager', coach: 'Steve' }];
+                d.forEach(i => batch.set(doc(ref), i)); 
+                await batch.commit();
+                showToast("Demo events loaded successfully", "success");
+            } catch (err) {
+                console.error("Demo load error:", err);
+                showToast("Failed to load demo data", "warn");
+            }
         };
 
         window.switchView = (v) => {
