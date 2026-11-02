@@ -730,13 +730,11 @@
         function updateNotificationButton() {
             if (!('Notification' in window)) { btnNotifications.classList.add('hidden'); return; }
             if (Notification.permission === 'granted') {
-                btnNotifications.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i> <span class="text-green-700">Test Alert</span>';
+                btnNotifications.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i> <span class="text-green-700">Alerts Enabled</span>';
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
                 btnNotifications.classList.add('bg-green-50', 'border-green-100');
-                btnNotifications.onclick = () => {
-                    new Notification("RegattaManager Test", { body: "System notifications are working!", icon: "https://via.placeholder.com/128?text=RM" });
-                    showToast("Test notification sent", "success");
-                };
+                btnNotifications.onclick = null;
+                btnNotifications.classList.add('cursor-default');
             } else if (Notification.permission === 'denied') {
                 btnNotifications.innerHTML = '<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span class="text-red-700">Alerts Blocked</span>';
                 btnNotifications.classList.remove('bg-yellow-50', 'border-yellow-100');
@@ -1629,6 +1627,14 @@
             if(unsubscribeBuilder) unsubscribeBuilder();
 
             state.events = [];
+            
+            // Restore missing Events listener
+            unsubscribeEvents = onSnapshot(getEventsRef(), (snap) => {
+                state.events = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                updateFilters();
+                if(!document.getElementById('view-regatta').classList.contains('hidden')) render();
+            });
+
             unsubscribeProgs = onSnapshot(getProgsRef(), (snap) => {
                 state.prognostics = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 // Sort by timestamp desc
